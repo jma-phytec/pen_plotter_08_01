@@ -319,7 +319,7 @@ extern Icssg_FwPoolMem gEnetSoc_Icssg1_1_FwPoolMem[];
 extern Icssg_FwPoolMem gEnetSoc_Icssg1_Swt_FwPoolMem[];
 
 // #define ENET_TEST_MII_MODE
-// #define DUAL_MAC_MODE  /* TODO: Need to allocate TX channels as 2 in enet_cfg.h file to get both MAC ports work simultaneously*/
+#define DUAL_MAC_MODE  /* TODO: Need to allocate TX channels as 2 in enet_cfg.h file to get both MAC ports work simultaneously*/
 /* Use this array to select the ports that will be used in the test */
 static EnetMp_TestParams testParams[] =
 {

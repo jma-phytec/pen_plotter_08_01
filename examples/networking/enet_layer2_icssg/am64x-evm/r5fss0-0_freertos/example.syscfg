@@ -1,8 +1,8 @@
 /**
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
- * @cliArgs --device "AM64x_beta" --package "ALV" --part "Default" --context "r5fss0-0" --product "MCU_PLUS_SDK@07.03.01"
- * @versions {"tool":"1.9.0+2015","templates":null}
+ * @cliArgs --device "AM64x_beta" --package "ALV" --part "Default" --context "r5fss0-0" --product "MCU_PLUS_SDK_AM64x@08.01.00"
+ * @versions {"tool":"1.10.0+2163"}
  */
 
 /**
@@ -88,6 +88,8 @@ mpu_armv77.baseAddr = 0x60000000;
 enet_icss1.$name                     = "CONFIG_ENET_ICSS0";
 enet_icss1.mode                      = "DUAL MAC";
 enet_icss1.phyToMacInterfaceMode     = "RGMII";
+enet_icss1.phyAddr1                  = 1;
+enet_icss1.phyAddr2                  = 2;
 enet_icss1.PRU_ICSSG1_RGMII1.$assign = "PRU_ICSSG1_RGMII1";
 enet_icss1.PRU_ICSSG1_RGMII2.$assign = "PRU_ICSSG1_RGMII2";
 
