@@ -44,10 +44,10 @@
 #include <ESL_OS_os.h>
 #include <ESL_BOARD_OS_config.h>
 
-#define TIESC_PHYADDR_0                     15
-#define TIESC_PHYADDR_1                     3
-#define TIESC_PHYADDR_2                     15
-#define TIESC_PHYADDR_3                     3
+#define TIESC_PHYADDR_0                     1
+#define TIESC_PHYADDR_1                     2
+#define TIESC_PHYADDR_2                     1
+#define TIESC_PHYADDR_3                     2
 #define TIESC_LINK0_POLINVERT               true
 #define TIESC_LINK1_POLINVERT               true
 #define TIESC_LINK2_POLINVERT               true

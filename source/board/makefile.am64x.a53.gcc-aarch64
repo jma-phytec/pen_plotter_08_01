@@ -19,6 +19,7 @@ FILES_common := \
     led.c \
     led_gpio.c \
     led_tpic2810.c \
+    led_pca9533d.c \
     led_ioexp.c \
     ioexp_tca6424.c \
 

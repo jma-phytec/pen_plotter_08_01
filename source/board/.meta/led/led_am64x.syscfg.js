@@ -15,6 +15,12 @@ let led_devices = [
         ioIndex     : 0,
     },
     {
+        name        : "PCA9533D",
+        type        : "I2C",
+        i2cAddress  : 0x62,   /* Default address */
+        ioIndex     : 0,
+    },
+    {
         name        : "Ioexp",
         type        : "I2C",
         i2cAddress  : 0x22,   /* Default address */
