@@ -155,7 +155,7 @@ extern "C" {
 /*! \brief Overwrite UDMA config for ICSSG as we use more flows/channels for
  *         multiport testNumber of TX channels. */
 #define ENET_CFG_NUM_INSTANCES                      (1U)
-#define ENET_CFG_TX_CHANNELS_NUM                    (1U * ENET_CFG_NUM_INSTANCES)
+#define ENET_CFG_TX_CHANNELS_NUM                    (2U * ENET_CFG_NUM_INSTANCES)
 #define ENET_CFG_RX_FLOWS_NUM                       (3U * ENET_CFG_NUM_INSTANCES)
 #define ENET_CFG_RING_MON_NUM                       (3U * ENET_CFG_NUM_INSTANCES)
 #else

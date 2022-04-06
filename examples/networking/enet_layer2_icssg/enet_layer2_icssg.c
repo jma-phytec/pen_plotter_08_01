@@ -319,13 +319,13 @@ extern Icssg_FwPoolMem gEnetSoc_Icssg1_1_FwPoolMem[];
 extern Icssg_FwPoolMem gEnetSoc_Icssg1_Swt_FwPoolMem[];
 
 // #define ENET_TEST_MII_MODE
-// #define DUAL_MAC_MODE  /* TODO: Need to allocate TX channels as 2 in enet_cfg.h file to get both MAC ports work simultaneously*/
+#define DUAL_MAC_MODE  /* TODO: Need to allocate TX channels as 2 in enet_cfg.h file to get both MAC ports work simultaneously*/
 /* Use this array to select the ports that will be used in the test */
 static EnetMp_TestParams testParams[] =
 {
 #if defined(DUAL_MAC_MODE)
-    { ENET_ICSSG_DUALMAC, 2U, { ENET_MAC_PORT_1 }, 1U, "icssg1-p1", },
-    { ENET_ICSSG_DUALMAC, 3U, { ENET_MAC_PORT_1 }, 1U, "icssg1-p2", },
+    { ENET_ICSSG_DUALMAC, 0U, { ENET_MAC_PORT_1 }, 1U, "icssg0-p1", },
+    { ENET_ICSSG_DUALMAC, 1U, { ENET_MAC_PORT_1 }, 1U, "icssg0-p2", },
 #else
     { ENET_ICSSG_SWITCH, 1U, { ENET_MAC_PORT_1, ENET_MAC_PORT_2 }, 2U, "icssg1", },
 #endif
@@ -1155,11 +1155,11 @@ static int32_t EnetMp_openPort(EnetMp_PerCtxt *perCtxt)
         if (boardPhyCfg != NULL)
         {
             EnetPhy_initCfg(phyCfg);
-            if ((ENET_ICSSG_DUALMAC == perCtxt->enetType) && (2U == perCtxt->instId))
+            if ((ENET_ICSSG_DUALMAC == perCtxt->enetType) && (0U == perCtxt->instId))
             {
                 phyCfg->phyAddr     = CONFIG_ENET_ICSS0_PHY1_ADDR;
             }
-            else if ((ENET_ICSSG_DUALMAC == perCtxt->enetType) && (3U == perCtxt->instId))
+            else if ((ENET_ICSSG_DUALMAC == perCtxt->enetType) && (1U == perCtxt->instId))
             {
                 phyCfg->phyAddr     = CONFIG_ENET_ICSS0_PHY2_ADDR;
             }
