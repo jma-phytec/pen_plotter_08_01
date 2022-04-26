@@ -44,6 +44,7 @@
 #include <ESL_OS_os.h>
 #include <ESL_BOARD_OS_config.h>
 
+//phyCORE-AM64x
 #define TIESC_PHYADDR_0                     1
 #define TIESC_PHYADDR_1                     2
 #define TIESC_PHYADDR_2                     1
@@ -69,7 +70,11 @@
  #define ECAT_PRODUCTNAME_SIMPLE            "TI EtherCAT Toolkit for AM64X.R5F"
  #define ECAT_REVISION_NO                   0x00010000
 
-#define ESL_DEFAULT_PRUICSS                 EC_API_SLV_ePRUICSS_INSTANCE_TWO
+//GPEVM and PRU Expansion Board uses this instance
+//#define ESL_DEFAULT_PRUICSS                 EC_API_SLV_ePRUICSS_INSTANCE_TWO
+
+//Pinger and Dev kit use this instance by default
+#define ESL_DEFAULT_PRUICSS                 EC_API_SLV_ePRUICSS_INSTANCE_ONE
 
 #if (defined __cplusplus)
 extern "C" {
