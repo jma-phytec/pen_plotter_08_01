@@ -1,8 +1,8 @@
 /**
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
- * @cliArgs --device "AM64x_beta" --package "ALV" --part "Default" --context "r5fss0-0" --product "MCU_PLUS_SDK@07.03.01"
- * @versions {"data":"2021040816","timestamp":"2021040816","tool":"1.8.1+1900","templates":null}
+ * @cliArgs --device "AM64x_beta" --package "ALV" --part "Default" --context "r5fss0-0" --product "MCU_PLUS_SDK_AM64x@08.01.00"
+ * @versions {"tool":"1.10.0+2163"}
  */
 
 /**
@@ -10,6 +10,19 @@
  */
 const gpio       = scripting.addModule("/drivers/gpio/gpio", {}, false);
 const gpio1      = gpio.addInstance();
+const gpio2      = gpio.addInstance();
+const gpio3      = gpio.addInstance();
+const gpio4      = gpio.addInstance();
+const gpio5      = gpio.addInstance();
+const gpio6      = gpio.addInstance();
+const gpio7      = gpio.addInstance();
+const gpio8      = gpio.addInstance();
+const gpio9      = gpio.addInstance();
+const gpio10     = gpio.addInstance();
+const gpio11     = gpio.addInstance();
+const gpio12     = gpio.addInstance();
+const gpio13     = gpio.addInstance();
+const gpio14     = gpio.addInstance();
 const debug_log  = scripting.addModule("/kernel/dpl/debug_log");
 const mpu_armv7  = scripting.addModule("/kernel/dpl/mpu_armv7", {}, false);
 const mpu_armv71 = mpu_armv7.addInstance();
@@ -22,11 +35,76 @@ const mpu_armv76 = mpu_armv7.addInstance();
 /**
  * Write custom configuration values to the imported modules.
  */
-gpio1.$name                    = "GPIO_LED";
-gpio1.pinDir                   = "OUTPUT";
-gpio1.useMcuDomainPeripherals  = true;
-gpio1.MCU_GPIO.$assign         = "MCU_GPIO0";
-gpio1.MCU_GPIO.gpioPin.$assign = "A7";
+gpio1.pinDir               = "OUTPUT";
+gpio1.$name                = "GPIO0_62";
+gpio1.GPIO.$assign         = "GPIO0";
+gpio1.GPIO.gpioPin.rx      = false;
+gpio1.GPIO.gpioPin.$assign = "ball.U7";
+
+gpio2.$name                = "GPIO0_29";
+gpio2.pinDir               = "OUTPUT";
+gpio2.GPIO.gpioPin.rx      = false;
+gpio2.GPIO.gpioPin.$assign = "ball.Y21";
+
+gpio3.$name                = "GPIO0_30";
+gpio3.pinDir               = "OUTPUT";
+gpio3.GPIO.gpioPin.rx      = false;
+gpio3.GPIO.gpioPin.$assign = "ball.Y20";
+
+gpio4.$name                = "GPIO0_36";
+gpio4.pinDir               = "OUTPUT";
+gpio4.GPIO.gpioPin.rx      = false;
+gpio4.GPIO.gpioPin.$assign = "ball.T19";
+
+gpio5.$name                = "GPIO0_35";
+gpio5.pinDir               = "OUTPUT";
+gpio5.GPIO.gpioPin.rx      = false;
+gpio5.GPIO.gpioPin.$assign = "ball.P17";
+
+gpio6.$name                = "GPIO0_47";
+gpio6.pinDir               = "OUTPUT";
+gpio6.GPIO.gpioPin.rx      = false;
+gpio6.GPIO.gpioPin.$assign = "ball.W8";
+
+gpio7.$name                = "GPIO0_45";
+gpio7.pinDir               = "OUTPUT";
+gpio7.GPIO.gpioPin.rx      = false;
+gpio7.GPIO.gpioPin.$assign = "ball.Y7";
+
+gpio8.$name                = "GPIO0_59";
+gpio8.pinDir               = "OUTPUT";
+gpio8.GPIO.gpioPin.rx      = false;
+gpio8.GPIO.gpioPin.$assign = "ball.AA9";
+
+gpio9.$name                = "GPIO0_18";
+gpio9.pinDir               = "OUTPUT";
+gpio9.GPIO.gpioPin.rx      = false;
+gpio9.GPIO.gpioPin.$assign = "ball.U20";
+
+gpio10.$name                = "GPIO0_82";
+gpio10.pinDir               = "OUTPUT";
+gpio10.GPIO.gpioPin.rx      = false;
+gpio10.GPIO.gpioPin.$assign = "ball.U18";
+
+gpio11.$name                = "GPIO0_83";
+gpio11.pinDir               = "OUTPUT";
+gpio11.GPIO.gpioPin.rx      = false;
+gpio11.GPIO.gpioPin.$assign = "ball.U19";
+
+gpio12.$name                = "GPIO0_56";
+gpio12.pinDir               = "OUTPUT";
+gpio12.GPIO.gpioPin.rx      = false;
+gpio12.GPIO.gpioPin.$assign = "ball.AA8";
+
+gpio13.$name                = "GPIO0_57";
+gpio13.pinDir               = "OUTPUT";
+gpio13.GPIO.gpioPin.rx      = false;
+gpio13.GPIO.gpioPin.$assign = "ball.U9";
+
+gpio14.$name                = "GPIO0_58";
+gpio14.pinDir               = "OUTPUT";
+gpio14.GPIO.gpioPin.rx      = false;
+gpio14.GPIO.gpioPin.$assign = "ball.W9";
 
 debug_log.enableUartLog        = true;
 debug_log.uartLog.$name        = "CONFIG_UART_CONSOLE";
@@ -66,5 +144,18 @@ mpu_armv76.size     = 31;
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-debug_log.uartLog.UART.RXD.$suggestSolution = "D15";
-debug_log.uartLog.UART.TXD.$suggestSolution = "C16";
+gpio2.GPIO.$suggestSolution                 = "GPIO0";
+gpio3.GPIO.$suggestSolution                 = "GPIO0";
+gpio4.GPIO.$suggestSolution                 = "GPIO0";
+gpio5.GPIO.$suggestSolution                 = "GPIO0";
+gpio6.GPIO.$suggestSolution                 = "GPIO0";
+gpio7.GPIO.$suggestSolution                 = "GPIO0";
+gpio8.GPIO.$suggestSolution                 = "GPIO0";
+gpio9.GPIO.$suggestSolution                 = "GPIO0";
+gpio10.GPIO.$suggestSolution                = "GPIO0";
+gpio11.GPIO.$suggestSolution                = "GPIO0";
+gpio12.GPIO.$suggestSolution                = "GPIO0";
+gpio13.GPIO.$suggestSolution                = "GPIO0";
+gpio14.GPIO.$suggestSolution                = "GPIO0";
+debug_log.uartLog.UART.RXD.$suggestSolution = "ball.D15";
+debug_log.uartLog.UART.TXD.$suggestSolution = "ball.C16";

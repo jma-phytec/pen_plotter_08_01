@@ -47,7 +47,7 @@
 void gpio_led_blink_main(void *args)
 {
     uint32_t    loopcnt = 5, delaySec = 1;
-    uint32_t    gpioBaseAddr, pinNum;
+    uint32_t    gpioBaseAddr;
 
     /* Open drivers to open the UART driver for console */
     Drivers_open();
@@ -57,15 +57,54 @@ void gpio_led_blink_main(void *args)
     DebugP_log("LED will Blink for %d seconds ...\r\n", (loopcnt * delaySec * 2));
 
     /* Get address after translation translate */
-    gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_LED_BASE_ADDR);
-    pinNum       = GPIO_LED_PIN;
+    gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO0_62_BASE_ADDR);
 
-    GPIO_setDirMode(gpioBaseAddr, pinNum, GPIO_LED_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_62_PIN, GPIO0_62_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_29_PIN, GPIO0_29_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_30_PIN, GPIO0_30_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_36_PIN, GPIO0_36_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_35_PIN, GPIO0_35_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_47_PIN, GPIO0_47_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_45_PIN, GPIO0_45_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_59_PIN, GPIO0_59_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_18_PIN, GPIO0_18_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_82_PIN, GPIO0_82_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_83_PIN, GPIO0_83_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_56_PIN, GPIO0_56_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_57_PIN, GPIO0_57_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GPIO0_58_PIN, GPIO0_58_DIR);
+
     while(loopcnt > 0)
     {
-        GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_62_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_29_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_30_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_36_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_35_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_47_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_45_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_59_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_18_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_82_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_83_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_56_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_57_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GPIO0_58_PIN);
         ClockP_sleep(delaySec);
-        GPIO_pinWriteLow(gpioBaseAddr, pinNum);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_62_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_29_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_30_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_36_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_35_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_47_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_45_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_59_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_18_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_82_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_83_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_56_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_57_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GPIO0_58_PIN);
         ClockP_sleep(delaySec);
 
         loopcnt--;
