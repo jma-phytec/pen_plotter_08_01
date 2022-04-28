@@ -318,7 +318,9 @@ void tiesc_store_fw_data(uint16_t *pData, uint16_t Size)
     uint32_t itr1 = 0;
     uint8_t *temp_ptr = (uint8_t *)pData;
     uint8_t data_buff[256];
-    uint32_t blockNum, pageNum;      /* Block, page number */
+    //uint32_t blockNum, pageNum;      /* Block, page number */
+
+    OSPI_Handle ospiHandle = OSPI_getHandle(CONFIG_OSPI0);    
 
     for(itr1 = 0 ; itr1 < Size  ; itr1++)
     {
@@ -331,13 +333,16 @@ void tiesc_store_fw_data(uint16_t *pData, uint16_t Size)
         if((fw_write_offset & (flash_block_size - 1)) == 0)
         {
             /* Erase Flash block */
-            Flash_offsetToBlkPage(gFlashHandle[CONFIG_FLASH0],fw_write_offset, &blockNum, &pageNum);
-            Flash_eraseBlk(gFlashHandle[CONFIG_FLASH0], blockNum);
+            //Flash_offsetToBlkPage(gFlashHandle[CONFIG_FLASH0],fw_write_offset, &blockNum, &pageNum);
+            //Flash_eraseBlk(gFlashHandle[CONFIG_FLASH0], blockNum);
+            OSPI_norFlashErase(ospiHandle, fw_write_offset);
+            
         }
 
         if(tiesc_read_from_cir_buff(data_buff, 256) >= 256)
         {
-            Flash_write(gFlashHandle[CONFIG_FLASH0], fw_write_offset, (uint8_t *)data_buff, 256);
+            //Flash_write(gFlashHandle[CONFIG_FLASH0], fw_write_offset, (uint8_t *)data_buff, 256);
+            OSPI_norFlashWrite(ospiHandle, fw_write_offset, (uint8_t*)data_buff, 256);
             fw_write_offset += 256;
         }
     }
@@ -346,8 +351,10 @@ void tiesc_store_fw_data(uint16_t *pData, uint16_t Size)
 void tiesc_boot_2_init_handler()
 {
     uint8_t data_buff[256];
-    uint32_t blockNum, pageNum;      /* Block, page number */
+    //uint32_t blockNum, pageNum;      /* Block, page number */
 
+    OSPI_Handle ospiHandle = OSPI_getHandle(CONFIG_OSPI0);    
+    
     /*
     * Make sure that firware is completely written to SPI flash
     */
@@ -357,13 +364,15 @@ void tiesc_boot_2_init_handler()
         if((fw_write_offset & (flash_block_size - 1)) == 0)
         {
             /* Erase Flash block */
-            Flash_offsetToBlkPage(gFlashHandle[CONFIG_FLASH0],fw_write_offset, &blockNum, &pageNum);
-            Flash_eraseBlk(gFlashHandle[CONFIG_FLASH0], blockNum);
+            //Flash_offsetToBlkPage(gFlashHandle[CONFIG_FLASH0],fw_write_offset, &blockNum, &pageNum);
+            //Flash_eraseBlk(gFlashHandle[CONFIG_FLASH0], blockNum);
+            OSPI_norFlashErase(ospiHandle, fw_write_offset);
         }
 
         if(tiesc_read_from_cir_buff(data_buff, 256) > 0)
         {
-            Flash_write(gFlashHandle[CONFIG_FLASH0], fw_write_offset, (uint8_t *)data_buff, 256);
+            //Flash_write(gFlashHandle[CONFIG_FLASH0], fw_write_offset, (uint8_t *)data_buff, 256);
+            OSPI_norFlashWrite(ospiHandle, fw_write_offset, (uint8_t*)data_buff, 256);
             fw_write_offset += 256;
         }
     }
@@ -549,6 +558,7 @@ void tiesc_foe_eoe_init(void)
     file_size = 0;
     fw_download_flag = 0;
     tiesc_getFoeFlashOffset(&fw_write_offset);
-    flash_block_size = ((Flash_Attrs *)Flash_getAttrs(CONFIG_FLASH0))->blockSize;
+//    flash_block_size = ((Flash_Attrs *)Flash_getAttrs(CONFIG_FLASH0))->blockSize;
+    flash_block_size = 131072;
 #endif
 }
