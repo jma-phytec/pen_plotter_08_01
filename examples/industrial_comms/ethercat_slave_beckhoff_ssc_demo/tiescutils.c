@@ -49,6 +49,7 @@
 #include <ti_drivers_open_close.h>
 #include <ti_board_open_close.h>
 
+
 //#define PROFILE_ECAT_STACK
 #ifdef PROFILE_ECAT_STACK
 uint32_t mainloop_delta, mainloop_max, pdi_delta, pdi_max, sync_delta, sync_max;
@@ -447,6 +448,8 @@ void Sync1task(void *arg)
     }
 }
 #endif
+
+
 
 void common_main()
 {
