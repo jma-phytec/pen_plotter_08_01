@@ -41,8 +41,9 @@ extern uint32_t Board_getnumLedPerGroup(void);
 void i2c_led_blink_main(void *args)
 {
     int32_t             status;
-    uint32_t            loopcnt = 10U, ledCnt, delayMsec = 100U, numLedPerGroup;
-    LED_Handle          ledHandle;
+    uint32_t            loopcnt = 100U, ledCnt, delaysec = 1U, numLedPerGroup;
+    LED_Handle          led0Handle;
+    LED_Handle          led1Handle;
 
     /* Open drivers to open the UART driver for console */
     Drivers_open();
@@ -51,33 +52,38 @@ void i2c_led_blink_main(void *args)
     DebugP_log("I2C LED Blink Test Started ...\r\n");
     DebugP_log("LED will Blink for %d loop ...\r\n", loopcnt);
 
-    ledHandle = gLedHandle[CONFIG_LED0];
-    DebugP_assert(NULL != ledHandle);
+    led0Handle = gLedHandle[CONFIG_LED0];
+    led1Handle = gLedHandle[CONFIG_LED1];
+    DebugP_assert(NULL != led0Handle);
+    DebugP_assert(NULL != led1Handle);
 
     numLedPerGroup = Board_getnumLedPerGroup();
 
     /* ON all LED when more than one LED is present - only then mask API is supported */
     if(numLedPerGroup > 1U)
     {
-        status = LED_setMask(ledHandle, 0xFFU);
+        status = LED_setMask(led0Handle, 0xFFU);
+        status = LED_setMask(led1Handle, 0xFFU);
         DebugP_assert(SystemP_SUCCESS == status);
-        ClockP_usleep(delayMsec * 1000U);
+        ClockP_sleep(delaysec);
     }
 
     while(loopcnt > 0U)
     {
         for(ledCnt = 0U; ledCnt < numLedPerGroup; ledCnt++)
         {
-            status = LED_off(ledHandle, ledCnt);
+            status = LED_off(led0Handle, ledCnt);
+            status = LED_off(led1Handle, ledCnt);
             DebugP_assert(SystemP_SUCCESS == status);
-            ClockP_usleep(delayMsec * 1000U);
+            ClockP_sleep(delaysec);
         }
 
         for(ledCnt = 0U; ledCnt < numLedPerGroup; ledCnt++)
         {
-            status = LED_on(ledHandle, ledCnt);
+            status = LED_on(led0Handle, ledCnt);
+            status = LED_on(led1Handle, ledCnt);
             DebugP_assert(SystemP_SUCCESS == status);
-            ClockP_usleep(delayMsec * 1000U);
+            ClockP_sleep(delaysec);
         }
 
         loopcnt--;
@@ -86,7 +92,8 @@ void i2c_led_blink_main(void *args)
     if(numLedPerGroup > 1U)
     {
         /* OFF all LED when more than one LED is present - only then mask API is supported */
-        status = LED_setMask(ledHandle, 0x00U);
+        status = LED_setMask(led0Handle, 0x00U);
+        status = LED_setMask(led1Handle, 0x00U);
         DebugP_assert(SystemP_SUCCESS == status);
     }
 
