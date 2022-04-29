@@ -1,0 +1,97 @@
+PROGRAM PLC_PRG
+VAR
+    i2c_led0 AT %QX0.0 : BOOL :=0;
+    i2c_led1 AT %QX0.1 : BOOL :=0;
+    i2c_led2 AT %QX0.2 : BOOL :=0;
+    i2c_led3 AT %QX0.3 : BOOL :=0;
+    i2c_led4 AT %QX0.4 : BOOL :=0;
+    i2c_led5 AT %QX0.5 : BOOL :=0;
+    i2c_led6 AT %QX0.6 : BOOL :=0;
+    i2c_led7 AT %QX0.7 : BOOL :=0;
+	tmpcount AT %QB1 : USINT := 0;
+	tmpcommand AT %QB2 : USINT := 0;
+	tmpdata AT %QW2 : INT := 0;
+	tmpswitch0 AT %IX0.0 : BOOL := 0;
+	tmpswitch1 AT %IX0.1 : BOOL := 0;
+	tmpswitch2 AT %IX0.2 : BOOL := 0;
+	tmpswitch3 AT %IX0.3 : BOOL := 0;
+	tmpswitch4 AT %IX0.4 : BOOL := 0;
+	tmpswitch5 AT %IX0.5 : BOOL := 0;
+	tmpswitch6 AT %IX0.6 : BOOL := 0;
+	tmpswitch7 AT %IX0.7 : BOOL := 0;
+	tmpinfo1 AT %ID1 : DINT := 0;
+	tmpinfo2 AT %IW4 : INT := 0;
+	count1: INT := 0;
+	count2: DINT := 0;
+	gcode_count: INT := 0;
+	
+	line: INT := 0;
+	state: INT := 0;
+	gcode_data : ARRAY[0..9] OF INT := [65, 66, 67, 68, 69, 70, 71, 72, 73, 13];
+	gcode_string : ARRAY [0..9] OF STRING(64) := ['G01 X200',
+													'G01 X0',
+													'G01 X201',
+													'G01 X1',
+													'G01 X202',
+													'G01 X2',
+													'G01 X203',
+													'G01 X3',
+													'G01 X204',
+													'G01 X4'];
+	
+END_VAR
+
+IF count1 > 200 THEN
+	count1 := 0;
+END_IF
+
+IF gcode_count > 63 THEN
+	gcode_count := 0;
+END_IF
+
+IF line > 9 THEN
+	line := 0;
+END_IF
+
+CASE state OF
+0:		// idle mode, ready to send new command
+	//tmpdata := gcode_data[gcode_count];
+	tmpdata := gcode_string[line][gcode_count];
+	tmpcount := 1;
+	state := 1;	// going to wait ack from slave
+1:		// waiting ack from slave
+	IF tmpswitch0 = 1 THEN	// not NULL
+		tmpcount := 0;
+		state := 2;
+	END_IF;
+	IF tmpswitch2 = 1 THEN	// // NULL
+		tmpcount := 0;
+		state := 3;
+	END_IF
+2:		// ack slave
+	tmpcount := 2;
+	IF tmpswitch1 = 1 THEN
+		state := 0;
+		gcode_count := gcode_count + 1;
+	END_IF;
+3:	// ack slave and waiting slave commplete gcode command
+	IF tmpswitch3 = 1 THEN	// gcode command complete
+		tmpcount := 4;
+		state := 0;
+		line := line + 1;
+		gcode_count := 0;
+	ELSE
+		tmpcount := 3;
+	END_IF;
+END_CASE;
+
+i2c_led0 := tmpswitch0;
+i2c_led1 := tmpswitch1;
+i2c_led2 := tmpswitch2;
+i2c_led3 := tmpswitch3;
+i2c_led4 := tmpswitch4;
+i2c_led5 := tmpswitch5;
+i2c_led6 := tmpswitch6;
+i2c_led7 := tmpswitch7;
+
+count1 := count1 + 1;

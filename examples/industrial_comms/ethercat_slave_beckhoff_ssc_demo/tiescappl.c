@@ -357,8 +357,18 @@ void APPL_Application(void)
 {
     uint8_t LED; // initial test data
     static uint8_t prevState = 55;
+    static uint8_t prevCount = 0;
+
+    uint8_t TmpCount;
+    uint8_t TmpCmd;
+    uint16_t TmpMotorData;
+
+    static uint8_t Tmpswitchs = 0;
+
 
     LED = sDOOutputs.LEDs;
+    TmpCount = sDO1Outputs.Count;
+    TmpCmd = sDO1Outputs.Cmd;
 
 #ifdef ENABLE_PDI_TASK
     if(LED != prevState)
@@ -370,19 +380,56 @@ void APPL_Application(void)
     prevState = LED;
     appState = sDO1Outputs.Cmd;// set the application state
 
-    /*TODO: Enable this when APIs are available*/
-//#ifdef ENABLE_PDI_TASK
-//    Board_getDigInput(&sDIInputs.switchs);
-//#endif
-
     if(appState == 0)
     {
         appState =
             sDIInputs.switchs;    //special mode to control app state by input switchs!
     }
 
-    sAI1Inputs.info1 = 0x12345600 | LED;
-    HW_EscReadWord(sAI1Inputs.info2, 0x10);
+    if(TmpCount != prevCount)
+    {
+    if(TmpCount==1) // new motor data
+    {
+        TmpMotorData = sDO1Outputs.MotorData;
+        update_gcode_cmdbuf(TmpMotorData);
+        //print_TmpMotorData(TmpMotorData);
+        if(TmpMotorData == 0) // gcode command line was sent
+        {
+            Tmpswitchs = 0x4;   //tmpswitch2
+        }
+        else
+        {
+            Tmpswitchs = 0x1;   // tmpswitch0
+        }
+    }
+    else if(TmpCount==2) // host received ack
+    {
+        Tmpswitchs = 0x2;   // tmpswitch1
+    }
+    else if(TmpCount==3)
+    {
+        bGCodeCommandRunning = TRUE;
+        //Tmpswitchs = 0x8;   // tmpswitch3
+    }
+    else if(TmpCount==4)    // host received ack of gcode command complete
+    {
+
+    }
+    else
+    {
+        Tmpswitchs = 0x10;  // tmpswitch4
+    }
+    }
+    else if(TmpCount==3)
+    {
+        if(bGCodeCommandRunning==FALSE)
+            Tmpswitchs = 0x08;
+    }
+
+    sDIInputs.switchs = Tmpswitchs;
+    //sAI1Inputs.info1 = Tmpinfo1;
+    //sAI1Inputs.info2 = Tmpinfo2;
+    prevCount = TmpCount;
 }
 
 #if EXPLICIT_DEVICE_ID

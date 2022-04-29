@@ -40,12 +40,25 @@
 #define MAIN_TASK_PRI  (configMAX_PRIORITIES-1)
 
 #define MAIN_TASK_SIZE (16384U/sizeof(configSTACK_DEPTH_TYPE))
+#define MOTOR_TASK_SIZE (16384U/sizeof(configSTACK_DEPTH_TYPE))
 StackType_t gMainTaskStack[MAIN_TASK_SIZE] __attribute__((aligned(32)));
+StackType_t gMotorTaskStack[MAIN_TASK_SIZE] __attribute__((aligned(32)));
 
 StaticTask_t gMainTaskObj;
+StaticTask_t gMotorTaskObj;
 TaskHandle_t gMainTask;
+TaskHandle_t gMotorTask;
 
 void ethercat_slave_beckhoff_ssc_demo_main(void *args);
+void motor_control_main(void *args);
+void motor_demo_main(void *args);
+
+void motor_main(void *args)
+{
+    //motor_control_main(NULL);
+    motor_demo_main(NULL);
+    vTaskDelete(NULL);
+}
 
 void frertos_main(void *args)
 {
@@ -60,7 +73,7 @@ int main()
     /* init SOC specific modules */
     System_init();
     Board_init();
-
+#if 1
     /* This task is created at highest priority, it should create more tasks and then delete itself */
     gMainTask = xTaskCreateStatic( frertos_main,   /* Pointer to the function that implements the task. */
                                   "freertos_main", /* Text name for the task.  This is to facilitate debugging only. */
@@ -70,7 +83,17 @@ int main()
                                   gMainTaskStack,  /* pointer to stack base */
                                   &gMainTaskObj ); /* pointer to statically allocated task object memory */
     configASSERT(gMainTask != NULL);
-
+#endif
+#if 1
+    gMotorTask = xTaskCreateStatic( motor_main, //motor_main,   /* Pointer to the function that implements the task. */
+                                  "motor_main", /* Text name for the task.  This is to facilitate debugging only. */
+                                  MOTOR_TASK_SIZE,  /* Stack depth in units of StackType_t typically uint32_t on 32b CPUs */
+                                  NULL,            /* We are not using the task parameter. */
+                                  MOTOR_TASK_PRI,   /* task priority, 0 is lowest priority, configMAX_PRIORITIES-1 is highest */
+                                  gMotorTaskStack,  /* pointer to stack base */
+                                  &gMotorTaskObj ); /* pointer to statically allocated task object memory */
+    configASSERT(gMotorTask != NULL);
+#endif
     /* Start the scheduler to start the tasks executing. */
     vTaskStartScheduler();
 
