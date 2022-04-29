@@ -18,6 +18,8 @@ const gpio       = scripting.addModule("/drivers/gpio/gpio", {}, false);
 const gpio1      = gpio.addInstance();
 const gpio2      = gpio.addInstance();
 const gpio3      = gpio.addInstance();
+const gpio4      = gpio.addInstance();
+const gpio5      = gpio.addInstance();
 const i2c        = scripting.addModule("/drivers/i2c/i2c", {}, false);
 const i2c1       = i2c.addInstance();
 const i2c2       = i2c.addInstance();
@@ -56,12 +58,22 @@ gpio2.$name                = "CONFIG_GPIO1";
 gpio2.pinDir               = "OUTPUT";
 led3.peripheralDriver      = gpio2;
 gpio2.GPIO.gpioPin.rx      = false;
-gpio2.GPIO.gpioPin.$assign = "ball.Y21";
+gpio2.GPIO.gpioPin.$assign = "ball.T19";
 
 gpio3.$name                = "CONFIG_GPIO2";
 gpio3.pinDir               = "OUTPUT";
 gpio3.GPIO.gpioPin.rx      = false;
-gpio3.GPIO.gpioPin.$assign = "ball.Y20";
+gpio3.GPIO.gpioPin.$assign = "ball.P17";
+
+gpio4.pinDir               = "OUTPUT";
+gpio4.$name                = "GPIO_MOTOR_STEP";
+gpio4.GPIO.gpioPin.rx      = false;
+gpio4.GPIO.gpioPin.$assign = "ball.Y21";
+
+gpio5.pinDir               = "OUTPUT";
+gpio5.$name                = "GPIO_MOTOR_DIR";
+gpio5.GPIO.gpioPin.rx      = false;
+gpio5.GPIO.gpioPin.$assign = "ball.Y20";
 
 i2c1.$name               = "CONFIG_I2C0";
 eeprom1.peripheralDriver = i2c1;
@@ -133,6 +145,8 @@ mpu_armv75.size     = 31;
 gpio1.GPIO.$suggestSolution                                = "GPIO0";
 gpio2.GPIO.$suggestSolution                                = "GPIO0";
 gpio3.GPIO.$suggestSolution                                = "GPIO0";
+gpio4.GPIO.$suggestSolution                                = "GPIO0";
+gpio5.GPIO.$suggestSolution                                = "GPIO0";
 ospi1.OSPI.$suggestSolution                                = "OSPI0";
 ospi1.OSPI.CLK.$suggestSolution                            = "ball.N20";
 ospi1.OSPI.CSn0.$suggestSolution                           = "ball.L19";

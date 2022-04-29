@@ -143,8 +143,8 @@ PROTO BOOL bEcatWaitForInputUpdate; /**< \brief Wait for input update*/
 PROTO BOOL bEtherCATRunLed; /**< \brief Current run LED value*/
 PROTO BOOL bEtherCATErrorLed; /**< \brief Current error LED value*/
 PROTO BOOL bRunApplication; /**< \brief Indicates if the stack shall be running (if false the Hardware will be released)*/
-
-
+PROTO BOOL bMotorApplication;
+PROTO BOOL bGCodeCommandRunning;
 
 #if ESC_EEPROM_EMULATION
 /*ECATCHANGE_START(V5.12) EEPROM1*/

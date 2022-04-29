@@ -1,0 +1,253 @@
+/*
+ *  MotorX Control
+ *
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <inttypes.h>
+#include <kernel/dpl/HwiP.h>
+#include <kernel/dpl/CacheP.h>
+#include <kernel/dpl/SemaphoreP.h>
+#include <kernel/dpl/ClockP.h>
+#include <kernel/dpl/HeapP.h>
+#include <kernel/dpl/CycleCounterP.h>
+#include <drivers/gpio.h>
+#include <kernel/dpl/AddrTranslateP.h>
+#include <kernel/dpl/DebugP.h>
+#include "motor_control.h"
+#include <math.h>
+#include <tiescutils.h>
+#include <tiesceoefoe.h>
+#include <tiescsoc.h>
+#include <applInterface.h>
+#include <ecatslv.h>
+#include <drivers/gpio.h>
+#include <kernel/dpl/AddrTranslateP.h>
+#include <kernel/dpl/DebugP.h>
+#include <kernel/dpl/ClockP.h>
+#include <ti_drivers_open_close.h>
+#include <ti_board_open_close.h>
+
+#define ROUND_LEN 40.4
+#define NUM_STEPS_PER_ROTATION 200
+
+char msgBuf[64];
+int idx = 0;
+
+float CalculateMotorLoop(MotorMod *Motor, float Displayment)
+{
+    float StepsRequired = 0;
+    // 200 steps = 1 rotation = 4.04cm = 40.4mm
+    StepsRequired = (Displayment / ROUND_LEN) * NUM_STEPS_PER_ROTATION;
+    DebugP_log("Motor movement loop = %f\r\n", StepsRequired);
+    return StepsRequired;
+}
+
+void gpio_motor_move(MotorMod *Motor, Bool isNegative)
+{
+    float Displacement;
+    float LoopRequired;
+
+    if(Motor->positioning==90) // Absolute
+    {
+        Displacement = Motor->next_pos - Motor->cur_pos;
+        if(Motor->next_pos > Motor->cur_pos)
+            Motor->dir = 1;
+        else
+            Motor->dir = 0;
+
+        gpio_motor_control_dir_main(Motor);
+        Motor->cur_pos = Motor->next_pos;
+    }
+    else    // Relative
+    {
+        Displacement = Motor->next_pos;
+        if(!isNegative)
+        {
+            Motor->dir = 1;
+            Motor->cur_pos = Motor->cur_pos + Motor->next_pos;
+        }
+        else
+        {
+            Motor->dir = 0;
+            Motor->cur_pos = Motor->cur_pos - Motor->next_pos;
+        }
+        gpio_motor_control_dir_main(Motor);
+    }
+
+    LoopRequired = CalculateMotorLoop(Motor, fabs(Displacement));
+    gpio_motor_control_step_main(Motor, LoopRequired);
+    DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
+    return;
+}
+
+
+void gpio_motor_control_ioctl(MotorMod *Motor, uint8_t cmd, uint32_t val)
+{
+    if(cmd == UPDATE_POSITIONING)
+        Motor->positioning = val;
+    else if(cmd == UPDATE_DIR)
+        Motor->dir = val;
+    else if(cmd == UPDATE_UNIT)
+    {
+        Motor->unit = val;
+        gpio_motor_control_setSpeed(Motor, Motor->speed);
+    }
+    else if(cmd == UPDATE_MOVING)
+        Motor->moving = val;
+    return;
+}
+
+void gpio_motor_control_setCurPos(MotorMod *Motor, float val)
+{
+    Motor->cur_pos = val;
+    return;
+}
+
+void gpio_motor_control_setNextPos(MotorMod *Motor, float val)
+{
+    Motor->next_pos = val;
+    return;
+}
+
+#define FACTOR 10
+
+void gpio_motor_control_setSpeed(MotorMod *Motor, float val)
+{
+    Motor->speed = val/60;  // per min
+    if(Motor->unit==20) // inches
+    {
+        Motor->pulse_width = (Motor->speed * 25.4) * FACTOR;  // TO DO
+    }
+    else    // millimeters
+    {
+        Motor->pulse_width = Motor->speed * FACTOR;  // TO DO
+    }
+    return;
+}
+
+void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id)
+{
+    Motor->cur_pos = 0;
+    Motor->next_pos = 0;
+    Motor->positioning = 90;
+    Motor->dir = 0;
+    Motor->unit = 21;
+    Motor->moving = 0;
+    Motor->isActive = TRUE;
+    if(core_id==CSL_CORE_ID_R5FSS1_0)
+    {
+        Motor->step_base_addr = GPIO_MOTOR_STEP_BASE_ADDR;
+        Motor->step_pin = GPIO_MOTOR_STEP_PIN;
+        Motor->step_dir = GPIO_MOTOR_STEP_DIR;
+        Motor->dir_base_addr = GPIO_MOTOR_DIR_BASE_ADDR;
+        Motor->dir_pin = GPIO_MOTOR_DIR_PIN;
+        Motor->dir_dir = GPIO_MOTOR_DIR_DIR;
+    }
+
+    gpio_motor_control_setSpeed(Motor, 6000);   // 6000mm per min = 100mm per sec
+    return;
+}
+
+//void gpio_motor_control_step_main(void *args)
+void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
+{
+    uint32_t    loopcnt = (uint32_t)StepsRequired;
+    uint32_t    gpioBaseAddr, pinNum;
+
+    /* Get address after translation translate */
+    gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(Motor->step_base_addr);
+    pinNum       = Motor->step_pin;
+
+    DebugP_log("GPIO1 STEP pin toggle starts (loopcnt %d) width %d...\r\n", loopcnt, (uint32_t)(Motor->pulse_width));
+
+    GPIO_setDirMode(gpioBaseAddr, pinNum, Motor->step_dir);
+    while(loopcnt>0)
+    {
+        if(Motor->isActive)
+        {
+            GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
+            ClockP_usleep((uint32_t)(Motor->pulse_width));
+            GPIO_pinWriteLow(gpioBaseAddr, pinNum);
+            ClockP_usleep((uint32_t)(Motor->pulse_width));
+        }
+        loopcnt--;
+    }
+
+    //DebugP_log("GPIO1 STEP pin toggle finishs ...\r\n");
+
+    return;
+}
+
+void gpio_motor_control_dir_main(MotorMod *Motor)
+{
+    uint32_t    gpioBaseAddr, pinNum;
+
+    //DebugP_log("GPIO DIR pin toggle starts ...\r\n");
+
+    /* Get address after translation translate */
+    gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(Motor->dir_base_addr);
+    pinNum       = Motor->dir_pin;
+
+    GPIO_setDirMode(gpioBaseAddr, pinNum, Motor->dir_dir);
+    if(Motor->dir==0)
+        GPIO_pinWriteLow(gpioBaseAddr, pinNum);
+    else
+        GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
+
+    ClockP_usleep(10000);
+
+    return;
+}
+
+void update_gcode_cmdbuf(uint16_t TmpMotorData)
+{
+    msgBuf[idx] = (char)(TmpMotorData & 0xff);
+    if(TmpMotorData == 0)
+    {
+        DebugP_log("msgBug %s\r\n", msgBuf);
+        idx = 0;
+    }
+    else
+        idx++;
+
+    return;
+}
+
+void print_TmpMotorData(uint16_t TmpMotorData)
+{
+    DebugP_log("TmpMotorData %d\r\n", TmpMotorData);
+    return;
+}
+
+int motor_control_main(void)
+{
+
+    uint32_t    mcu_gpio0_BaseAddr;
+    uint32_t    pin_step, pin_dir;
+
+    DebugP_log("Motor Control Started\r\n");
+
+    /* Get address after translation translate */
+    mcu_gpio0_BaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_MOTOR_STEP_BASE_ADDR);
+    pin_step       = GPIO_MOTOR_STEP_PIN;
+    pin_dir        = GPIO_MOTOR_DIR_PIN;
+
+    GPIO_setDirMode(mcu_gpio0_BaseAddr, pin_step, GPIO_MOTOR_STEP_DIR);
+    GPIO_setDirMode(mcu_gpio0_BaseAddr, pin_dir, GPIO_MOTOR_DIR_DIR);
+
+    bMotorApplication = TRUE;
+    do
+    {
+        GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_step);
+        GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
+        ClockP_sleep(1);
+        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_step);
+        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_dir);
+        ClockP_sleep(1);
+    }
+    while(bMotorApplication == TRUE);
+
+    return 0;
+}
