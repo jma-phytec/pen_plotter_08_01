@@ -55,7 +55,7 @@ static int32_t Flash_norXspiCmdWrite(Flash_Config *config, uint8_t cmd, uint32_t
     int32_t status = SystemP_SUCCESS;
     Flash_NorXspiObject *obj = (Flash_NorXspiObject *)(config->object);
     OSPI_WriteCmdParams wrParams;
-
+    
     OSPI_WriteCmdParams_init(&wrParams);
     wrParams.cmd          = cmd;
     wrParams.cmdAddr      = cmdAddr;
@@ -64,7 +64,6 @@ static int32_t Flash_norXspiCmdWrite(Flash_Config *config, uint8_t cmd, uint32_t
     wrParams.txDataLen    = txLen;
 
     status = OSPI_writeCmd(obj->ospiHandle, &wrParams);
-
     return status;
 }
 
@@ -74,7 +73,7 @@ static int32_t Flash_norXspiCmdRead(Flash_Config *config, uint8_t cmd, uint32_t 
     int32_t status = SystemP_SUCCESS;
     Flash_NorXspiObject *obj = (Flash_NorXspiObject *)(config->object);
     OSPI_ReadCmdParams  rdParams;
-
+    
     OSPI_ReadCmdParams_init(&rdParams);
     rdParams.cmd           = cmd;
     rdParams.cmdAddr       = cmdAddr;
@@ -83,16 +82,15 @@ static int32_t Flash_norXspiCmdRead(Flash_Config *config, uint8_t cmd, uint32_t 
     rdParams.rxDataLen     = rxLen;
 
     status = OSPI_readCmd(obj->ospiHandle, &rdParams);
-
     return status;
 }
 
 static int32_t Flash_norXspiWaitReady(Flash_Config *config, uint32_t timeOut)
 {
     int32_t status = SystemP_SUCCESS;
-    Flash_NorXspiDevDefines *devDefines = (Flash_NorXspiDevDefines *)config->devDefines;
     Flash_NorXspiObject *obj = (Flash_NorXspiObject *)(config->object);
-
+    Flash_NorXspiDevDefines *devDefines = (Flash_NorXspiDevDefines *)config->devDefines;
+    
     uint8_t  readStatus;
     uint8_t  cmd, numAddrBytes;
     uint32_t cmdAddr;
@@ -132,7 +130,6 @@ static int32_t Flash_norXspiWaitReady(Flash_Config *config, uint32_t timeOut)
     {
         status = SystemP_FAILURE;
     }
-
     return status;
 }
 
@@ -201,10 +198,26 @@ static int32_t Flash_norXspiReadId(Flash_Config *config)
     int32_t  status;
     Flash_NorXspiObject *obj = (Flash_NorXspiObject *)(config->object);
     Flash_NorXspiDevDefines *devDefines = (Flash_NorXspiDevDefines *)config->devDefines;
+#ifdef M35XU512
+    uint32_t manfID, devID;
+
+    OSPI_norFlashReadId(obj->ospiHandle, &manfID, &devID);
+    if ((manfID == devDefines->NOR_MANF_ID) && (devID == devDefines->NOR_DEVICE_ID))
+    {
+        config->attrs->manufacturerId = manfID;
+        config->attrs->deviceId = devID;
+        status = SystemP_SUCCESS;
+    }
+    else
+    {
+        status = SystemP_FAILURE;
+    }
+#else
     uint8_t  idCode[FLASH_XSPI_ID_CODE_SIZE_MAX];
     uint8_t  cmd = OSPI_CMD_INVALID_OPCODE;
     uint32_t cmdAddr = OSPI_CMD_INVALID_ADDR;
     uint8_t  numAddrBytes = 0;
+
 
     DebugP_assert(FLASH_XSPI_ID_CODE_SIZE_MAX >= devDefines->NOR_RDID_NUM_BYTES);
 
@@ -238,6 +251,7 @@ static int32_t Flash_norXspiReadId(Flash_Config *config)
             status = SystemP_FAILURE;
         }
     }
+#endif
     return (status);
 }
 
@@ -422,14 +436,18 @@ static int32_t Flash_norXspiOpen(Flash_Config *config, Flash_Params *params)
     int32_t status = SystemP_SUCCESS;
     Flash_NorXspiObject *obj = (Flash_NorXspiObject *)(config->object);
     Flash_Attrs *attrs = config->attrs;
-    int32_t attackVectorStatus = SystemP_FAILURE;
 
     obj->ospiHandle = OSPI_getHandle(attrs->driverInstance);
     if(obj->ospiHandle==NULL)
     {
         status = SystemP_FAILURE;
     }
-
+#ifdef M35XU512
+    OSPI_norFlashInit1s1s1s(obj->ospiHandle);
+    status = SystemP_SUCCESS;
+#else
+    int32_t attackVectorStatus = SystemP_FAILURE;
+    
     if(status == SystemP_SUCCESS)
     {
         /* Set device size and addressing bytes */
@@ -471,6 +489,7 @@ static int32_t Flash_norXspiOpen(Flash_Config *config, Flash_Params *params)
         Flash_norXspiSetDummyCycles(config);
         uint32_t readDataCapDelay = 4U;
         OSPI_setRdDataCaptureDelay(obj->ospiHandle, readDataCapDelay);
+
         status = Flash_norXspiReadId(config);
 
         while((status != SystemP_SUCCESS) && (readDataCapDelay >= 0U))
@@ -524,7 +543,7 @@ static int32_t Flash_norXspiOpen(Flash_Config *config, Flash_Params *params)
         /* Disable hybrid sector configuration */
         status = Flash_norXspiHybridSectorConfig(config, 0);
     }
-
+#endif
     return (status);
 }
 
@@ -543,8 +562,12 @@ static int32_t Flash_norXspiRead(Flash_Config *config, uint32_t offset, uint8_t 
 {
     int32_t status = SystemP_SUCCESS;
     Flash_NorXspiObject *obj = (Flash_NorXspiObject *)(config->object);
-    Flash_Attrs *attrs = config->attrs;
 
+#ifdef M35XU512
+     OSPI_norFlashRead(obj->ospiHandle, offset, buf, len);
+#else
+    Flash_Attrs *attrs = config->attrs;
+     
     if(obj->phyEnable)
     {
         OSPI_enablePhy(obj->ospiHandle);
@@ -570,7 +593,7 @@ static int32_t Flash_norXspiRead(Flash_Config *config, uint32_t offset, uint8_t 
     {
         OSPI_disablePhy(obj->ospiHandle);
     }
-
+#endif
     return status;
 }
 
@@ -578,6 +601,10 @@ static int32_t Flash_norXspiWrite(Flash_Config *config, uint32_t offset, uint8_t
 {
     int32_t status = SystemP_SUCCESS;
     Flash_NorXspiObject *obj = (Flash_NorXspiObject *)(config->object);
+
+#ifdef M35XU512
+    OSPI_norFlashWrite(obj->ospiHandle, offset, buf, len);
+#else
     Flash_NorXspiDevDefines *devDefines = (Flash_NorXspiDevDefines *)config->devDefines;
     Flash_Attrs *attrs = config->attrs;
 
@@ -644,13 +671,19 @@ static int32_t Flash_norXspiWrite(Flash_Config *config, uint32_t offset, uint8_t
             }
         }
     }
-
+#endif
     return status;
 }
 
 static int32_t Flash_norXspiErase(Flash_Config *config, uint32_t blkNum)
 {
     int32_t status = SystemP_SUCCESS;
+
+#ifdef M35XU512
+    Flash_NorXspiObject *obj = (Flash_NorXspiObject *)(config->object);    
+    OSPI_norFlashErase(obj->ospiHandle, blkNum);
+
+#else
     Flash_NorXspiDevDefines *devDefines = (Flash_NorXspiDevDefines *)config->devDefines;
 
     uint8_t  cmd = OSPI_CMD_INVALID_OPCODE;
@@ -691,6 +724,6 @@ static int32_t Flash_norXspiErase(Flash_Config *config, uint32_t blkNum)
     {
         status = Flash_norXspiWaitReady(config, devDefines->NOR_BULK_ERASE_TIMEOUT);
     }
-
+#endif
     return status;
 }

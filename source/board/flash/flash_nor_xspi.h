@@ -84,8 +84,10 @@ typedef struct {
 } Flash_NorXspiObject;
 
 /* FLash Device specific extern */
-extern Flash_NorXspiDevDefines gFlashNorXspiDeviceDefines_S28HS512T;
-extern Flash_Attrs gFlashNorXspiAttrs_S28HS512T;
+//extern Flash_NorXspiDevDefines gFlashNorXspiDeviceDefines_S28HS512T;
+//extern Flash_Attrs gFlashNorXspiAttrs_S28HS512T;
+extern Flash_NorXspiDevDefines gFlashNorXspiDeviceDefines_M35XU512;
+extern Flash_Attrs gFlashNorXspiAttrs_M35XU512;
 
 /* FLash specific externs */
 extern Flash_Fxns gFlashNorXspiFxns;

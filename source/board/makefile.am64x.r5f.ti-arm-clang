@@ -25,6 +25,7 @@ FILES_common := \
     flash_nor_ospi_device_MX25LM25645G.c \
     flash_nor_xspi.c \
     flash_nor_xspi_device_S28HS512T.c \
+	flash_nor_xspi_device_M35XU512.c \
     flash_nor_ospi_quad.c \
     flash_nor_ospi_quad_device_S25HL512T.c \
     led.c \

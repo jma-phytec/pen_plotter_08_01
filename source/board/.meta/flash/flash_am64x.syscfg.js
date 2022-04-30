@@ -9,6 +9,11 @@ let flash_devices = [
         capacity: 64*1024*1024,
     },
     {
+        name: "M35XU512",
+        type: "NOR XSPI",
+        capacity: 64*1024*1024,
+    },
+    {
     	name: "MX25LM25645G",
     	type: "NOR OSPI",
     	capacity: 32*1024*1024,

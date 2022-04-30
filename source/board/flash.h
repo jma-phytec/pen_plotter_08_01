@@ -37,6 +37,8 @@
 #include <kernel/dpl/SystemP.h>
 #include <drivers/hw_include/soc_config.h>
 
+#define M35XU512
+
 /**
  *  \defgroup BOARD_FLASH_MODULE APIs for FLASH
  *  \ingroup BOARD_MODULE
