@@ -147,6 +147,16 @@ void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id)
     }
 
     gpio_motor_control_setSpeed(Motor, 6000);   // 6000mm per min = 100mm per sec
+
+    uint32_t    gpioBaseAddr, pinNum;
+
+    /* Get address after translation translate */
+    gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_EN_BASE_ADDR);
+    pinNum       = GPIO_EN_PIN;
+
+    GPIO_setDirMode(gpioBaseAddr, GPIO_EN_PIN, GPIO_EN_DIR);
+    GPIO_pinWriteLow(gpioBaseAddr, pinNum);
+
     return;
 }
 
@@ -226,7 +236,11 @@ int motor_control_main(void)
 
     uint32_t    mcu_gpio0_BaseAddr;
     uint32_t    pin_step, pin_dir;
+    MotorMod MotorX, MotorY, MotorZ;
 
+    gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0);
+    //gpio_motor_control_init(&MotorY);
+    //gpio_motor_control_init(&MotorZ);
     DebugP_log("Motor Control Started\r\n");
 
     /* Get address after translation translate */
@@ -241,10 +255,10 @@ int motor_control_main(void)
     do
     {
         GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_step);
-        GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
+        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_dir);
         ClockP_sleep(1);
         GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_step);
-        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_dir);
+        GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
         ClockP_sleep(1);
     }
     while(bMotorApplication == TRUE);
