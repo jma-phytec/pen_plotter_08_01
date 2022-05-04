@@ -57,8 +57,8 @@ void motor_demo_main(void *args);
 
 void motor_main(void *args)
 {
-    //motor_control_main(NULL);
-    motor_demo_main(NULL);
+    motor_control_main(NULL);
+    //motor_demo_main(NULL);
     vTaskDelete(NULL);
 }
 
