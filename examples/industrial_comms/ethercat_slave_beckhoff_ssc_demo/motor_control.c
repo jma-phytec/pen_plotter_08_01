@@ -255,10 +255,11 @@ int motor_control_main(void)
     do
     {
         GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_step);
-        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_dir);
-        ClockP_sleep(1);
-        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_step);
         GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
+        ClockP_usleep(500);
+        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_step);
+        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_dir);
+        ClockP_usleep(500);
         ClockP_sleep(1);
     }
     while(bMotorApplication == TRUE);
