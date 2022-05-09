@@ -149,6 +149,8 @@ void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id)
 
     gpio_motor_control_setSpeed(Motor, 6000);   // 6000mm per min = 100mm per sec
 
+
+    // Enable 8255 EN pin
     uint32_t    gpioBaseAddr, pinNum;
 
     /* Get address after translation translate */
@@ -161,7 +163,6 @@ void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id)
     return;
 }
 
-//void gpio_motor_control_step_main(void *args)
 void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
 {
     uint32_t    loopcnt = (uint32_t)StepsRequired;
@@ -209,7 +210,7 @@ void gpio_motor_control_dir_main(MotorMod *Motor)
     else
         GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
 
-    ClockP_usleep(10000);
+    ClockP_usleep(100);
 
     return;
 }
@@ -238,7 +239,8 @@ int motor_control_main(void)
 {
     uint32_t    mcu_gpio0_BaseAddr;
     uint32_t    pin_step, pin_dir, count = 0;
-    MotorMod MotorX, MotorY, MotorZ;
+    //MotorMod MotorY, MotorZ;
+    MotorMod MotorX;
 
     gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0);
     //gpio_motor_control_init(&MotorY);
