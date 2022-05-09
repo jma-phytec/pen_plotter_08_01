@@ -598,36 +598,40 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     return 0;
 }
 
+extern char msgBuf[64];
 
 int motor_demo_main(void)
 {
     int i = 0;
-    char msgBuf[MAX_MSG_SIZE];
+    //char msgBuf[MAX_MSG_SIZE];
     MotorMod MotorX, MotorY, MotorZ;
 
     DebugP_log("Motor Demo Started\r\n");
+    memset(msgBuf, 0, MAX_MSG_SIZE-1);
 
     gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0);
     //gpio_motor_control_init(&MotorY);
     //gpio_motor_control_init(&MotorZ);
 
     bMotorApplication = TRUE;
-    //bGCodeCommandRunning = FALSE;
-    bGCodeCommandRunning = TRUE;
+    bGCodeCommandRunning = FALSE;
+    //bGCodeCommandRunning = TRUE;
     do
     {
         if(bGCodeCommandRunning==TRUE)
         {
-            memset(msgBuf, 0, MAX_MSG_SIZE-1);
-            memcpy(msgBuf, GCodeFile2[i++], MAX_MSG_SIZE-1);
-            msgBuf[MAX_MSG_SIZE-1] = 0;
+            //memcpy(msgBuf, GCodeFile2[i++], MAX_MSG_SIZE-1);
             DebugP_log("Before gc_execute_line\r\n");
             gc_execute_line(&MotorX, &MotorY, &MotorZ, msgBuf);       // G Code Parser
             DebugP_log("After gc_execute_line\r\n");
             if(i>9)
                 i = 0;
-            //bGCodeCommandRunning = FALSE;
-            bGCodeCommandRunning = TRUE;;
+
+            memset(msgBuf, 0, MAX_MSG_SIZE-1);
+            msgBuf[MAX_MSG_SIZE-1] = 0;
+
+            bGCodeCommandRunning = FALSE;
+            //bGCodeCommandRunning = TRUE;;
         }
         else
             vTaskDelay(500);
