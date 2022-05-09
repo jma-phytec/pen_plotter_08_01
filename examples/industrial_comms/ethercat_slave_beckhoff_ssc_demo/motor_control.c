@@ -29,8 +29,9 @@
 #include <ti_drivers_open_close.h>
 #include <ti_board_open_close.h>
 
-#define ROUND_LEN 40.4
-#define NUM_STEPS_PER_ROTATION 200
+#define ROUND_LEN 40.5
+#define NUM_STEPS_PER_ROTATION 205
+#define STEPSIZE 16
 
 char msgBuf[64];
 int idx = 0;
@@ -39,8 +40,8 @@ float CalculateMotorLoop(MotorMod *Motor, float Displayment)
 {
     float StepsRequired = 0;
     // 200 steps = 1 rotation = 4.04cm = 40.4mm
-    StepsRequired = (Displayment / ROUND_LEN) * NUM_STEPS_PER_ROTATION;
-    DebugP_log("Motor movement loop = %f\r\n", StepsRequired);
+    StepsRequired = (Displayment / ROUND_LEN) * NUM_STEPS_PER_ROTATION * STEPSIZE;
+    DebugP_log("CalculateMotorLoop: Displayment %f StepsRequired %f\r\n", Displayment, StepsRequired);
     return StepsRequired;
 }
 
@@ -178,9 +179,11 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
         if(Motor->isActive)
         {
             GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
-            ClockP_usleep((uint32_t)(Motor->pulse_width));
+            //ClockP_usleep((uint32_t)(Motor->pulse_width));
+            ClockP_usleep(300);
             GPIO_pinWriteLow(gpioBaseAddr, pinNum);
-            ClockP_usleep((uint32_t)(Motor->pulse_width));
+            //ClockP_usleep((uint32_t)(Motor->pulse_width));
+            ClockP_usleep(300);
         }
         loopcnt--;
     }
@@ -233,9 +236,8 @@ void print_TmpMotorData(uint16_t TmpMotorData)
 
 int motor_control_main(void)
 {
-
     uint32_t    mcu_gpio0_BaseAddr;
-    uint32_t    pin_step, pin_dir;
+    uint32_t    pin_step, pin_dir, count = 0;
     MotorMod MotorX, MotorY, MotorZ;
 
     gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0);
@@ -255,12 +257,21 @@ int motor_control_main(void)
     do
     {
         GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_step);
-        GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
-        ClockP_usleep(500);
+        //GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
+        //ClockP_usleep(500);     // 32 micro step setup (with loading)
+        ClockP_usleep(300);     // 16 micro step setup (with loading)
         GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_step);
-        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_dir);
-        ClockP_usleep(500);
-        ClockP_sleep(1);
+        if(count>8100)  // 10cm
+        {
+            return 0;
+            GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_dir);
+        }
+        else
+            GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
+        ClockP_usleep(300);
+        count++;
+        if(count>14000)
+            count = 0;
     }
     while(bMotorApplication == TRUE);
 

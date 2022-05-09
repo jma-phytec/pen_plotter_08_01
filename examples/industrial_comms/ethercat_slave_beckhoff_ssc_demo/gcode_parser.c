@@ -612,7 +612,8 @@ int motor_demo_main(void)
     //gpio_motor_control_init(&MotorZ);
 
     bMotorApplication = TRUE;
-    bGCodeCommandRunning = FALSE;
+    //bGCodeCommandRunning = FALSE;
+    bGCodeCommandRunning = TRUE;
     do
     {
         if(bGCodeCommandRunning==TRUE)
@@ -625,7 +626,8 @@ int motor_demo_main(void)
             DebugP_log("After gc_execute_line\r\n");
             if(i>9)
                 i = 0;
-            bGCodeCommandRunning = FALSE;
+            //bGCodeCommandRunning = FALSE;
+            bGCodeCommandRunning = TRUE;;
         }
         else
             vTaskDelay(500);
