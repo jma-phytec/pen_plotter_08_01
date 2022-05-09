@@ -33,7 +33,7 @@
 #define NUM_STEPS_PER_ROTATION 205
 #define STEPSIZE 16
 
-char msgBuf[64];
+char msgBuf[128];
 int idx = 0;
 
 float CalculateMotorLoop(MotorMod *Motor, float Displayment)
@@ -41,7 +41,7 @@ float CalculateMotorLoop(MotorMod *Motor, float Displayment)
     float StepsRequired = 0;
     // 200 steps = 1 rotation = 4.04cm = 40.4mm
     StepsRequired = (Displayment / ROUND_LEN) * NUM_STEPS_PER_ROTATION * STEPSIZE;
-    DebugP_log("CalculateMotorLoop: Displayment %f StepsRequired %f\r\n", Displayment, StepsRequired);
+    //DebugP_log("CalculateMotorLoop: Displayment %f StepsRequired %f\r\n", Displayment, StepsRequired);
     return StepsRequired;
 }
 
@@ -79,7 +79,7 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative)
 
     LoopRequired = CalculateMotorLoop(Motor, fabs(Displacement));
     gpio_motor_control_step_main(Motor, LoopRequired);
-    DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
+    //DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
     return;
 }
 
@@ -171,7 +171,7 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
     gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(Motor->step_base_addr);
     pinNum       = Motor->step_pin;
 
-    DebugP_log("GPIO1 STEP pin toggle starts (loopcnt %d) width %d...\r\n", loopcnt, (uint32_t)(Motor->pulse_width));
+    //DebugP_log("GPIO1 STEP pin toggle starts (loopcnt %d) width %d...\r\n", loopcnt, (uint32_t)(Motor->pulse_width));
 
     GPIO_setDirMode(gpioBaseAddr, pinNum, Motor->step_dir);
     while(loopcnt>0)
@@ -219,7 +219,7 @@ void update_gcode_cmdbuf(uint16_t TmpMotorData)
     msgBuf[idx] = (char)(TmpMotorData & 0xff);
     if(TmpMotorData == 0)
     {
-        DebugP_log("msgBug %s\r\n", msgBuf);
+        //DebugP_log("msgBug %s\r\n", msgBuf);
         idx = 0;
     }
     else

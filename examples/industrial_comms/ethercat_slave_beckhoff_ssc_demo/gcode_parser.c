@@ -128,7 +128,7 @@ uint32_t gRemoteCoreId[] = {
 uint16_t gRemoteServiceEndPt = 13u;
 
 /* maximum size that message can have in this example */
-#define MAX_MSG_SIZE        (64u)
+#define MAX_MSG_SIZE        (128u)
 
 /* Main core ack reply end point
  *
@@ -467,14 +467,14 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
         }
 
         char_counter++;
-        DebugP_log("char_counter %d\r\n", char_counter);
+        //DebugP_log("char_counter %d\r\n", char_counter);
 
 
         if(!read_float(line, &char_counter, &value, &isNegative))   // Read command code
         {
             return 0;
         }
-        DebugP_log("value %f int_value %d mantissa %d\r\n",  value, int_value, mantissa);
+        //DebugP_log("value %f int_value %d mantissa %d\r\n",  value, int_value, mantissa);
 
         int_value = trunc(value);
         mantissa =  round(100*(value - int_value)); // Compute mantissa for Gxx.x commands.
@@ -556,11 +556,11 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
                   //gpio_motor_control_setSpeed(MotorZ, value);
                   break;
               case 'X':     // X Direction
-                  gpio_motor_control_setNextPos(MotorX, value);
+                  //gpio_motor_control_setNextPos(MotorX, value);
                   RequiredMoveX = TRUE;
                   break;
               case 'Y':     // Y Direction
-                  //gpio_motor_control_setNextPos(MotorY, value);
+                  gpio_motor_control_setNextPos(MotorX, value);
                   RequiredMoveY = TRUE;
                   break;
               case 'Z':     // Z Direction
@@ -598,7 +598,7 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     return 0;
 }
 
-extern char msgBuf[64];
+extern char msgBuf[128];
 
 int motor_demo_main(void)
 {
@@ -620,18 +620,19 @@ int motor_demo_main(void)
     {
         if(bGCodeCommandRunning==TRUE)
         {
-            //memcpy(msgBuf, GCodeFile2[i++], MAX_MSG_SIZE-1);
-            DebugP_log("Before gc_execute_line\r\n");
+            bGCodeCommandRunning = FALSE;
+            //bGCodeCommandRunning = TRUE
+            memcpy(msgBuf, GCodeFile1[i++], MAX_MSG_SIZE-1);
+            //DebugP_log("Before gc_execute_line\r\n");
             gc_execute_line(&MotorX, &MotorY, &MotorZ, msgBuf);       // G Code Parser
-            DebugP_log("After gc_execute_line\r\n");
-            if(i>9)
+            //DebugP_log("After gc_execute_line\r\n");
+            if(i>548)
                 i = 0;
 
             memset(msgBuf, 0, MAX_MSG_SIZE-1);
             msgBuf[MAX_MSG_SIZE-1] = 0;
 
-            bGCodeCommandRunning = FALSE;
-            //bGCodeCommandRunning = TRUE;;
+;;
         }
         else
             vTaskDelay(500);
