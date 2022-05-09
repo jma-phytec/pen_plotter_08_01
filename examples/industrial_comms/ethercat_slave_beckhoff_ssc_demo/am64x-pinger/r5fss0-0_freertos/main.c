@@ -134,7 +134,7 @@ int main()
     System_init();
     EthRefCLK_init();
     Board_init();
-#if 1
+
     /* This task is created at highest priority, it should create more tasks and then delete itself */
     gMainTask = xTaskCreateStatic( frertos_main,   /* Pointer to the function that implements the task. */
                                   "freertos_main", /* Text name for the task.  This is to facilitate debugging only. */
@@ -145,8 +145,6 @@ int main()
                                   &gMainTaskObj ); /* pointer to statically allocated task object memory */
     configASSERT(gMainTask != NULL);
 
-#endif
-#if 1
     gMotorTask = xTaskCreateStatic( motor_main, //motor_main,   /* Pointer to the function that implements the task. */
                                   "motor_main", /* Text name for the task.  This is to facilitate debugging only. */
                                   MOTOR_TASK_SIZE,  /* Stack depth in units of StackType_t typically uint32_t on 32b CPUs */
@@ -155,7 +153,7 @@ int main()
                                   gMotorTaskStack,  /* pointer to stack base */
                                   &gMotorTaskObj ); /* pointer to statically allocated task object memory */
     configASSERT(gMotorTask != NULL);
-#endif
+
     /* Start the scheduler to start the tasks executing. */
     vTaskStartScheduler();
 

@@ -359,16 +359,20 @@ void APPL_Application(void)
     static uint8_t prevState = 55;
     static uint8_t prevCount = 0;
 
-    uint8_t TmpCount;
-    uint8_t TmpCmd;
-    uint16_t TmpMotorData;
+    uint8_t TmpCount;       // message from EtherCAT master
+                            // 1: new gcode data ready
+                            // 2: master received ack
+                            // 3: master requests start motor
+                            // 4: master received ack (gcode command complete)
 
-    static uint8_t Tmpswitchs = 0;
+    //uint8_t TmpCmd;         // not use
+    uint16_t TmpMotorData;  // gcode code data, 1 char transfer each time
 
+    static uint8_t Tmpswitchs = 0;  // message to EtherCAT master
 
-    LED = sDOOutputs.LEDs;
-    TmpCount = sDO1Outputs.Count;
-    TmpCmd = sDO1Outputs.Cmd;
+    LED = sDOOutputs.LEDs;      // LED data from EtherCAT master
+    TmpCount = sDO1Outputs.Count;   // from EtherCAT master
+    //TmpCmd = sDO1Outputs.Cmd;
 
 #ifdef ENABLE_PDI_TASK
     if(LED != prevState)
@@ -388,42 +392,42 @@ void APPL_Application(void)
 
     if(TmpCount != prevCount)
     {
-    if(TmpCount==1) // new motor data
-    {
-        TmpMotorData = sDO1Outputs.MotorData;
-        update_gcode_cmdbuf(TmpMotorData);
-        //print_TmpMotorData(TmpMotorData);
-        if(TmpMotorData == 0) // gcode command line was sent
+        if(TmpCount==1) // new gcode data
         {
-            Tmpswitchs = 0x4;   //tmpswitch2
+            TmpMotorData = sDO1Outputs.MotorData;       // gcode data
+            update_gcode_cmdbuf(TmpMotorData);
+            //print_TmpMotorData(TmpMotorData);
+            if(TmpMotorData == 0) // gcode command line was sent
+            {
+                Tmpswitchs = 0x4;   //tmpswitch2, ack to master gcode command line was well received
+            }
+            else
+            {
+                Tmpswitchs = 0x1;   // tmpswitch0, ack to master 1 gcode char was well received
+            }
+        }
+        else if(TmpCount==2) // master received ack
+        {
+            Tmpswitchs = 0x2;   // tmpswitch1, ack to slave after 1 gcode char was confirmed
+        }
+        else if(TmpCount==3)
+        {
+            bGCodeCommandRunning = TRUE;
+            //Tmpswitchs = 0x8;   // tmpswitch3
+        }
+        else if(TmpCount==4)    // master received ack of gcode command execute complete
+        {
+
         }
         else
         {
-            Tmpswitchs = 0x1;   // tmpswitch0
+            Tmpswitchs = 0x10;  // tmpswitch4
         }
     }
-    else if(TmpCount==2) // host received ack
+    else if(TmpCount==3)    // bGCodeCommandRunning is keeping TRUE
     {
-        Tmpswitchs = 0x2;   // tmpswitch1
-    }
-    else if(TmpCount==3)
-    {
-        bGCodeCommandRunning = TRUE;
-        //Tmpswitchs = 0x8;   // tmpswitch3
-    }
-    else if(TmpCount==4)    // host received ack of gcode command complete
-    {
-
-    }
-    else
-    {
-        Tmpswitchs = 0x10;  // tmpswitch4
-    }
-    }
-    else if(TmpCount==3)
-    {
-        if(bGCodeCommandRunning==FALSE)
-            Tmpswitchs = 0x08;
+        if(bGCodeCommandRunning==FALSE) // Gcode command execute completed
+            Tmpswitchs = 0x08;  // tmpswitch3, notify slave gcode command execute completed
     }
 
     sDIInputs.switchs = Tmpswitchs;

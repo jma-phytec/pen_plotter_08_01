@@ -37,6 +37,8 @@
 #include <drivers/ipc_notify.h>
 #include <drivers/ipc_rpmsg.h>
 #include <math.h>
+#include <FreeRTOS.h>
+#include <task.h>
 #include <drivers/gpio.h>
 #include <kernel/dpl/AddrTranslateP.h>
 #include <tiescutils.h>
@@ -301,7 +303,7 @@ void ipc_rpmsg_echo_main_core_start()
 
     ClockP_usleep(500*1000); /* wait for log messages from remote cores to be flushed, otherwise this delay is not needed */
 
-    DebugP_log("[JMA IPC RPMSG ECHO] Message exchange started by main core !!!\r\n");
+    DebugP_log("[IPC RPMSG ECHO] Message exchange started by main core !!!\r\n");
 
     curTime = ClockP_getTimeUsec();
 
@@ -430,7 +432,6 @@ uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr, Bool *is
 }
 
 
-
 uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, char *line)
 {
     uint8_t char_counter = 0;
@@ -511,8 +512,6 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
             case 20:    // inches
             case 21:    // millimeters
                 gpio_motor_control_ioctl(MotorX, UPDATE_UNIT, int_value);
-                //gpio_motor_control_ioctl(MotorY, UPDATE_UNIT, int_value);
-                //gpio_motor_control_ioctl(MotorZ, UPDATE_UNIT, int_value);
                 break;
             case 17:
             case 18:
@@ -524,8 +523,6 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
             case 90:    // absoulte mode
             case 91:    // relative mode
                 gpio_motor_control_ioctl(MotorX, UPDATE_POSITIONING, int_value);
-                //gpio_motor_control_ioctl(MotorY, UPDATE_POSITIONING, int_value);
-                //gpio_motor_control_ioctl(MotorZ, UPDATE_POSITIONING, int_value);
                 break;
             default:
                 break;
@@ -552,19 +549,17 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
               case 'F': // Feedrate
               case 'S': // Speed
                   gpio_motor_control_setSpeed(MotorX, value);
-                  //gpio_motor_control_setSpeed(MotorY, value);
-                  //gpio_motor_control_setSpeed(MotorZ, value);
                   break;
               case 'X':     // X Direction
                   //gpio_motor_control_setNextPos(MotorX, value);
-                  RequiredMoveX = TRUE;
+                  //RequiredMoveX = TRUE;
                   break;
               case 'Y':     // Y Direction
                   gpio_motor_control_setNextPos(MotorX, value);
                   RequiredMoveY = TRUE;
                   break;
               case 'Z':     // Z Direction
-                  //gpio_motor_control_setNextPos(MotorZ, value);
+                  //gpio_motor_control_setNextPos(MotorX, value);
                   //RequiredMoveZ = TRUE;
                   break;
               default:
@@ -577,20 +572,17 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
 
     if(RequiredMoveX)
     {
-        //DebugP_log("RequiredMoveX\r\n");
         gpio_motor_move(MotorX, isNegative);   // return after motor movement complete
         RequiredMoveX = FALSE;
     }
     if(RequiredMoveY)
     {
-        //DebugP_log("RequiredMoveY\r\n");
-        //gpio_motor_move(MotorY, isNegative);   // return after motor movement complete
+        gpio_motor_move(MotorX, isNegative);   // return after motor movement complete
         RequiredMoveY = FALSE;
     }
     if(RequiredMoveZ)
     {
-        //DebugP_log("RequiredMoveZ\r\n");
-        //gpio_motor_move(MotorZ, isNegative);   // return after motor movement complete
+        gpio_motor_move(MotorX, isNegative);   // return after motor movement complete
         RequiredMoveZ = FALSE;
     }
     //DebugP_log("Position %d %d\r\n", MotorX->cur_pos, MotorY->cur_pos);
@@ -622,20 +614,18 @@ int motor_demo_main(void)
         {
             bGCodeCommandRunning = FALSE;
             //bGCodeCommandRunning = TRUE
-            memcpy(msgBuf, GCodeFile1[i++], MAX_MSG_SIZE-1);
+            //memcpy(msgBuf, GCodeFile1[i++], MAX_MSG_SIZE-1);
             //DebugP_log("Before gc_execute_line\r\n");
             gc_execute_line(&MotorX, &MotorY, &MotorZ, msgBuf);       // G Code Parser
             //DebugP_log("After gc_execute_line\r\n");
-            if(i>548)
-                i = 0;
+            //if(i>548)
+                //i = 0;
 
             memset(msgBuf, 0, MAX_MSG_SIZE-1);
             msgBuf[MAX_MSG_SIZE-1] = 0;
-
-;;
         }
         else
-            vTaskDelay(500);
+            vTaskDelay(100);
     }
     while(bMotorApplication == TRUE);
     /* This loop will never exit */
