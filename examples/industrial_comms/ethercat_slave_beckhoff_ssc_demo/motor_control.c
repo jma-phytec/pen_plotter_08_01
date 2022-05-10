@@ -41,7 +41,9 @@ float CalculateMotorLoop(MotorMod *Motor, float Displayment)
     float StepsRequired = 0;
     // 200 steps = 1 rotation = 4.04cm = 40.4mm
     StepsRequired = (Displayment / ROUND_LEN) * NUM_STEPS_PER_ROTATION * STEPSIZE;
-    //DebugP_log("CalculateMotorLoop: Displayment %f StepsRequired %f\r\n", Displayment, StepsRequired);
+#ifdef MYDEBUG
+    DebugP_log("CalculateMotorLoop: Displayment %f StepsRequired %f\r\n", Displayment, StepsRequired);
+#endif
     return StepsRequired;
 }
 
@@ -79,7 +81,9 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative)
 
     LoopRequired = CalculateMotorLoop(Motor, fabs(Displacement));
     gpio_motor_control_step_main(Motor, LoopRequired);
-    //DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
+#ifdef MYDEBUG
+    DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
+#endif
     return;
 }
 
@@ -160,6 +164,30 @@ void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id)
     GPIO_setDirMode(gpioBaseAddr, GPIO_EN_PIN, GPIO_EN_DIR);
     GPIO_pinWriteLow(gpioBaseAddr, pinNum);
 
+    // Enable LED
+    GPIO_setDirMode(gpioBaseAddr, RED_GPIO_PIN, RED_GPIO_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GREEN_GPIO_PIN, GREEN_GPIO_DIR);
+    GPIO_setDirMode(gpioBaseAddr, BLUE_GPIO_PIN, BLUE_GPIO_DIR);
+
+
+#ifdef MOTORX
+    GPIO_pinWriteHigh(gpioBaseAddr, RED_GPIO_PIN);
+    GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
+    GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
+#endif
+
+#ifdef MOTORY
+    GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
+    GPIO_pinWriteHigh(gpioBaseAddr, GREEN_GPIO_PIN);
+    GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
+#endif
+
+#ifdef MOTORZ
+    GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
+    GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
+    GPIO_pinWriteHigh(gpioBaseAddr, BLUE_GPIO_PIN);
+#endif
+
     return;
 }
 
@@ -220,7 +248,9 @@ void update_gcode_cmdbuf(uint16_t TmpMotorData)
     msgBuf[idx] = (char)(TmpMotorData & 0xff);
     if(TmpMotorData == 0)
     {
-        //DebugP_log("msgBug %s\r\n", msgBuf);
+#ifdef MYDEBUG
+        DebugP_log("msgBug %s\r\n", msgBuf);
+#endif
         idx = 0;
     }
     else

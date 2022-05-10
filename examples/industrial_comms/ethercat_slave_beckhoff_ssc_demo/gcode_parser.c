@@ -49,7 +49,6 @@
 #include "ti_drivers_open_close.h"
 #include "ti_board_open_close.h"
 #include "motor_control.h"
-
 #include "gcode_data.h"
 
 /* This example shows message exchange between multiple cores.
@@ -551,16 +550,22 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
                   gpio_motor_control_setSpeed(MotorX, value);
                   break;
               case 'X':     // X Direction
-                  //gpio_motor_control_setNextPos(MotorX, value);
-                  //RequiredMoveX = TRUE;
+#ifdef MOTORX
+                  gpio_motor_control_setNextPos(MotorX, value);
+                  RequiredMoveX = TRUE;
+#endif
                   break;
               case 'Y':     // Y Direction
+#ifdef MOTORY
                   gpio_motor_control_setNextPos(MotorX, value);
                   RequiredMoveY = TRUE;
+#endif
                   break;
               case 'Z':     // Z Direction
-                  //gpio_motor_control_setNextPos(MotorX, value);
-                  //RequiredMoveZ = TRUE;
+#ifdef MOTORZ
+                  gpio_motor_control_setNextPos(MotorX, value);
+                  RequiredMoveZ = TRUE;
+#endif
                   break;
               default:
                   break;
@@ -594,7 +599,7 @@ extern char msgBuf[128];
 
 int motor_demo_main(void)
 {
-    int i = 0;
+    //int i = 0;
     //char msgBuf[MAX_MSG_SIZE];
     MotorMod MotorX, MotorY, MotorZ;
 
