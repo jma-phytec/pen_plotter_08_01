@@ -133,6 +133,10 @@
         </file>
         <file path="../../../tiescutils.c" openOnCreation="false" excludeFromBuild="false" action="link">
         </file>
+        <file path="../../../gcode_parser.c" openOnCreation="false" excludeFromBuild="false" action="link">
+        </file>
+        <file path="../../../motor_control.c" openOnCreation="false" excludeFromBuild="false" action="link">
+        </file>
         <file path="../main.c" openOnCreation="false" excludeFromBuild="false" action="link">
         </file>
         <file path="linker.cmd" openOnCreation="false" excludeFromBuild="false" action="link">

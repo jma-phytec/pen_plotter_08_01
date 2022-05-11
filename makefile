@@ -5,7 +5,7 @@ include imports.mak
 DEVICE ?= am64x
 
 # debug, release
-PROFILE?=release
+PROFILE?=debug
 
 ifeq ($(DEVICE),$(filter $(DEVICE), am64x))
   SYSCFG_DEVICE = AM64x_beta
