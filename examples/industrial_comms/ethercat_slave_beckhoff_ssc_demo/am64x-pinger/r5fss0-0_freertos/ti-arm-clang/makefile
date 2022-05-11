@@ -43,6 +43,8 @@ FILES_common := \
 	tieschw.c \
 	tiesceoefoe.c \
 	tiescutils.c \
+	gcode_parser.c \
+	motor_control.c \
 	main.c \
 	ti_drivers_config.c \
 	ti_drivers_open_close.c \
