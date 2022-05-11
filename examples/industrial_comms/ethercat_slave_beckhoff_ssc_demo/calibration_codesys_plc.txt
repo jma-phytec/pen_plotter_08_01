@@ -1,0 +1,249 @@
+PROGRAM PLC_PRG
+VAR
+
+	iCounter : UDINT := 0 ;
+	cmpString1 : STRING;
+	cmpString2 : STRING;
+	cmpString3 : STRING;
+	cmpString4 : STRING;
+	sCommand0 : STRING;
+	sCommand1 : STRING;
+	sCommand2 : STRING;
+	sCommand3 : STRING;
+
+	refCommand0 : REFERENCE TO STRING;
+	refCommand1 : REFERENCE TO STRING;
+	refCommand2 : REFERENCE TO STRING;
+	refCommand3 : REFERENCE TO STRING;
+	sOutput : STRING;
+	refOutput : REFERENCE TO STRING;
+	pt0 : POINTER TO STRING;
+	pt1 : POINTER TO STRING;
+	pt2 : POINTER TO STRING;
+	pt3 : POINTER TO STRING;
+	pt4 : POINTER TO STRING;
+	result : RTS_IEC_RESULT;		
+
+	s0_led0 AT %QX0.0 : BOOL :=0;
+    s0_led1 AT %QX0.1 : BOOL :=0;
+    s0_led2 AT %QX0.2 : BOOL :=0;
+    s0_led3 AT %QX0.3 : BOOL :=0;
+    s0_led4 AT %QX0.4 : BOOL :=0;
+    s0_led5 AT %QX0.5 : BOOL :=0;
+    s0_led6 AT %QX0.6 : BOOL :=0;
+    s0_led7 AT %QX0.7 : BOOL :=0;
+	s0_count AT %QB1 : USINT := 0;
+	s0_command AT %QB2 : USINT := 0;
+	s0_data AT %QW2 : INT := 0;
+	s0_switch0 AT %IX0.0 : BOOL := 0;
+	s0_switch1 AT %IX0.1 : BOOL := 0;
+	s0_switch2 AT %IX0.2 : BOOL := 0;
+	s0_switch3 AT %IX0.3 : BOOL := 0;
+	s0_switch4 AT %IX0.4 : BOOL := 0;
+	s0_switch5 AT %IX0.5 : BOOL := 0;
+	s0_switch6 AT %IX0.6 : BOOL := 0;
+	s0_switch7 AT %IX0.7 : BOOL := 0;
+	s0_info1 AT %ID1 : DINT := 0;
+	s0_info2 AT %IW4 : INT := 0;
+
+	s1_led0 AT %QX6.0 : BOOL :=0;
+    s1_led1 AT %QX6.1 : BOOL :=0;
+    s1_led2 AT %QX6.2 : BOOL :=0;
+    s1_led3 AT %QX6.3 : BOOL :=0;
+    s1_led4 AT %QX6.4 : BOOL :=0;
+    s1_led5 AT %QX6.5 : BOOL :=0;
+    s1_led6 AT %QX6.6 : BOOL :=0;
+    s1_led7 AT %QX6.7 : BOOL :=0;
+	s1_count AT %QB7 : USINT := 0;
+	s1_command AT %QB8 : USINT := 0;
+	s1_data AT %QW5 : INT := 0;
+	s1_switch0 AT %IX12.0 : BOOL := 0;
+	s1_switch1 AT %IX12.1 : BOOL := 0;
+	s1_switch2 AT %IX12.2 : BOOL := 0;
+	s1_switch3 AT %IX12.3 : BOOL := 0;
+	s1_switch4 AT %IX12.4 : BOOL := 0;
+	s1_switch5 AT %IX12.5 : BOOL := 0;
+	s1_switch6 AT %IX12.6 : BOOL := 0;
+	s1_switch7 AT %IX12.7 : BOOL := 0;
+	s1_info1 AT %ID4 : DINT := 0;
+	s1_info2 AT %IW10 : INT := 0;
+
+	s2_led0 AT %QX12.0 : BOOL :=0;
+    s2_led1 AT %QX12.1 : BOOL :=0;
+    s2_led2 AT %QX12.2 : BOOL :=0;
+    s2_led3 AT %QX12.3 : BOOL :=0;
+    s2_led4 AT %QX12.4 : BOOL :=0;
+    s2_led5 AT %QX12.5 : BOOL :=0;
+    s2_led6 AT %QX12.6 : BOOL :=0;
+    s2_led7 AT %QX12.7 : BOOL :=0;
+	s2_count AT %QB13 : USINT := 0;
+	s2_command AT %QB14 : USINT := 0;
+	s2_data AT %QW8 : INT := 0;
+	s2_switch0 AT %IX24.0 : BOOL := 0;
+	s2_switch1 AT %IX24.1 : BOOL := 0;
+	s2_switch2 AT %IX24.2 : BOOL := 0;
+	s2_switch3 AT %IX24.3 : BOOL := 0;
+	s2_switch4 AT %IX24.4 : BOOL := 0;
+	s2_switch5 AT %IX24.5 : BOOL := 0;
+	s2_switch6 AT %IX24.6 : BOOL := 0;
+	s2_switch7 AT %IX24.7 : BOOL := 0;
+	s2_info1 AT %ID7 : DINT := 0;
+	s2_info2 AT %IW16 : INT := 0;
+
+	gcode_count: INT := 0;
+	
+	line: INT := 0;
+	state: INT := 0;
+	calibration_gcode_string : ARRAY [0..31] OF STRING(128) := [
+													'G01 X0 Y0 Z0',
+													'G01 X100',
+													'G01 Y10 Z-2',
+													'G01 X0',
+													'G01 Y20 Z-4',
+													'G01 X100',
+													'G01 Y30 Z-6',
+													'G01 X0',
+													'G01 Y40 Z-8',
+													'G01 X100',
+													'G01 Y50 Z-10',
+													'G01 X0',
+													'G01 Y60 Z-12',
+													'G01 X100',
+													'G01 Y70 Z-14',
+													'G01 X0',
+													'G01 Y80 Z-16',
+													'G01 X100',
+													'G01 Y90 Z-18',
+													'G01 X0',
+													'G01 Y100 Z-20',
+													'G01 X100',
+													'G01 Y110 Z-22',
+													'G01 X0',
+													'G01 Y120 Z-24',
+													'G01 X100',
+													'G01 Y130 Z-26',
+													'G01 X0',
+													'G01 Y140 Z-28',
+													'G01 X100',
+													'G01 Y150 Z-30',
+													'G01 X0'													
+													];
+
+END_VAR
+
+
+
+iCounter := iCounter + 1 ;
+
+sCommand0:= 'cat /tmp/test';
+//sCommand0:= 'mux-gpio1_47.sh && read-gpio1_47.sh';
+sCommand1:= 'echo 1 > /tmp/output';
+sCommand2:= 'echo 2 > /tmp/output';
+sCommand3:= 'echo 3 > /tmp/output';
+refCommand0 REF= sCommand0;
+refCommand1 REF= sCommand1;
+refCommand2 REF= sCommand2;
+refCommand3 REF= sCommand3;
+refOutput REF= sOutput;
+cmpString1:= '1$N';
+cmpString2:= '2$N';
+cmpString3:= '3$N';
+cmpString4:= '3$N';
+SysProcessExecuteCommand2(pszCommand:=refCommand0, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+pt0 := ADR(sOutput);
+pt1 := ADR(cmpString1);
+pt2 := ADR(cmpString2);
+pt3 := ADR(cmpString3);
+pt4 := ADR(cmpString4);
+IF StrFindA(pt0, pt1, 0 ) = 1 THEN	//	1
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));
+END_IF
+IF StrFindA(pt0, pt2, 0 ) = 1 THEN	//	2
+	SysProcessExecuteCommand2(pszCommand:= refCommand2, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));
+END_IF
+IF StrFindA(pt0, pt3, 0 ) = 1 THEN	//	3
+	SysProcessExecuteCommand2(pszCommand:= refCommand3, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));
+END_IF
+IF StrFindA(pt0, pt4, 0 ) = 1 THEN	//	3
+	SysProcessExecuteCommand2(pszCommand:= refCommand3, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));
+END_IF
+
+IF gcode_count > 127 THEN
+	gcode_count := 0;
+END_IF
+
+IF line > 31 THEN
+	line := 0;
+END_IF
+
+CASE state OF
+0:		// idle mode, ready to send new command
+	s0_data := calibration_gcode_string[line][gcode_count];
+	s1_data := calibration_gcode_string[line][gcode_count];
+	s2_data := calibration_gcode_string[line][gcode_count];
+	s0_count := 1;
+	s1_count := 1;
+	s2_count := 1;
+	state := 1;	// going to wait ack from slave
+1:		// waiting ack from slave
+	IF (s0_switch0 = 1) AND (s1_switch0 = 1) AND (s2_switch0 = 1) THEN	// not NULL
+		s0_count := 0;
+		s1_count := 0;
+		s2_count := 0;
+		state := 2;
+	END_IF;
+	IF (s0_switch2 = 1) AND (s1_switch2 = 1) AND (s2_switch2 = 1) THEN	// // NULL
+		s0_count := 0;
+		s1_count := 0;
+		s2_count := 0;
+		state := 3;
+	END_IF
+2:		// ack slave
+	s0_count := 2;
+	s1_count := 2;
+	s2_count := 2;
+	IF (s0_switch1 = 1) AND (s1_switch1 = 1) AND (s2_switch1 = 1) THEN
+		state := 0;
+		gcode_count := gcode_count + 1;
+	END_IF;
+3:	// ack slave and waiting slave commplete gcode command
+	IF (s0_switch3 = 1) AND (s1_switch3 = 1) AND (s2_switch3 = 1) THEN	// gcode command complete
+		s0_count := 4;
+		s1_count := 4;
+		s2_count := 4;
+		state := 0;
+		line := line + 1;
+		gcode_count := 0;
+	ELSE
+		s0_count := 3;
+		s1_count := 3;
+		s2_count := 3;
+	END_IF;
+END_CASE;
+
+s0_led0 := s0_switch0;
+s0_led1 := s0_switch1;
+s0_led2 := s0_switch2;
+s0_led3 := s0_switch3;
+s0_led4 := s0_switch4;
+s0_led5 := s0_switch5;
+s0_led6 := s0_switch6;
+s0_led7 := s0_switch7;
+
+s0_led0 := s1_switch0;
+s1_led1 := s1_switch1;
+s1_led2 := s1_switch2;
+s1_led3 := s1_switch3;
+s1_led4 := s1_switch4;
+s1_led5 := s1_switch5;
+s1_led6 := s1_switch6;
+s1_led7 := s1_switch7;
+
+s2_led0 := s2_switch0;
+s2_led1 := s2_switch1;
+s2_led2 := s2_switch2;
+s2_led3 := s2_switch3;
+s2_led4 := s2_switch4;
+s2_led5 := s2_switch5;
+s2_led6 := s2_switch6;
+s2_led7 := s2_switch7;
