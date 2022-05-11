@@ -3,7 +3,7 @@
  */
 
 
-#define MOTORZ
+#define MOTORX
 #define MYDEBUG
 
 struct MotorModule {
