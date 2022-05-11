@@ -175,7 +175,27 @@ void tiesc_displayEscVersion(uint16_t revision, uint16_t build)
 
 void tiesc_setOutputLed(uint8_t mask)
 {
-    LED_setMask(gLedHandle[CONFIG_LED_DIGITAL_OUTPUT], (uint32_t)(0xFFFF & mask));
+    //LED_setMask(gLedHandle[CONFIG_LED_DIGITAL_OUTPUT], (uint32_t)(0xFFFF & mask));
+
+    uint32_t    gpioBaseAddr, pinNum;
+    /* Get address after translation translate */
+    gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GREEN_GPIO_BASE_ADDR);
+
+    // Enable LED
+    GPIO_setDirMode(gpioBaseAddr, RED_GPIO_PIN, RED_GPIO_DIR);
+    GPIO_setDirMode(gpioBaseAddr, GREEN_GPIO_PIN, GREEN_GPIO_DIR);
+    GPIO_setDirMode(gpioBaseAddr, BLUE_GPIO_PIN, BLUE_GPIO_DIR);
+
+    GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
+    GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
+    GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
+
+    if(mask & 0x01)
+        GPIO_pinWriteHigh(gpioBaseAddr, RED_GPIO_PIN);
+    if(mask & 0x02)
+        GPIO_pinWriteHigh(gpioBaseAddr, GREEN_GPIO_PIN);
+    if(mask & 0x04)
+        GPIO_pinWriteHigh(gpioBaseAddr, BLUE_GPIO_PIN);
 }
 
 void tiesc_setRunLed(uint8_t value)
