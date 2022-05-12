@@ -10,11 +10,13 @@ VAR
 	sCommand1 : STRING;
 	sCommand2 : STRING;
 	sCommand3 : STRING;
+	sCommand4 : STRING;
 
 	refCommand0 : REFERENCE TO STRING;
 	refCommand1 : REFERENCE TO STRING;
 	refCommand2 : REFERENCE TO STRING;
 	refCommand3 : REFERENCE TO STRING;
+	refCommand4 : REFERENCE TO STRING;
 	sOutput : STRING;
 	refOutput : REFERENCE TO STRING;
 	pt0 : POINTER TO STRING;
@@ -93,7 +95,9 @@ VAR
 	gcode_count: INT := 0;
 	
 	line: INT := 0;
-	state: INT := 0;
+	state: INT := 10;
+	mode: INT := 0;	// 0: Idle, 1: Calibration, 2: Print, 3: Home
+	pending_to_home: INT := 0;
 	calibration_gcode_string : ARRAY [0..31] OF STRING(128) := [
 													'G01 X0 Y0 Z0',
 													'G01 X100',
@@ -128,27 +132,32 @@ VAR
 													'G01 Y150 Z-30',
 													'G01 X0'													
 													];
+	home_gcode_string : ARRAY [0..1] OF STRING(128) := [
+														'G01 X0 Y0',
+														''
+														];
 
 END_VAR
-
 
 
 iCounter := iCounter + 1 ;
 
 sCommand0:= 'cat /tmp/test';
 //sCommand0:= 'mux-gpio1_47.sh && read-gpio1_47.sh';
-sCommand1:= 'echo 1 > /tmp/output';
+sCommand1:= 'echo 0 > /tmp/test';
 sCommand2:= 'echo 2 > /tmp/output';
 sCommand3:= 'echo 3 > /tmp/output';
+sCommand4:= 'echo 4 > /tmp/output';
 refCommand0 REF= sCommand0;
 refCommand1 REF= sCommand1;
 refCommand2 REF= sCommand2;
 refCommand3 REF= sCommand3;
+refCommand4 REF= sCommand4;
 refOutput REF= sOutput;
 cmpString1:= '1$N';
 cmpString2:= '2$N';
 cmpString3:= '3$N';
-cmpString4:= '3$N';
+cmpString4:= '4$N';
 SysProcessExecuteCommand2(pszCommand:=refCommand0, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 pt0 := ADR(sOutput);
 pt1 := ADR(cmpString1);
@@ -156,31 +165,88 @@ pt2 := ADR(cmpString2);
 pt3 := ADR(cmpString3);
 pt4 := ADR(cmpString4);
 IF StrFindA(pt0, pt1, 0 ) = 1 THEN	//	1
-	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 1;	// Calibration
+	// Green
+	s0_led0 := 0;
+	s0_led1 := 1;
+	s0_led2 := 0;
+	s1_led0 := 0;
+	s1_led1 := 1;
+	s1_led2 := 0;
+	s2_led0 := 0;
+	s2_led1 := 1;
+	s2_led2 := 0;
+	
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
 END_IF
 IF StrFindA(pt0, pt2, 0 ) = 1 THEN	//	2
-	SysProcessExecuteCommand2(pszCommand:= refCommand2, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	// write line to EEPROM
+	pending_to_home := 1;
 END_IF
 IF StrFindA(pt0, pt3, 0 ) = 1 THEN	//	3
-	SysProcessExecuteCommand2(pszCommand:= refCommand3, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));
+	SysProcessExecuteCommand2(pszCommand:= refCommand0, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 END_IF
-IF StrFindA(pt0, pt4, 0 ) = 1 THEN	//	3
-	SysProcessExecuteCommand2(pszCommand:= refCommand3, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));
+IF StrFindA(pt0, pt4, 0 ) = 1 THEN	//	4
+	SysProcessExecuteCommand2(pszCommand:= refCommand0, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 END_IF
 
 IF gcode_count > 127 THEN
 	gcode_count := 0;
 END_IF
 
-IF line > 31 THEN
-	line := 0;
+IF mode = 1 THEN
+	IF line > 5 THEN	//31
+		mode := 3;
+		line := 0;
+		gcode_count := 0;
+		state := 0;
+	END_IF
+END_IF
+
+IF mode = 3 THEN
+	IF line > 0 THEN
+		state := 10;
+	END_IF
 END_IF
 
 CASE state OF
-0:		// idle mode, ready to send new command
-	s0_data := calibration_gcode_string[line][gcode_count];
-	s1_data := calibration_gcode_string[line][gcode_count];
-	s2_data := calibration_gcode_string[line][gcode_count];
+10:		// idle state
+	// Red
+	mode := 0;
+	line := 0;
+	gcode_count := 0;
+	s0_led0 := 1;
+	s0_led1 := 0;
+	s0_led2 := 0;
+	s1_led0 := 1;
+	s1_led1 := 0;
+	s1_led2 := 0;
+	s2_led0 := 1;
+	s2_led1 := 0;
+	s2_led2 := 0;
+
+0:		// calibration idle mode, ready to send new command
+	IF pending_to_home = 1 THEN
+		pending_to_home := 0;
+		line := 0;
+		gcode_count := 0;
+		mode := 3;
+	END_IF
+
+	IF mode = 1 THEN		// Calibration
+		s0_data := calibration_gcode_string[line][gcode_count];
+		s1_data := calibration_gcode_string[line][gcode_count];
+		s2_data := calibration_gcode_string[line][gcode_count];
+	END_IF
+	IF mode = 3 THEN
+		s0_data := home_gcode_string[line][gcode_count];
+		s1_data := home_gcode_string[line][gcode_count];
+		s2_data := home_gcode_string[line][gcode_count];		
+	END_IF
 	s0_count := 1;
 	s1_count := 1;
 	s2_count := 1;
@@ -221,6 +287,7 @@ CASE state OF
 	END_IF;
 END_CASE;
 
+(*
 s0_led0 := s0_switch0;
 s0_led1 := s0_switch1;
 s0_led2 := s0_switch2;
@@ -247,3 +314,4 @@ s2_led4 := s2_switch4;
 s2_led5 := s2_switch5;
 s2_led6 := s2_switch6;
 s2_led7 := s2_switch7;
+*)
