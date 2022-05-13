@@ -430,9 +430,24 @@ void APPL_Application(void)
             Tmpswitchs = 0x08;  // tmpswitch3, notify slave gcode command execute completed
     }
 
+    // HomeSwitch
+    {
+        uint32_t hs_val;
+        hs_val = tiesc_readHomeSwitch();
+        bHomeSwitch = hs_val;
+
+        if(hs_val==0)
+            sAI1Inputs.info1 = 0;
+        else if(hs_val==1)
+            sAI1Inputs.info1 = 1;
+        else
+            sAI1Inputs.info1 = 2;
+    }
+
     sDIInputs.switchs = Tmpswitchs;
     //sAI1Inputs.info1 = Tmpinfo1;
     //sAI1Inputs.info2 = Tmpinfo2;
+
     prevCount = TmpCount;
 }
 

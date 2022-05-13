@@ -53,6 +53,8 @@ void tiesc_socParamsInit(bsp_params *bspInitParams);
 
 void tiesc_displayEscVersion(uint16_t revision, uint16_t build);
 
+uint32_t tiesc_ReadHomeSwitch(void);
+
 void tiesc_setOutputLed(uint8_t mask);
 
 void tiesc_setRunLed(uint8_t value);
