@@ -111,6 +111,8 @@ void gpio_motor_control_ioctl(MotorMod *Motor, uint8_t cmd, uint32_t val)
     }
     else if(cmd == UPDATE_MOVING)
         Motor->moving = val;
+    else if(cmd == UPDATE_HOME)
+        Motor->cur_pos = 0;
     return;
 }
 
