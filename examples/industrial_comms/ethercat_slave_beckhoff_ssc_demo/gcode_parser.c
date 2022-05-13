@@ -439,6 +439,9 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     uint8_t int_value = 0;
     uint16_t mantissa = 0;
     Bool isNegative = FALSE;
+    Bool isNegativeX = FALSE;
+    Bool isNegativeY = FALSE;
+    Bool isNegativeZ = FALSE;
     Bool RequiredMoveX = FALSE;
     Bool RequiredMoveY = FALSE;
     Bool RequiredMoveZ = FALSE;
@@ -476,6 +479,7 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
         }
         int_value = trunc(value);
         mantissa =  round(100*(value - int_value)); // Compute mantissa for Gxx.x commands.
+
 #ifdef MYDEBUG
         DebugP_log("value %f int_value %d mantissa %d\r\n",  value, int_value, mantissa);
 #endif
@@ -556,18 +560,21 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
               case 'X':     // X Direction
 #ifdef MOTORX
                   gpio_motor_control_setNextPos(MotorX, value);
+                  isNegativeX = isNegative;
                   RequiredMoveX = TRUE;
 #endif
                   break;
               case 'Y':     // Y Direction
 #ifdef MOTORY
                   gpio_motor_control_setNextPos(MotorX, value);
+                  isNegativeY = isNegative;
                   RequiredMoveY = TRUE;
 #endif
                   break;
               case 'Z':     // Z Direction
 #ifdef MOTORZ
                   gpio_motor_control_setNextPos(MotorX, value);
+                  isNegativeZ = isNegative;
                   RequiredMoveZ = TRUE;
 #endif
                   break;
@@ -581,17 +588,17 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
 
     if(RequiredMoveX)
     {
-        gpio_motor_move(MotorX, isNegative);   // return after motor movement complete
+        gpio_motor_move(MotorX, isNegativeX);   // return after motor movement complete
         RequiredMoveX = FALSE;
     }
     if(RequiredMoveY)
     {
-        gpio_motor_move(MotorX, isNegative);   // return after motor movement complete
+        gpio_motor_move(MotorX, isNegativeY);   // return after motor movement complete
         RequiredMoveY = FALSE;
     }
     if(RequiredMoveZ)
     {
-        gpio_motor_move(MotorX, isNegative);   // return after motor movement complete
+        gpio_motor_move(MotorX, isNegativeZ);   // return after motor movement complete
         RequiredMoveZ = FALSE;
     }
     //DebugP_log("Position %d %d\r\n", MotorX->cur_pos, MotorY->cur_pos);

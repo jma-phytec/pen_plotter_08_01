@@ -4,7 +4,7 @@
 
 
 #define MOTORZ
-//#define MYDEBUG
+#define MYDEBUG
 
 struct MotorModule {
     uint32_t step_base_addr;
