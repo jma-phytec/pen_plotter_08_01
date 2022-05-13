@@ -367,6 +367,16 @@ CASE state OF
 	END_IF;
 END_CASE;
 
+IF s0_info1 = 1 THEN
+	;
+END_IF
+IF s1_info1 = 1 THEN
+	;
+END_IF
+IF s2_info1 = 1 THEN
+	;
+END_IF
+
 (*
 s0_led0 := s0_switch0;
 s0_led1 := s0_switch1;
@@ -395,6 +405,7 @@ s2_led5 := s2_switch5;
 s2_led6 := s2_switch6;
 s2_led7 := s2_switch7;
 *)
+
 
 PROGRAM PLC_PRG
 VAR

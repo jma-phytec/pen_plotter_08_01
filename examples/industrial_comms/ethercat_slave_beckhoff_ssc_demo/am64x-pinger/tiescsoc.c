@@ -173,6 +173,19 @@ void tiesc_displayEscVersion(uint16_t revision, uint16_t build)
     DebugP_log("Firmware Version : %d.%d.%d\n\r", (revision >> 8), (build >> 8), (build & 0xFF));
 }
 
+uint32_t tiesc_readHomeSwitch(void)
+{
+    uint32_t    gpioBaseAddr, hs_val;
+    /* Get address after translation translate */
+    gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_HOME_SWITCH_BASE_ADDR);
+
+    GPIO_setDirMode(gpioBaseAddr, GPIO_HOME_SWITCH_PIN, GPIO_HOME_SWITCH_DIR);
+
+    hs_val = GPIO_pinRead(gpioBaseAddr, GPIO_HOME_SWITCH_PIN);
+
+    return hs_val;
+}
+
 void tiesc_setOutputLed(uint8_t mask)
 {
     //LED_setMask(gLedHandle[CONFIG_LED_DIGITAL_OUTPUT], (uint32_t)(0xFFFF & mask));
