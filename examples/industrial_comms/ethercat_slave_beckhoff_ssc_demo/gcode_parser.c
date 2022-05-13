@@ -474,7 +474,7 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
         {
             return 0;
         }
-        //DebugP_log("value %f int_value %d mantissa %d\r\n",  value, int_value, mantissa);
+        DebugP_log("value %f int_value %d mantissa %d\r\n",  value, int_value, mantissa);
 
         int_value = trunc(value);
         mantissa =  round(100*(value - int_value)); // Compute mantissa for Gxx.x commands.
