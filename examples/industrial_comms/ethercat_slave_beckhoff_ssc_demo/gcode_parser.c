@@ -474,10 +474,11 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
         {
             return 0;
         }
-        DebugP_log("value %f int_value %d mantissa %d\r\n",  value, int_value, mantissa);
-
         int_value = trunc(value);
         mantissa =  round(100*(value - int_value)); // Compute mantissa for Gxx.x commands.
+#ifdef MYDEBUG
+        DebugP_log("value %f int_value %d mantissa %d\r\n",  value, int_value, mantissa);
+#endif
 
         switch(letter)
         {
@@ -522,6 +523,9 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
             case 90:    // absoulte mode
             case 91:    // relative mode
                 gpio_motor_control_ioctl(MotorX, UPDATE_POSITIONING, int_value);
+                break;
+            case 92:    // set the current position as 0
+                gpio_motor_control_ioctl(MotorX, UPDATE_HOME, int_value);
                 break;
             default:
                 break;
@@ -630,7 +634,7 @@ int motor_demo_main(void)
             msgBuf[MAX_MSG_SIZE-1] = 0;
         }
         else
-            vTaskDelay(100);
+            vTaskDelay(5);
     }
     while(bMotorApplication == TRUE);
     /* This loop will never exit */

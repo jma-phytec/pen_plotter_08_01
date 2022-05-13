@@ -4,7 +4,7 @@ iCounter := iCounter + 1 ;
 sCommand0:= 'cat /tmp/test';
 //sCommand0:= 'mux-gpio1_47.sh && read-gpio1_47.sh';
 sCommand1:= 'echo 0 > /tmp/test';
-sCommand2:= 'echo 2 > /tmp/output';
+sCommand2:= 'cat /etc/pinger/pos_z';
 sCommand3:= 'echo 3 > /tmp/output';
 sCommand4:= 'echo 4 > /tmp/output';
 refCommand0 REF= sCommand0;
@@ -13,19 +13,37 @@ refCommand2 REF= sCommand2;
 refCommand3 REF= sCommand3;
 refCommand4 REF= sCommand4;
 refOutput REF= sOutput;
-cmpString1:= '1$N';
-cmpString2:= '2$N';
-cmpString3:= '3$N';
-cmpString4:= '4$N';
+cmpString1:= 'C$N';
+cmpString2:= 'S$N';
+cmpString3:= 'P$N';
+cmpString4:= 'T$N';
+cmpString5:= 'X+$N';
+cmpString6:= 'X-$N';
+cmpString7:= 'Y+$N';
+cmpString8:= 'Y-$N';
+cmpString9:= 'Z+$N';
+cmpString10:= 'Z-$N';
+cmpString11:= 'H$N';
+cmpString12:= 'SH$N';
+
 SysProcessExecuteCommand2(pszCommand:=refCommand0, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 pt0 := ADR(sOutput);
 pt1 := ADR(cmpString1);
 pt2 := ADR(cmpString2);
 pt3 := ADR(cmpString3);
 pt4 := ADR(cmpString4);
-IF StrFindA(pt0, pt1, 0 ) = 1 THEN	//	1
+pt5 := ADR(cmpString5);
+pt6 := ADR(cmpString6);
+pt7 := ADR(cmpString7);
+pt8 := ADR(cmpString8);
+pt9 := ADR(cmpString9);
+pt10 := ADR(cmpString10);
+pt11 := ADR(cmpString11);
+pt12 := ADR(cmpString12);
+
+IF StrCaseCmpA(pt0, pt1) = 0 THEN	//	1: Calibration
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
-	mode := 1;	// Calibration
+	mode := 1;
 	// Green
 	s0_led0 := 0;
 	s0_led1 := 1;
@@ -41,13 +59,12 @@ IF StrFindA(pt0, pt1, 0 ) = 1 THEN	//	1
 	gcode_count := 0;	
 	state := 0;
 END_IF
-IF StrFindA(pt0, pt2, 0 ) = 1 THEN	//	2
+IF StrCaseCmpA(pt0, pt2) = 0 THEN	//	2: Stop
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
-	// Stop Calibration
 	// write line to EEPROM
 	pending_to_home := 1;
 END_IF
-IF StrFindA(pt0, pt3, 0 ) = 1 THEN	//	3
+IF StrCaseCmpA(pt0, pt3) = 0 THEN	//	3: Print
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	mode := 2;
 	// Blue
@@ -65,15 +82,76 @@ IF StrFindA(pt0, pt3, 0 ) = 1 THEN	//	3
 	state := 0;
 	
 END_IF
-IF StrFindA(pt0, pt4, 0 ) = 1 THEN	//	4
+IF StrCaseCmpA(pt0, pt4) = 0 THEN	//	4: Test
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 4;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
 END_IF
+IF StrCaseCmpA(pt0, pt5) = 0 THEN	//	5: X+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 5;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt6) = 0 THEN	//	6: X-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 6;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt7) = 0 THEN	//	7: Y+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 7;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt8) = 0 THEN	//	8: Y-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 8;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt9) = 0 THEN	//	9: Z+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 9;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt10) = 0 THEN	//	10: Z-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 10;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt11) = 0 THEN	//	11: Home
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 11;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt12) = 0 THEN	//	12: Set Home 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 12;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+
 
 IF gcode_count > 127 THEN
 	gcode_count := 0;
 END_IF
 
-IF mode = 1 THEN
+IF mode = 1 THEN	// Calibration
 	IF line > 31 THEN
 		mode := 3;
 		line := 0;
@@ -82,21 +160,75 @@ IF mode = 1 THEN
 	END_IF
 END_IF
 
-IF mode = 2 THEN
+IF mode = 2 THEN	// Print
 	IF line > 4548 THEN	// 548 (bunny), 4548 (cartoonsom)
 		mode := 3;
 		line := 0;
 		gcode_count := 0;
 		state := 0;
 	END_IF
-	
 END_IF
 
-IF mode = 3 THEN
+IF mode = 3 THEN	// Home
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 4 THEN	// Test
+	IF line > 4 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 5 THEN	// X+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 6 THEN	// X-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 7 THEN	// Y+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 8 THEN	// Y-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 9 THEN	// Z+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 10 THEN	// Z-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 11 THEN	// Home
+	IF line > 1 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 12 THEN	// Set Home
 	IF line > 0 THEN
 		state := 10;
 	END_IF
 END_IF
+
 
 CASE state OF
 10:		// idle state
@@ -134,17 +266,67 @@ CASE state OF
 		s0_data := cartoonsom_gcode_string[line][gcode_count];
 		s1_data := cartoonsom_gcode_string[line][gcode_count];
 		s2_data := cartoonsom_gcode_string[line][gcode_count];
-		//s0_data := test_gcode_string[line][gcode_count];
-		//s1_data := test_gcode_string[line][gcode_count];
-		//s2_data := test_gcode_string[line][gcode_count];
-
 	END_IF
 	
-	IF mode = 3 THEN
+	IF mode = 3 THEN	// Home
 		s0_data := home_gcode_string[line][gcode_count];
 		s1_data := home_gcode_string[line][gcode_count];
 		s2_data := home_gcode_string[line][gcode_count];		
 	END_IF
+	IF mode = 4 THEN	// Test
+		s0_data := test_gcode_string[line][gcode_count];
+		s1_data := test_gcode_string[line][gcode_count];
+		s2_data := test_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 5 THEN	// X+
+		s0_data := X_p_gcode_string[line][gcode_count];
+		s1_data := X_p_gcode_string[line][gcode_count];
+		s2_data := X_p_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 6 THEN	// X-
+		s0_data := X_m_gcode_string[line][gcode_count];
+		s1_data := X_m_gcode_string[line][gcode_count];
+		s2_data := X_m_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 7 THEN	// Y+
+		s0_data := Y_p_gcode_string[line][gcode_count];
+		s1_data := Y_p_gcode_string[line][gcode_count];
+		s2_data := Y_p_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 8 THEN	// Y-
+		s0_data := Y_m_gcode_string[line][gcode_count];
+		s1_data := Y_m_gcode_string[line][gcode_count];
+		s2_data := Y_m_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 9 THEN	// Z+
+		s0_data := Z_p_gcode_string[line][gcode_count];
+		s1_data := Z_p_gcode_string[line][gcode_count];
+		s2_data := Z_p_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 10 THEN	// Z-
+		s0_data := Z_m_gcode_string[line][gcode_count];
+		s1_data := Z_m_gcode_string[line][gcode_count];
+		s2_data := Z_m_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 11 THEN	// Home
+		s0_data := home_gcode_string[line][gcode_count];
+		s1_data := home_gcode_string[line][gcode_count];
+		s2_data := home_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 12 THEN	// Set Home
+		s0_data := set_home_gcode_string[line][gcode_count];
+		s1_data := set_home_gcode_string[line][gcode_count];
+		s2_data := set_home_gcode_string[line][gcode_count];
+	END_IF
+	
 	s0_count := 1;
 	s1_count := 1;
 	s2_count := 1;
@@ -222,6 +404,14 @@ VAR
 	cmpString2 : STRING;
 	cmpString3 : STRING;
 	cmpString4 : STRING;
+	cmpString5 : STRING;
+	cmpString6 : STRING;
+	cmpString7 : STRING;
+	cmpString8 : STRING;
+	cmpString9 : STRING;
+	cmpString10 : STRING;
+	cmpString11 : STRING;
+	cmpString12 : STRING;
 	sCommand0 : STRING;
 	sCommand1 : STRING;
 	sCommand2 : STRING;
@@ -240,6 +430,14 @@ VAR
 	pt2 : POINTER TO STRING;
 	pt3 : POINTER TO STRING;
 	pt4 : POINTER TO STRING;
+	pt5 : POINTER TO STRING;
+	pt6 : POINTER TO STRING;
+	pt7 : POINTER TO STRING;
+	pt8 : POINTER TO STRING;
+	pt9 : POINTER TO STRING;
+	pt10 : POINTER TO STRING;
+	pt11 : POINTER TO STRING;
+	pt12 : POINTER TO STRING;
 	result : RTS_IEC_RESULT;		
 
 	s0_led0 AT %QX0.0 : BOOL :=0;
@@ -348,10 +546,47 @@ VAR
 													'G01 Y60 Z-30',
 													'G01 X0'													
 													];
-	home_gcode_string : ARRAY [0..1] OF STRING(128) := [
+	home_gcode_string : ARRAY [0..2] OF STRING(128) := [
+														'G90',
 														'G01 X0 Y0 Z0',
 														''
 														];
+	set_home_gcode_string : ARRAY [0..1] OF STRING(128) := [
+														'G92',
+														''
+														];
+
+	X_p_gcode_string : ARRAY [0..2] OF STRING(128) := [
+														'G91',
+														'G01 X10',
+														''
+														];
+	X_m_gcode_string : ARRAY [0..2] OF STRING(128) := [
+														'G91',
+														'G01 X-10',
+														''
+														];
+	Y_p_gcode_string : ARRAY [0..2] OF STRING(128) := [
+														'G91',
+														'G01 Y10',
+														''
+														];
+	Y_m_gcode_string : ARRAY [0..2] OF STRING(128) := [
+														'G91',
+														'G01 Y-10',
+														''
+														];
+	Z_p_gcode_string : ARRAY [0..2] OF STRING(128) := [
+														'G91',
+														'G01 Z1',
+														''
+														];
+	Z_m_gcode_string : ARRAY [0..2] OF STRING(128) := [
+														'G91',
+														'G01 Z-1',
+														''
+														];
+														
 	test_gcode_string : ARRAY [0..4] OF STRING(128) := [
 														'G00 Z2.000',
 														'G01 Z-2.000',
@@ -5467,4 +5702,3 @@ VAR
 ];													
 
 END_VAR
-

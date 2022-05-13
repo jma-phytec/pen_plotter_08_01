@@ -30,7 +30,8 @@ enum MotorCmd {
     UPDATE_POSITIONING = 1,
     UPDATE_DIR,
     UPDATE_UNIT,
-    UPDATE_MOVING
+    UPDATE_MOVING,
+    UPDATE_HOME
 };
 
 void gpio_motor_control_ioctl(MotorMod *Motor, uint8_t cmd, uint32_t val);
