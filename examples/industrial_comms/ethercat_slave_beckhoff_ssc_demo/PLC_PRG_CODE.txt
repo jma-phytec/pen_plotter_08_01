@@ -1,0 +1,503 @@
+
+iCounter := iCounter + 1 ;
+
+sCommand0:= 'cat /tmp/test';
+//sCommand0:= 'mux-gpio1_47.sh && read-gpio1_47.sh';
+sCommand1:= 'echo 0 > /tmp/test';
+sCommand2:= 'cat /etc/pinger/pos_z';
+sCommand3:= 'echo Z155 > /tmp/test';
+sCommand4:= 'echo Z160 > /tmp/test';
+sCommand5:= 'echo Z165 > /tmp/test';
+sCommand6:= 'echo SH > /tmp/test';
+refCommand0 REF= sCommand0;
+refCommand1 REF= sCommand1;
+refCommand2 REF= sCommand2;
+refCommand3 REF= sCommand3;
+refCommand4 REF= sCommand4;
+refCommand5 REF= sCommand5;
+refCommand6 REF= sCommand6;
+refOutput REF= sOutput;
+cmpString1:= 'C$N';
+cmpString2:= 'S$N';
+cmpString3:= 'P$N';
+cmpString4:= 'T$N';
+cmpString5:= 'X+$N';
+cmpString6:= 'X-$N';
+cmpString7:= 'Y+$N';
+cmpString8:= 'Y-$N';
+cmpString9:= 'Z+$N';
+cmpString10:= 'Z-$N';
+cmpString11:= 'H$N';
+cmpString12:= 'SH$N';
+cmpString13:= 'HS$N';
+cmpString14:= 'Z155$N';
+cmpString15:= 'Z160$N';
+cmpString16:= 'Z165$N';
+
+SysProcessExecuteCommand2(pszCommand:=refCommand0, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+pt0 := ADR(sOutput);
+pt1 := ADR(cmpString1);
+pt2 := ADR(cmpString2);
+pt3 := ADR(cmpString3);
+pt4 := ADR(cmpString4);
+pt5 := ADR(cmpString5);
+pt6 := ADR(cmpString6);
+pt7 := ADR(cmpString7);
+pt8 := ADR(cmpString8);
+pt9 := ADR(cmpString9);
+pt10 := ADR(cmpString10);
+pt11 := ADR(cmpString11);
+pt12 := ADR(cmpString12);
+pt13 := ADR(cmpString13);
+pt14 := ADR(cmpString14);
+pt15 := ADR(cmpString15);
+pt16 := ADR(cmpString16);
+
+IF StrCaseCmpA(pt0, pt1) = 0 THEN	//	1: Calibration
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 1;
+	// Green
+	s0_led0 := 0;
+	s0_led1 := 1;
+	s0_led2 := 0;
+	s1_led0 := 0;
+	s1_led1 := 1;
+	s1_led2 := 0;
+	s2_led0 := 0;
+	s2_led1 := 1;
+	s2_led2 := 0;
+	
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt2) = 0 THEN	//	2: Stop
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	// write line to EEPROM
+	pending_to_home := 1;
+END_IF
+IF StrCaseCmpA(pt0, pt3) = 0 THEN	//	3: Print
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 2;
+	// Blue
+	s0_led0 := 0;
+	s0_led1 := 0;
+	s0_led2 := 1;
+	s1_led0 := 0;
+	s1_led1 := 0;
+	s1_led2 := 1;
+	s2_led0 := 0;
+	s2_led1 := 0;
+	s2_led2 := 1;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+	
+END_IF
+IF StrCaseCmpA(pt0, pt4) = 0 THEN	//	4: Test
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 4;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt5) = 0 THEN	//	5: X+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 5;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt6) = 0 THEN	//	6: X-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 6;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt7) = 0 THEN	//	7: Y+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 7;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt8) = 0 THEN	//	8: Y-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 8;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt9) = 0 THEN	//	9: Z+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 9;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt10) = 0 THEN	//	10: Z-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 10;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt11) = 0 THEN	//	11: Home
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 11;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt12) = 0 THEN	//	12: Set Home 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 12;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt13) = 0 THEN	//	12: Go to Home Switch 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 13;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt14) = 0 THEN	//	14: ZM155 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 14;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt15) = 0 THEN	//	15: ZM160 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 15;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, pt16) = 0 THEN	//	16: ZM165 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 16;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+
+
+IF gcode_count > 127 THEN
+	gcode_count := 0;
+END_IF
+
+IF mode = 1 THEN	// Calibration
+	IF line > 31 THEN
+		mode := 3;
+		line := 0;
+		gcode_count := 0;
+		state := 0;
+	END_IF
+END_IF
+
+IF mode = 2 THEN	// Print
+	IF line > 4548 THEN	// 548 (bunny), 4548 (cartoonsom)
+		mode := 3;
+		line := 0;
+		gcode_count := 0;
+		state := 0;
+	END_IF
+END_IF
+
+IF mode = 3 THEN	// Home
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 4 THEN	// Test
+	IF line > 4 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 5 THEN	// X+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 6 THEN	// X-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 7 THEN	// Y+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 8 THEN	// Y-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 9 THEN	// Z+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 10 THEN	// Z-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 11 THEN	// Home
+	IF line > 1 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 12 THEN	// Set Home
+	IF line > 0 THEN
+		state := 10;
+	END_IF
+END_IF
+
+IF mode = 13 THEN	// Go to Home Switch
+	IF s0_info1 = 1 THEN
+		IF s1_info1 = 1 THEN
+			IF s2_info1 = 1 THEN
+				SysProcessExecuteCommand2(pszCommand:=refCommand3, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+				state := 10;
+			END_IF
+		END_IF
+	END_IF
+	IF line > 2 THEN
+		line := 0;
+		gcode_count := 0;
+		state := 0;
+	END_IF
+END_IF
+
+IF mode = 14 THEN	// Z155
+	IF line > 2 THEN
+		SysProcessExecuteCommand2(pszCommand:=refCommand6, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+		state := 10;
+	END_IF
+END_IF
+IF mode = 15 THEN	// ZM160
+	IF line > 2 THEN
+		SysProcessExecuteCommand2(pszCommand:=refCommand6, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+		state := 10;
+	END_IF
+END_IF
+IF mode = 16 THEN	// ZM165
+	IF line > 2 THEN
+		SysProcessExecuteCommand2(pszCommand:=refCommand6, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+		state := 10;
+	END_IF
+END_IF
+
+CASE state OF
+10:		// idle state
+	// Red
+	mode := 0;
+	line := 0;
+	gcode_count := 0;
+	s0_led0 := 1;
+	s0_led1 := 0;
+	s0_led2 := 0;
+	s1_led0 := 1;
+	s1_led1 := 0;
+	s1_led2 := 0;
+	s2_led0 := 1;
+	s2_led1 := 0;
+	s2_led2 := 0;
+
+0:		// calibration idle mode, ready to send new command
+	IF pending_to_home = 1 THEN
+		pending_to_home := 0;
+		line := 0;
+		gcode_count := 0;
+		mode := 3;
+	END_IF
+
+	IF mode = 1 THEN		// Calibration
+		s0_data := calibration_gcode_string[line][gcode_count];
+		s1_data := calibration_gcode_string[line][gcode_count];
+		s2_data := calibration_gcode_string[line][gcode_count];
+	END_IF
+	IF mode = 2 THEN		// Print
+		//s0_data := bunny_gcode_string[line][gcode_count];
+		//s1_data := bunny_gcode_string[line][gcode_count];
+		//s2_data := bunny_gcode_string[line][gcode_count];
+		s0_data := cartoonsom_gcode_string[line][gcode_count];
+		s1_data := cartoonsom_gcode_string[line][gcode_count];
+		s2_data := cartoonsom_gcode_string[line][gcode_count];
+	END_IF
+	
+	IF mode = 3 THEN	// Home
+		s0_data := home_gcode_string[line][gcode_count];
+		s1_data := home_gcode_string[line][gcode_count];
+		s2_data := home_gcode_string[line][gcode_count];		
+	END_IF
+	IF mode = 4 THEN	// Test
+		s0_data := test_gcode_string[line][gcode_count];
+		s1_data := test_gcode_string[line][gcode_count];
+		s2_data := test_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 5 THEN	// X+
+		s0_data := X_p_gcode_string[line][gcode_count];
+		s1_data := X_p_gcode_string[line][gcode_count];
+		s2_data := X_p_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 6 THEN	// X-
+		s0_data := X_m_gcode_string[line][gcode_count];
+		s1_data := X_m_gcode_string[line][gcode_count];
+		s2_data := X_m_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 7 THEN	// Y+
+		s0_data := Y_p_gcode_string[line][gcode_count];
+		s1_data := Y_p_gcode_string[line][gcode_count];
+		s2_data := Y_p_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 8 THEN	// Y-
+		s0_data := Y_m_gcode_string[line][gcode_count];
+		s1_data := Y_m_gcode_string[line][gcode_count];
+		s2_data := Y_m_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 9 THEN	// Z+
+		s0_data := Z_p_gcode_string[line][gcode_count];
+		s1_data := Z_p_gcode_string[line][gcode_count];
+		s2_data := Z_p_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 10 THEN	// Z-
+		s0_data := Z_m_gcode_string[line][gcode_count];
+		s1_data := Z_m_gcode_string[line][gcode_count];
+		s2_data := Z_m_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 11 THEN	// Home
+		s0_data := home_gcode_string[line][gcode_count];
+		s1_data := home_gcode_string[line][gcode_count];
+		s2_data := home_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 12 THEN	// Set Home
+		s0_data := set_home_gcode_string[line][gcode_count];
+		s1_data := set_home_gcode_string[line][gcode_count];
+		s2_data := set_home_gcode_string[line][gcode_count];
+	END_IF
+
+	IF mode = 13 THEN	// Go to Home Switch
+		s0_data := homeswitch_gcode_string[line][gcode_count];
+		s1_data := homeswitch_gcode_string[line][gcode_count];
+		s2_data := homeswitch_gcode_string[line][gcode_count];
+	END_IF
+	IF mode = 14 THEN	// ZM155
+		s0_data := Z_m155_gcode_string[line][gcode_count];
+		s1_data := Z_m155_gcode_string[line][gcode_count];
+		s2_data := Z_m155_gcode_string[line][gcode_count];
+	END_IF
+	IF mode = 15 THEN	// ZM160
+		s0_data := Z_m160_gcode_string[line][gcode_count];
+		s1_data := Z_m160_gcode_string[line][gcode_count];
+		s2_data := Z_m160_gcode_string[line][gcode_count];
+	END_IF
+	IF mode = 16 THEN	// ZM165
+		s0_data := Z_m165_gcode_string[line][gcode_count];
+		s1_data := Z_m165_gcode_string[line][gcode_count];
+		s2_data := Z_m165_gcode_string[line][gcode_count];
+	END_IF
+
+	
+	s0_count := 1;
+	s1_count := 1;
+	s2_count := 1;
+	state := 1;	// going to wait ack from slave
+1:		// waiting ack from slave
+	IF (s0_switch0 = 1) AND (s1_switch0 = 1) AND (s2_switch0 = 1) THEN	// not NULL
+		s0_count := 0;
+		s1_count := 0;
+		s2_count := 0;
+		state := 2;
+	END_IF;
+	IF (s0_switch2 = 1) AND (s1_switch2 = 1) AND (s2_switch2 = 1) THEN	// // NULL
+		s0_count := 0;
+		s1_count := 0;
+		s2_count := 0;
+		state := 3;
+	END_IF
+2:		// ack slave
+	s0_count := 2;
+	s1_count := 2;
+	s2_count := 2;
+	IF (s0_switch1 = 1) AND (s1_switch1 = 1) AND (s2_switch1 = 1) THEN
+		state := 0;
+		gcode_count := gcode_count + 1;
+	END_IF;
+3:	// ack slave and waiting slave commplete gcode command
+	IF (s0_switch3 = 1) AND (s1_switch3 = 1) AND (s2_switch3 = 1) THEN	// gcode command complete
+		s0_count := 4;
+		s1_count := 4;
+		s2_count := 4;
+		state := 0;
+		line := line + 1;
+		gcode_count := 0;
+	ELSE
+		s0_count := 3;
+		s1_count := 3;
+		s2_count := 3;
+	END_IF;
+END_CASE;
+
+IF s0_info1 = 1 THEN
+	;
+END_IF
+IF s1_info1 = 1 THEN
+	;
+END_IF
+IF s2_info1 = 1 THEN
+	;
+END_IF
+
+(*
+s0_led0 := s0_switch0;
+s0_led1 := s0_switch1;
+s0_led2 := s0_switch2;
+s0_led3 := s0_switch3;
+s0_led4 := s0_switch4;
+s0_led5 := s0_switch5;
+s0_led6 := s0_switch6;
+s0_led7 := s0_switch7;
+
+s0_led0 := s1_switch0;
+s1_led1 := s1_switch1;
+s1_led2 := s1_switch2;
+s1_led3 := s1_switch3;
+s1_led4 := s1_switch4;
+s1_led5 := s1_switch5;
+s1_led6 := s1_switch6;
+s1_led7 := s1_switch7;
+
+s2_led0 := s2_switch0;
+s2_led1 := s2_switch1;
+s2_led2 := s2_switch2;
+s2_led3 := s2_switch3;
+s2_led4 := s2_switch4;
+s2_led5 := s2_switch5;
+s2_led6 := s2_switch6;
+s2_led7 := s2_switch7;
+*)
