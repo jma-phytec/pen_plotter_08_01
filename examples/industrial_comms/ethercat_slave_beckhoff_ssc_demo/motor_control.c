@@ -42,13 +42,13 @@ float CalculateMotorLoop(MotorMod *Motor, float Displayment)
     // 200 steps = 1 rotation = 4.04cm = 40.4mm
     StepsRequired = (Displayment / ROUND_LEN) * NUM_STEPS_PER_ROTATION * STEPSIZE;
 #ifdef MOTORX
-    StepsRequired = StepsRequired * 2.5;
+    StepsRequired = StepsRequired * 1;
 #endif
 #ifdef MOTORY
-    StepsRequired = StepsRequired * 2.5;
+    StepsRequired = StepsRequired * 1;
 #endif
 #ifdef MOTORZ
-    StepsRequired = StepsRequired * 50;
+    StepsRequired = StepsRequired * 3;
 #endif
 
 #ifdef MYDEBUG
