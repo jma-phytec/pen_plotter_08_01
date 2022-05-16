@@ -1,6 +1,5 @@
 PROGRAM PLC_PRG
 VAR
-
 	iCounter : UDINT := 0 ;
 	cmpStringC : STRING;
 	cmpStringS : STRING;
@@ -225,7 +224,7 @@ VAR
 
 	gohome_gcode_string : ARRAY [0..1] OF STRING(128) := [
 														'G01 Z-0',
-														''
+														'G92'
 														];
 														
 	bunny_gcode_string : ARRAY [0..548] OF STRING(128) := 
