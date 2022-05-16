@@ -7,11 +7,18 @@ sCommand1:= 'echo 0 > /tmp/test';
 sCommand2:= 'cat /etc/pinger/pos_z';
 sCommandSH:= 'echo SH > /tmp/test';
 sCommandGHZ:= 'echo GHZ > /tmp/test';
+sCommandR0_23:= 'mux-gpio0_23.sh && read-gpio0_23.sh';
+sCommandR0_24:= 'mux-gpio0_24.sh && read-gpio0_24.sh';
+sCommandR0_25:= 'mux-gpio0_25.sh && read-gpio0_25.sh';
+
 refCommand0 REF= sCommand0;
 refCommand1 REF= sCommand1;
 refCommand2 REF= sCommand2;
 refCommandSH REF= sCommandSH;
 refCommandGHZ REF= sCommandGHZ;
+refCommandR0_23 REF= sCommandR0_23;
+refCommandR0_24 REF= sCommandR0_24;
+refCommandR0_25 REF= sCommandR0_25;
 
 refOutput REF= sOutput;
 cmpStringC:= 'C$N';
@@ -29,9 +36,9 @@ cmpStringSH:= 'SH$N';
 cmpStringHS:= 'HS$N';
 cmpStringGH:= 'GH$N';
 cmpStringGHZ:= 'GHZ$N';
+cmpStringV0:= '0$N';
+cmpStringV1:= '1$N';
 
-SysProcessExecuteCommand2(pszCommand:=refCommand0, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
-pt0 := ADR(sOutput);
 ptC := ADR(cmpStringC);
 ptS := ADR(cmpStringS);
 ptP := ADR(cmpStringP);
@@ -47,8 +54,43 @@ ptSH := ADR(cmpStringSH);
 ptHS := ADR(cmpStringHS);
 ptGH := ADR(cmpStringGH);
 ptGHZ := ADR(cmpStringGHZ);
+ptV0 := ADR(cmpStringV0);
+ptV1 := ADR(cmpStringV1);
 
-IF StrCaseCmpA(pt0, ptC) = 0 THEN	//	1: Calibration
+btnP := FALSE;
+btnC := FALSE;
+btnH := FALSE;
+
+IF mode = 0 THEN
+SysProcessExecuteCommand2(pszCommand:=refCommandR0_23, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+pt0 := ADR(sOutput);
+IF StrCaseCmpA(pt0, ptV0) = 0 THEN	//	Print
+	btnP := TRUE;
+END_IF
+END_IF
+
+IF mode = 0 OR mode = 1 THEN
+SysProcessExecuteCommand2(pszCommand:=refCommandR0_24, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+pt0 := ADR(sOutput);
+IF StrCaseCmpA(pt0, ptV0) = 0 THEN	// Calibration
+	btnC := TRUE;
+END_IF
+END_IF
+
+IF mode = 0 THEN
+SysProcessExecuteCommand2(pszCommand:=refCommandR0_25, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+pt0 := ADR(sOutput);
+IF StrCaseCmpA(pt0, ptV0) = 0 THEN	// Home
+	btnH := TRUE;
+END_IF
+END_IF
+
+IF mode = 0 THEN
+	SysProcessExecuteCommand2(pszCommand:=refCommand0, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+	pt0 := ADR(sOutput);
+END_IF
+
+IF StrCaseCmpA(pt0, ptC) = 0 OR (btnC = TRUE AND mode = 0) THEN	//	1: Calibration
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	mode := 1;
 	// Green
@@ -66,7 +108,7 @@ IF StrCaseCmpA(pt0, ptC) = 0 THEN	//	1: Calibration
 	gcode_count := 0;	
 	state := 0;
 END_IF
-IF StrCaseCmpA(pt0, ptS) = 0 THEN	//	2: Stop
+IF StrCaseCmpA(pt0, ptS) = 0 OR (btnC = FALSE AND mode = 1) THEN	//	2: Stop
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	IF mode = 1 THEN	// Calibration
 		// write line number to file
@@ -108,7 +150,7 @@ IF StrCaseCmpA(pt0, ptS) = 0 THEN	//	2: Stop
 		state := 10;
 	END_IF
 END_IF
-IF StrCaseCmpA(pt0, ptP) = 0 THEN	//	3: Print
+IF StrCaseCmpA(pt0, ptP) = 0 OR (btnP = TRUE AND mode = 0) THEN	//	3: Print
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	mode := 2;
 	// Blue
@@ -196,7 +238,7 @@ IF StrCaseCmpA(pt0, ptHS) = 0 THEN	//	12: Go to Home Switch
 	gcode_count := 0;	
 	state := 0;
 END_IF
-IF StrCaseCmpA(pt0, ptGH) = 0 THEN	//	Go Home 
+IF StrCaseCmpA(pt0, ptGH) = 0 OR (btnH = TRUE AND mode = 0) THEN	//	Go Home 
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	mode := 14;
 	line := 0;
@@ -224,33 +266,33 @@ IF StrCaseCmpA(pt0, ptGHZ) = 0 THEN	//	Go Home: Moving Z-axis
 	pt162 := ADR('162$N');
 	pt163 := ADR('163$N');
 		IF StrCaseCmpA(pt0, pt150) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-10';
-		ELSIF StrCaseCmpA(pt0, pt151) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-11';
-		ELSIF StrCaseCmpA(pt0, pt152) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-12';
-		ELSIF StrCaseCmpA(pt0, pt153) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-13';
-		ELSIF StrCaseCmpA(pt0, pt154) = 0 THEN
 			gohome_gcode_string[0] := 'G01 Z-14';
+		ELSIF StrCaseCmpA(pt0, pt151) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-151';
+		ELSIF StrCaseCmpA(pt0, pt152) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-152';
+		ELSIF StrCaseCmpA(pt0, pt153) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-153';
+		ELSIF StrCaseCmpA(pt0, pt154) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-154';
 		ELSIF StrCaseCmpA(pt0, pt155) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-15';
+			gohome_gcode_string[0] := 'G01 Z-155';
 		ELSIF StrCaseCmpA(pt0, pt156) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-16';
+			gohome_gcode_string[0] := 'G01 Z-156';
 		ELSIF StrCaseCmpA(pt0, pt157) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-17';
+			gohome_gcode_string[0] := 'G01 Z-157';
 		ELSIF StrCaseCmpA(pt0, pt158) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-18';
+			gohome_gcode_string[0] := 'G01 Z-158';
 		ELSIF StrCaseCmpA(pt0, pt159) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-19';
+			gohome_gcode_string[0] := 'G01 Z-159';
 		ELSIF StrCaseCmpA(pt0, pt160) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-20';
+			gohome_gcode_string[0] := 'G01 Z-160';
 		ELSIF StrCaseCmpA(pt0, pt161) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-21';
+			gohome_gcode_string[0] := 'G01 Z-161';
 		ELSIF StrCaseCmpA(pt0, pt162) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-22';			
+			gohome_gcode_string[0] := 'G01 Z-162';			
 		ELSE
-			gohome_gcode_string[0] := 'G01 Z-23';			
+			gohome_gcode_string[0] := 'G01 Z-163';			
 		END_IF	
 	
 	mode := 15;
@@ -272,7 +314,7 @@ IF mode = 1 THEN	// Calibration
 END_IF
 
 IF mode = 2 THEN	// Print
-	IF line > 4548 THEN	// 548 (bunny), 4548 (cartoonsom)
+	IF line > 623 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec)
 		line := 0;
 		gcode_count := 0;
 		state := 10;
@@ -406,9 +448,12 @@ CASE state OF
 		//s0_data := bunny_gcode_string[line][gcode_count];
 		//s1_data := bunny_gcode_string[line][gcode_count];
 		//s2_data := bunny_gcode_string[line][gcode_count];
-		s0_data := cartoonsom_gcode_string[line][gcode_count];
-		s1_data := cartoonsom_gcode_string[line][gcode_count];
-		s2_data := cartoonsom_gcode_string[line][gcode_count];
+		//s0_data := cartoonsom_gcode_string[line][gcode_count];
+		//s1_data := cartoonsom_gcode_string[line][gcode_count];
+		//s2_data := cartoonsom_gcode_string[line][gcode_count];
+		s0_data := phytec_gcode_string[line][gcode_count];
+		s1_data := phytec_gcode_string[line][gcode_count];
+		s2_data := phytec_gcode_string[line][gcode_count];
 	END_IF
 	
 	IF mode = 3 THEN	// Home
