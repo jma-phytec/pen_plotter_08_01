@@ -45,20 +45,13 @@ VAR
 	sOutput : STRING;
 	refOutput : REFERENCE TO STRING;
 	pt0 : POINTER TO STRING;
-	pt150 : POINTER TO STRING;
-	pt151 : POINTER TO STRING;
-	pt152 : POINTER TO STRING;
-	pt153 : POINTER TO STRING;
-	pt154 : POINTER TO STRING;
-	pt155 : POINTER TO STRING;
-	pt156 : POINTER TO STRING;
-	pt157 : POINTER TO STRING;
-	pt158 : POINTER TO STRING;
-	pt159 : POINTER TO STRING;
-	pt160 : POINTER TO STRING;
-	pt161 : POINTER TO STRING;
-	pt162 : POINTER TO STRING;
-	pt163 : POINTER TO STRING;
+	pt136 : POINTER TO STRING := ADR('136$N');
+	pt137 : POINTER TO STRING := ADR('137$N');
+	pt138 : POINTER TO STRING := ADR('138$N');
+	pt139 : POINTER TO STRING := ADR('139$N');
+	pt140 : POINTER TO STRING := ADR('140$N');
+	pt141 : POINTER TO STRING := ADR('141$N');
+	pt142 : POINTER TO STRING := ADR('142$N');
 	ptC : POINTER TO STRING:= ADR(cmpStringC);
 	ptS : POINTER TO STRING:= ADR(cmpStringS);
 	ptP : POINTER TO STRING:= ADR(cmpStringP);
@@ -150,37 +143,23 @@ VAR
 	state: INT := 10;
 	mode: INT := 0;	// 0: Idle, 1: Calibration, 2: Print, 3: Home
 	pending_to_home: INT := 0;
-	calibration_gcode_string : ARRAY [0..29] OF STRING(128) := [
+	calibration_gcode_string : ARRAY [0..15] OF STRING(128) := [
 													'G90',
-													'G01 X0 Y0 Z0',
-													'G01 Z-15',		// -150
+													'G92',
+													'G01 Z-136',
 													'G01 X40',
-													'G01 Y5 Z-1',
+													'G01 Y5 Z-137',
 													'G01 X0',
-													'G01 Y10 Z-2',
+													'G01 Y10 Z-138',
 													'G01 X40',
-													'G01 Y15 Z-3',
+													'G01 Y15 Z-139',
 													'G01 X0',
-													'G01 Y20 Z-4',
+													'G01 Y20 Z-140',
 													'G01 X40',
-													'G01 Y25 Z-5',
+													'G01 Y25 Z-141',
 													'G01 X0',
-													'G01 Y30 Z-6',
-													'G01 X40',
-													'G01 Y35 Z-7',
-													'G01 X0',
-													'G01 Y40 Z-8',
-													'G01 X0',
-													'G01 Y45 Z-9',
-													'G01 X40',
-													'G01 Y50 Z-10',
-													'G01 X0',
-													'G01 Y55 Z-11',
-													'G01 X40',
-													'G01 Y60 Z-12',
-													'G01 X0',
-													'G01 Y65 Z-13',
-													'G01 X40'											
+													'G01 Y30 Z-142',
+													'G01 X40'
 													];
 	home_gcode_string : ARRAY [0..2] OF STRING(128) := [
 														'G90',
