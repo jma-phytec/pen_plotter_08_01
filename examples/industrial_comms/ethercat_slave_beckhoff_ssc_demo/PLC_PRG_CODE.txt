@@ -235,77 +235,53 @@ IF mode = 1 THEN	// Calibration
 		gcode_count := 0;
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 2 THEN	// Print
+ELSIF mode = 2 THEN	// Print
 	IF line > 623 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec)
 		line := 0;
 		gcode_count := 0;
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 3 THEN	// Home
+ELSIF mode = 3 THEN	// Home
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 4 THEN	// Test
+ELSIF mode = 4 THEN	// Test
 	IF line > 4 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 5 THEN	// X+
+ELSIF mode = 5 THEN	// X+
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 6 THEN	// X-
+ELSIF mode = 6 THEN	// X-
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 7 THEN	// Y+
+ELSIF mode = 7 THEN	// Y+
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 8 THEN	// Y-
+ELSIF mode = 8 THEN	// Y-
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 9 THEN	// Z+
+ELSIF mode = 9 THEN	// Z+
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 10 THEN	// Z-
+ELSIF mode = 10 THEN	// Z-
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 11 THEN	// Home
+ELSIF mode = 11 THEN	// Home
 	IF line > 1 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 12 THEN	// Set Home
+ELSIF mode = 12 THEN	// Set Home
 	IF line > 0 THEN
 		state := 10;
 	END_IF
-END_IF
-
-IF mode = 13 THEN	// Go to Home Switch
+ELSIF mode = 13 THEN	// Go to Home Switch
 	IF s0_info1 = 1 THEN
 		IF s1_info1 = 1 THEN
 			IF s2_info1 = 1 THEN
@@ -318,9 +294,7 @@ IF mode = 13 THEN	// Go to Home Switch
 		gcode_count := 0;
 		state := 0;
 	END_IF
-END_IF
-
-IF mode = 14 THEN	// Go Home
+ELSIF mode = 14 THEN	// Go Home
 	IF s0_info1 = 1 THEN
 		IF s1_info1 = 1 THEN
 			IF s2_info1 = 1 THEN
@@ -336,9 +310,7 @@ IF mode = 14 THEN	// Go Home
 		gcode_count := 0;
 		state := 0;
 	END_IF
-END_IF
-
-IF mode = 15 THEN	// Go Home: Move Z-axis
+ELSIF mode = 15 THEN	// Go Home: Move Z-axis
 	IF line > 1 THEN
 		line := 0;
 		gcode_count := 0;
@@ -367,8 +339,7 @@ CASE state OF
 		s0_data := calibration_gcode_string[line][gcode_count];
 		s1_data := calibration_gcode_string[line][gcode_count];
 		s2_data := calibration_gcode_string[line][gcode_count];
-	END_IF
-	IF mode = 2 THEN		// Print
+	ELSIF mode = 2 THEN		// Print
 		//s0_data := bunny_gcode_string[line][gcode_count];
 		//s1_data := bunny_gcode_string[line][gcode_count];
 		//s2_data := bunny_gcode_string[line][gcode_count];
@@ -378,79 +349,55 @@ CASE state OF
 		s0_data := phytec_gcode_string[line][gcode_count];
 		s1_data := phytec_gcode_string[line][gcode_count];
 		s2_data := phytec_gcode_string[line][gcode_count];
-	END_IF
-	
-	IF mode = 3 THEN	// Home
+	ELSIF mode = 3 THEN	// Home
 		s0_data := home_gcode_string[line][gcode_count];
 		s1_data := home_gcode_string[line][gcode_count];
 		s2_data := home_gcode_string[line][gcode_count];		
-	END_IF
-	IF mode = 4 THEN	// Test
+	ELSIF mode = 4 THEN	// Test
 		s0_data := test_gcode_string[line][gcode_count];
 		s1_data := test_gcode_string[line][gcode_count];
 		s2_data := test_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 5 THEN	// X+
+	ELSIF mode = 5 THEN	// X+
 		s0_data := X_p_gcode_string[line][gcode_count];
 		s1_data := X_p_gcode_string[line][gcode_count];
 		s2_data := X_p_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 6 THEN	// X-
+	ELSIF mode = 6 THEN	// X-
 		s0_data := X_m_gcode_string[line][gcode_count];
 		s1_data := X_m_gcode_string[line][gcode_count];
 		s2_data := X_m_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 7 THEN	// Y+
+	ELSIF mode = 7 THEN	// Y+
 		s0_data := Y_p_gcode_string[line][gcode_count];
 		s1_data := Y_p_gcode_string[line][gcode_count];
 		s2_data := Y_p_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 8 THEN	// Y-
+	ELSIF mode = 8 THEN	// Y-
 		s0_data := Y_m_gcode_string[line][gcode_count];
 		s1_data := Y_m_gcode_string[line][gcode_count];
 		s2_data := Y_m_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 9 THEN	// Z+
+	ELSIF mode = 9 THEN	// Z+
 		s0_data := Z_p_gcode_string[line][gcode_count];
 		s1_data := Z_p_gcode_string[line][gcode_count];
 		s2_data := Z_p_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 10 THEN	// Z-
+	ELSIF mode = 10 THEN	// Z-
 		s0_data := Z_m_gcode_string[line][gcode_count];
 		s1_data := Z_m_gcode_string[line][gcode_count];
 		s2_data := Z_m_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 11 THEN	// Home
+	ELSIF mode = 11 THEN	// Home
 		s0_data := home_gcode_string[line][gcode_count];
 		s1_data := home_gcode_string[line][gcode_count];
 		s2_data := home_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 12 THEN	// Set Home
+	ELSIF mode = 12 THEN	// Set Home
 		s0_data := set_home_gcode_string[line][gcode_count];
 		s1_data := set_home_gcode_string[line][gcode_count];
 		s2_data := set_home_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 13 THEN	// Go to Home Switch
+	ELSIF mode = 13 THEN	// Go to Home Switch
 		s0_data := homeswitch_gcode_string[line][gcode_count];
 		s1_data := homeswitch_gcode_string[line][gcode_count];
 		s2_data := homeswitch_gcode_string[line][gcode_count];
-	END_IF
-	IF mode = 14 THEN	// Go Home
+	ELSIF mode = 14 THEN	// Go Home
 		s0_data := homeswitch_gcode_string[line][gcode_count];
 		s1_data := homeswitch_gcode_string[line][gcode_count];
 		s2_data := homeswitch_gcode_string[line][gcode_count];
-	END_IF
-
-	IF mode = 15 THEN	// Go Home: move Z-axis
+	ELSIF mode = 15 THEN	// Go Home: move Z-axis
 		s0_data := gohome_gcode_string[line][gcode_count];
 		s1_data := gohome_gcode_string[line][gcode_count];
 		s2_data := gohome_gcode_string[line][gcode_count];
