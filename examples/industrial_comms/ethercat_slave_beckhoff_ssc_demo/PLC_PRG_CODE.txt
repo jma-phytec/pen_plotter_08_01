@@ -69,34 +69,22 @@ IF StrCaseCmpA(pt0, ptS) = 0 OR (btnC = FALSE AND mode = 1) THEN	//	2: Stop
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	IF mode = 1 THEN	// Calibration
 		// write line number to file
-		IF line < 5 THEN
-			line := 150;
-		ELSIF line < 7 THEN
-			line := 151;
-		ELSIF line < 9 THEN
-			line := 152;
-		ELSIF line < 11 THEN
-			line := 153;
-		ELSIF line < 13 THEN
-			line := 154;
-		ELSIF line < 15 THEN
-			line := 155;
-		ELSIF line < 17 THEN
-			line := 156;
-		ELSIF line < 19 THEN
-			line := 157;
-		ELSIF line < 21 THEN
-			line := 158;
-		ELSIF line < 23 THEN
-			line := 159;
-		ELSIF line < 25 THEN
-			line := 160;
-		ELSIF line < 27 THEN
-			line := 161;
-		ELSIF line < 29 THEN
-			line := 162;
+		IF line < 4 THEN
+			line := 136;
+		ELSIF line < 6 THEN
+			line := 137;
+		ELSIF line < 8 THEN
+			line := 138;
+		ELSIF line < 10 THEN
+			line := 139;
+		ELSIF line < 12 THEN
+			line := 140;
+		ELSIF line < 14 THEN
+			line := 141;
+		ELSIF line < 16 THEN
+			line := 142;
 		ELSE
-			line := 163;
+			line := 142;
 		END_IF
 		sCommand3 := Concat('echo "', INT_TO_STRING(line));
 		sCommand3 := Concat(sCommand3, '"  > /etc/pinger/pos_z');
@@ -211,48 +199,22 @@ IF StrCaseCmpA(pt0, ptGHZ) = 0 THEN	//	Go Home: Moving Z-axis
 
 	SysProcessExecuteCommand2(pszCommand:=refCommand2, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 	pt0 := ADR(sOutput);
-	pt150 := ADR('150$N');
-	pt151 := ADR('151$N');
-	pt152 := ADR('152$N');
-	pt153 := ADR('153$N');
-	pt154 := ADR('154$N');
-	pt155 := ADR('155$N');
-	pt156 := ADR('156$N');
-	pt157 := ADR('157$N');
-	pt158 := ADR('158$N');
-	pt159 := ADR('159$N');
-	pt160 := ADR('160$N');
-	pt161 := ADR('161$N');
-	pt162 := ADR('162$N');
-	pt163 := ADR('163$N');
-		IF StrCaseCmpA(pt0, pt150) = 0 THEN
+		IF StrCaseCmpA(pt0, pt136) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-136';
+		ELSIF StrCaseCmpA(pt0, pt137) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-137';
+		ELSIF StrCaseCmpA(pt0, pt138) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-138';
+		ELSIF StrCaseCmpA(pt0, pt139) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-139';
+		ELSIF StrCaseCmpA(pt0, pt140) = 0 THEN
 			gohome_gcode_string[0] := 'G01 Z-140';
-		ELSIF StrCaseCmpA(pt0, pt151) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-151';
-		ELSIF StrCaseCmpA(pt0, pt152) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-152';
-		ELSIF StrCaseCmpA(pt0, pt153) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-153';
-		ELSIF StrCaseCmpA(pt0, pt154) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-154';
-		ELSIF StrCaseCmpA(pt0, pt155) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-155';
-		ELSIF StrCaseCmpA(pt0, pt156) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-156';
-		ELSIF StrCaseCmpA(pt0, pt157) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-157';
-		ELSIF StrCaseCmpA(pt0, pt158) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-158';
-		ELSIF StrCaseCmpA(pt0, pt159) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-159';
-		ELSIF StrCaseCmpA(pt0, pt160) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-160';
-		ELSIF StrCaseCmpA(pt0, pt161) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-161';
-		ELSIF StrCaseCmpA(pt0, pt162) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-162';			
+		ELSIF StrCaseCmpA(pt0, pt141) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-141';
+		ELSIF StrCaseCmpA(pt0, pt142) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-142';
 		ELSE
-			gohome_gcode_string[0] := 'G01 Z-163';			
+			gohome_gcode_string[0] := 'G01 Z-142';			
 		END_IF	
 	
 	mode := 15;
@@ -268,7 +230,7 @@ IF gcode_count > 127 THEN
 END_IF
 
 IF mode = 1 THEN	// Calibration
-	IF line > 29 THEN
+	IF line > 15 THEN
 		line := 0;
 		gcode_count := 0;
 		state := 10;
