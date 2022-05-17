@@ -1,15 +1,7 @@
 
-iCounter := iCounter + 1 ;
+//iCounter := iCounter + 1 ;
 
-sCommand0:= 'cat /tmp/test';
 //sCommand0:= 'mux-gpio1_47.sh && read-gpio1_47.sh';
-sCommand1:= 'echo 0 > /tmp/test';
-sCommand2:= 'cat /etc/pinger/pos_z';
-sCommandSH:= 'echo SH > /tmp/test';
-sCommandGHZ:= 'echo GHZ > /tmp/test';
-sCommandR0_23:= 'mux-gpio0_23.sh && read-gpio0_23.sh';
-sCommandR0_24:= 'mux-gpio0_24.sh && read-gpio0_24.sh';
-sCommandR0_25:= 'mux-gpio0_25.sh && read-gpio0_25.sh';
 
 refCommand0 REF= sCommand0;
 refCommand1 REF= sCommand1;
@@ -21,41 +13,6 @@ refCommandR0_24 REF= sCommandR0_24;
 refCommandR0_25 REF= sCommandR0_25;
 
 refOutput REF= sOutput;
-cmpStringC:= 'C$N';
-cmpStringS:= 'S$N';
-cmpStringP:= 'P$N';
-cmpStringT:= 'T$N';
-cmpStringXP:= 'X+$N';
-cmpStringXM:= 'X-$N';
-cmpStringYP:= 'Y+$N';
-cmpStringYM:= 'Y-$N';
-cmpStringZP:= 'Z+$N';
-cmpStringZM:= 'Z-$N';
-cmpStringH:= 'H$N';
-cmpStringSH:= 'SH$N';
-cmpStringHS:= 'HS$N';
-cmpStringGH:= 'GH$N';
-cmpStringGHZ:= 'GHZ$N';
-cmpStringV0:= '0$N';
-cmpStringV1:= '1$N';
-
-ptC := ADR(cmpStringC);
-ptS := ADR(cmpStringS);
-ptP := ADR(cmpStringP);
-ptT := ADR(cmpStringT);
-ptXP := ADR(cmpStringXP);
-ptXM := ADR(cmpStringXM);
-ptYP := ADR(cmpStringYP);
-ptYM := ADR(cmpStringYM);
-ptZP := ADR(cmpStringZP);
-ptZM := ADR(cmpStringZM);
-ptH := ADR(cmpStringH);
-ptSH := ADR(cmpStringSH);
-ptHS := ADR(cmpStringHS);
-ptGH := ADR(cmpStringGH);
-ptGHZ := ADR(cmpStringGHZ);
-ptV0 := ADR(cmpStringV0);
-ptV1 := ADR(cmpStringV1);
 
 btnP := FALSE;
 btnC := FALSE;
@@ -168,6 +125,9 @@ IF StrCaseCmpA(pt0, ptP) = 0 OR (btnP = TRUE AND mode = 0) THEN	//	3: Print
 	state := 0;
 	
 END_IF
+
+IF mode = 0 THEN
+
 IF StrCaseCmpA(pt0, ptT) = 0 THEN	//	4: Test
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	mode := 4;
@@ -266,7 +226,7 @@ IF StrCaseCmpA(pt0, ptGHZ) = 0 THEN	//	Go Home: Moving Z-axis
 	pt162 := ADR('162$N');
 	pt163 := ADR('163$N');
 		IF StrCaseCmpA(pt0, pt150) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-14';
+			gohome_gcode_string[0] := 'G01 Z-140';
 		ELSIF StrCaseCmpA(pt0, pt151) = 0 THEN
 			gohome_gcode_string[0] := 'G01 Z-151';
 		ELSIF StrCaseCmpA(pt0, pt152) = 0 THEN
@@ -299,6 +259,8 @@ IF StrCaseCmpA(pt0, ptGHZ) = 0 THEN	//	Go Home: Moving Z-axis
 	line := 0;
 	gcode_count := 0;	
 	state := 0;
+END_IF
+
 END_IF
 
 IF gcode_count > 127 THEN
@@ -593,7 +555,7 @@ s0_led5 := s0_switch5;
 s0_led6 := s0_switch6;
 s0_led7 := s0_switch7;
 
-s0_led0 := s1_switch0;
+s1_led0 := s1_switch0;
 s1_led1 := s1_switch1;
 s1_led2 := s1_switch2;
 s1_led3 := s1_switch3;
