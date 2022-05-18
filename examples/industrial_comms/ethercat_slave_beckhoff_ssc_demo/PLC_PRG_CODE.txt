@@ -70,21 +70,21 @@ IF StrCaseCmpA(pt0, ptS) = 0 OR (btnC = FALSE AND mode = 1) THEN	//	2: Stop
 	IF mode = 1 THEN	// Calibration
 		// write line number to file
 		IF line < 4 THEN
-			line := 136;
+			line := 80;
 		ELSIF line < 6 THEN
-			line := 137;
+			line := 81;
 		ELSIF line < 8 THEN
-			line := 138;
+			line := 82;
 		ELSIF line < 10 THEN
-			line := 139;
+			line := 83;
 		ELSIF line < 12 THEN
-			line := 140;
+			line := 84;
 		ELSIF line < 14 THEN
-			line := 141;
+			line := 85;
 		ELSIF line < 16 THEN
-			line := 142;
+			line := 86;
 		ELSE
-			line := 142;
+			line := 86;
 		END_IF
 		sCommand3 := Concat('echo "', INT_TO_STRING(line));
 		sCommand3 := Concat(sCommand3, '"  > /etc/pinger/pos_z');
@@ -199,22 +199,22 @@ IF StrCaseCmpA(pt0, ptGHZ) = 0 THEN	//	Go Home: Moving Z-axis
 
 	SysProcessExecuteCommand2(pszCommand:=refCommand2, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 	pt0 := ADR(sOutput);
-		IF StrCaseCmpA(pt0, pt136) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-136';
-		ELSIF StrCaseCmpA(pt0, pt137) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-137';
-		ELSIF StrCaseCmpA(pt0, pt138) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-138';
-		ELSIF StrCaseCmpA(pt0, pt139) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-139';
-		ELSIF StrCaseCmpA(pt0, pt140) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-140';
-		ELSIF StrCaseCmpA(pt0, pt141) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-141';
-		ELSIF StrCaseCmpA(pt0, pt142) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-142';
+		IF StrCaseCmpA(pt0, pt80) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-80';
+		ELSIF StrCaseCmpA(pt0, pt81) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-81';
+		ELSIF StrCaseCmpA(pt0, pt82) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-82';
+		ELSIF StrCaseCmpA(pt0, pt83) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-83';
+		ELSIF StrCaseCmpA(pt0, pt84) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-84';
+		ELSIF StrCaseCmpA(pt0, pt85) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-85';
+		ELSIF StrCaseCmpA(pt0, pt86) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-86';
 		ELSE
-			gohome_gcode_string[0] := 'G01 Z-142';			
+			gohome_gcode_string[0] := 'G01 Z-86';			
 		END_IF	
 	
 	mode := 15;
@@ -235,53 +235,65 @@ IF mode = 1 THEN	// Calibration
 		gcode_count := 0;
 		state := 10;
 	END_IF
-ELSIF mode = 2 THEN	// Print
-	IF line > 1284 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
+END_IF
+IF mode = 2 THEN	// Print
+	IF line > 13 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
 		line := 0;
 		gcode_count := 0;
 		state := 10;
 	END_IF
-ELSIF mode = 3 THEN	// Home
+END_IF
+IF mode = 3 THEN	// Home
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 4 THEN	// Test
+END_IF
+IF mode = 4 THEN	// Test
 	IF line > 4 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 5 THEN	// X+
+END_IF
+IF mode = 5 THEN	// X+
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 6 THEN	// X-
+END_IF
+IF mode = 6 THEN	// X-
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 7 THEN	// Y+
+END_IF
+IF mode = 7 THEN	// Y+
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 8 THEN	// Y-
+END_IF
+IF mode = 8 THEN	// Y-
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 9 THEN	// Z+
+END_IF
+IF mode = 9 THEN	// Z+
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 10 THEN	// Z-
+END_IF
+IF mode = 10 THEN	// Z-
 	IF line > 2 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 11 THEN	// Home
+END_IF
+IF mode = 11 THEN	// Home
 	IF line > 1 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 12 THEN	// Set Home
+END_IF
+IF mode = 12 THEN	// Set Home
 	IF line > 0 THEN
 		state := 10;
 	END_IF
-ELSIF mode = 13 THEN	// Go to Home Switch
+END_IF
+IF mode = 13 THEN	// Go to Home Switch
 	IF s0_info1 = 1 THEN
 		IF s1_info1 = 1 THEN
 			IF s2_info1 = 1 THEN
@@ -294,7 +306,8 @@ ELSIF mode = 13 THEN	// Go to Home Switch
 		gcode_count := 0;
 		state := 0;
 	END_IF
-ELSIF mode = 14 THEN	// Go Home
+END_IF
+IF mode = 14 THEN	// Go Home
 	IF s0_info1 = 1 THEN
 		IF s1_info1 = 1 THEN
 			IF s2_info1 = 1 THEN
@@ -305,12 +318,14 @@ ELSIF mode = 14 THEN	// Go Home
 				SysProcessExecuteCommand2(pszCommand:=refCommandGHZ, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 			END_IF
 		END_IF
-	ELSIF line > 1 THEN
+	END_IF
+	IF line > 1 THEN
 		line := 0;
 		gcode_count := 0;
 		state := 0;
 	END_IF
-ELSIF mode = 15 THEN	// Go Home: Move Z-axis
+END_IF
+IF mode = 15 THEN	// Go Home: Move Z-axis
 	IF line > 1 THEN
 		line := 0;
 		gcode_count := 0;
@@ -343,9 +358,12 @@ CASE state OF
 		//s0_data := bunny_gcode_string[line][gcode_count];
 		//s1_data := bunny_gcode_string[line][gcode_count];
 		//s2_data := bunny_gcode_string[line][gcode_count];
-		s0_data := phytecP_gcode_string[line][gcode_count];
-		s1_data := phytecP_gcode_string[line][gcode_count];
-		s2_data := phytecP_gcode_string[line][gcode_count];
+		//s0_data := phytecP_gcode_string[line][gcode_count];
+		//s1_data := phytecP_gcode_string[line][gcode_count];
+		//s2_data := phytecP_gcode_string[line][gcode_count];
+		s0_data := phytecP_manual_gcode_string[line][gcode_count];
+		s1_data := phytecP_manual_gcode_string[line][gcode_count];
+		s2_data := phytecP_manual_gcode_string[line][gcode_count];
 		//s0_data := phytecLogo_gcode_string[line][gcode_count];
 		//s1_data := phytecLogo_gcode_string[line][gcode_count];
 		//s2_data := phytecLogo_gcode_string[line][gcode_count];
