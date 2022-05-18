@@ -45,13 +45,13 @@ VAR
 	sOutput : STRING;
 	refOutput : REFERENCE TO STRING;
 	pt0 : POINTER TO STRING;
-	pt136 : POINTER TO STRING := ADR('136$N');
-	pt137 : POINTER TO STRING := ADR('137$N');
-	pt138 : POINTER TO STRING := ADR('138$N');
-	pt139 : POINTER TO STRING := ADR('139$N');
-	pt140 : POINTER TO STRING := ADR('140$N');
-	pt141 : POINTER TO STRING := ADR('141$N');
-	pt142 : POINTER TO STRING := ADR('142$N');
+	pt80 : POINTER TO STRING := ADR('80$N');
+	pt81 : POINTER TO STRING := ADR('81$N');
+	pt82 : POINTER TO STRING := ADR('82$N');
+	pt83 : POINTER TO STRING := ADR('83$N');
+	pt84 : POINTER TO STRING := ADR('84$N');
+	pt85 : POINTER TO STRING := ADR('85$N');
+	pt86 : POINTER TO STRING := ADR('86$N');
 	ptC : POINTER TO STRING:= ADR(cmpStringC);
 	ptS : POINTER TO STRING:= ADR(cmpStringS);
 	ptP : POINTER TO STRING:= ADR(cmpStringP);
@@ -146,19 +146,19 @@ VAR
 	calibration_gcode_string : ARRAY [0..15] OF STRING(128) := [
 													'G90',
 													'G92',
-													'G01 Z-136',
+													'G01 Z-82',
 													'G01 X40',
-													'G01 Y5 Z-137',
+													'G01 Y5 Z-83',
 													'G01 X0',
-													'G01 Y10 Z-138',
+													'G01 Y10 Z-84',
 													'G01 X40',
-													'G01 Y15 Z-139',
+													'G01 Y15 Z-85',
 													'G01 X0',
-													'G01 Y20 Z-140',
+													'G01 Y20 Z-86',
 													'G01 X40',
-													'G01 Y25 Z-141',
+													'G01 Y25 Z-87',
 													'G01 X0',
-													'G01 Y30 Z-142',
+													'G01 Y30 Z-88',
 													'G01 X40'
 													];
 	home_gcode_string : ARRAY [0..2] OF STRING(128) := [
@@ -170,10 +170,9 @@ VAR
 														'G92',
 														''
 														];
-	homeswitch_gcode_string : ARRAY [0..2] OF STRING(128) := [
+	homeswitch_gcode_string : ARRAY [0..1] OF STRING(128) := [
 														'G91',
-														'G01 X-5 Y-5 Z5',
-														''
+														'G01 X-5 Y-5 Z5'
 														];
 
 	X_p_gcode_string : ARRAY [0..2] OF STRING(128) := [
@@ -219,6 +218,24 @@ VAR
 														'G01 Z-0',
 														'G92'
 														];
+														
+	phytecP_manual_gcode_string : ARRAY [0..13] OF STRING(128) :=
+[
+'G92',
+'G90',
+'G00 Z2.000',
+'G01 Y20',
+'G01 X20',
+'G011 Z-2.000',
+'G01 Y80',
+'G01 X50',
+'G01 Y50',
+'G01 X30',
+'G01 Y20',
+'G01 X20',
+'G01 Z2.000',
+'M2'
+];														
 														
 	bunny_gcode_string : ARRAY [0..548] OF STRING(128) := 
 
