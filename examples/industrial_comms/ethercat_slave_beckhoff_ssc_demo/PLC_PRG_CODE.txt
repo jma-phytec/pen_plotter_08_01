@@ -237,7 +237,7 @@ IF mode = 1 THEN	// Calibration
 	END_IF
 END_IF
 IF mode = 2 THEN	// Print
-	IF line > 13 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
+	IF line > 23 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
 		line := 0;
 		gcode_count := 0;
 		state := 10;
