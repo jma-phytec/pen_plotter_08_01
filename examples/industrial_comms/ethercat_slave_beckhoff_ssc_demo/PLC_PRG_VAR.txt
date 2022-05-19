@@ -219,7 +219,7 @@ VAR
 														'G92'
 														];
 														
-	phytecP_manual_gcode_string : ARRAY [0..13] OF STRING(128) :=
+	phytecP_manual_gcode_string : ARRAY [0..23] OF STRING(128) :=
 [
 'G92',
 'G90',
@@ -233,7 +233,17 @@ VAR
 'G01 X50',
 'G01 Y20',
 'G01 X40',
-'G01 Z2.000',
+'G01 Z4.000',
+'G01 Y70',
+'G01 X50',
+'G01 Z-4.000',
+'G01 X60',
+'G01 Y60',
+'G01 X50',
+'G01 Y70',
+'G01 Z4.000',
+'G01 X0',
+'G01 Y0',
 'M2'
 ];														
 														
