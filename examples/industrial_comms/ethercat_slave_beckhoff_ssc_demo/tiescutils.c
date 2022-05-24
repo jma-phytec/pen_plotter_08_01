@@ -96,8 +96,6 @@ TaskP_Object sync0TaskObject;           // ECAT SYNC0 ISR
 TaskP_Object sync1TaskObject;           // ECAT SYNC1 ISR
 #endif
 
-uint32_t appState = 0;
-
 /* ========================================================================== */
 /*                       Function Definitions                                 */
 /* ========================================================================== */

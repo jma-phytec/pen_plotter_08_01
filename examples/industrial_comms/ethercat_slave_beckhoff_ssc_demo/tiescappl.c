@@ -55,8 +55,6 @@
 /*                            Global Variables                                */
 /* ========================================================================== */
 
-extern uint32_t appState;
-
 /* ========================================================================== */
 /*                       Function Definitions                                 */
 /* ========================================================================== */
@@ -369,9 +367,10 @@ void APPL_Application(void)
     uint16_t TmpMotorData;  // gcode code data, 1 char transfer each time
 
     static uint8_t Tmpswitchs = 0;  // message to EtherCAT master
+    
+    LED = sDOOutputs.LEDs & 0x0f;      // LED data from EtherCAT master
 
-    LED = sDOOutputs.LEDs;      // LED data from EtherCAT master
-    TmpCount = sDO1Outputs.Count;   // from EtherCAT master
+    TmpCount = (sDOOutputs.LEDs >> 4) & 0x0f;   // from EtherCAT master
     //TmpCmd = sDO1Outputs.Cmd;
 
 #ifdef ENABLE_PDI_TASK
@@ -382,13 +381,6 @@ void APPL_Application(void)
 #endif
 
     prevState = LED;
-    appState = sDO1Outputs.Cmd;// set the application state
-
-    if(appState == 0)
-    {
-        appState =
-            sDIInputs.switchs;    //special mode to control app state by input switchs!
-    }
 
     if(TmpCount != prevCount)
     {
