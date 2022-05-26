@@ -423,6 +423,7 @@ void APPL_Application(void)
     }
 
     // HomeSwitch
+    if(0)
     {
         uint32_t hs_val;
         hs_val = tiesc_readHomeSwitch();

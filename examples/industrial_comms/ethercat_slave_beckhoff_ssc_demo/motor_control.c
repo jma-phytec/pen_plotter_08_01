@@ -62,6 +62,10 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative)
     float Displacement;
     float LoopRequired;
 
+#ifdef MYDEBUG
+    DebugP_log("Motor positioning %d cur_pos %f next_pos %f\r\n", Motor->positioning, Motor->cur_pos, Motor->next_pos);
+#endif
+
     if(Motor->positioning==90) // Absolute
     {
         Displacement = Motor->next_pos - Motor->cur_pos;
@@ -75,16 +79,17 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative)
     }
     else    // Relative
     {
-        Displacement = Motor->next_pos;
-        if(!isNegative)
+        if(isNegative==0)
         {
             Motor->dir = 1;
-            Motor->cur_pos = Motor->cur_pos + Motor->next_pos;
+	    Displacement = Motor->next_pos - Motor->cur_pos;
+            Motor->cur_pos = Motor->next_pos;
         }
         else
         {
             Motor->dir = 0;
-            Motor->cur_pos = Motor->cur_pos - Motor->next_pos;
+	    Displacement = Motor->cur_pos - Motor->next_pos;
+            Motor->cur_pos = Motor->next_pos;
         }
         gpio_motor_control_dir_main(Motor);
     }
@@ -122,9 +127,14 @@ void gpio_motor_control_setCurPos(MotorMod *Motor, float val)
     return;
 }
 
-void gpio_motor_control_setNextPos(MotorMod *Motor, float val)
+void gpio_motor_control_setNextPos(MotorMod *Motor, float val, int isNegative)
 {
-    Motor->next_pos = val;
+    if(Motor->positioning==90)	// Absolute
+	    Motor->next_pos = val;
+    else
+    {
+	Motor->next_pos = Motor->next_pos + val;
+    }
     return;
 }
 
@@ -220,13 +230,13 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
         if(Motor->isActive)
         {
 #ifdef MOTORX
-            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
+            //if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
 #endif
 #ifdef MOTORY
-            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
+            //if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
 #endif
 #ifdef MOTORZ
-            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
+            //if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
 #endif
             {
                 GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
