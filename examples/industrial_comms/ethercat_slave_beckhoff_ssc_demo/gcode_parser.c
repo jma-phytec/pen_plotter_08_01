@@ -559,21 +559,21 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
                   break;
               case 'X':     // X Direction
 #ifdef MOTORX
-                  gpio_motor_control_setNextPos(MotorX, value);
+                  gpio_motor_control_setNextPos(MotorX, value, isNegative);
                   isNegativeX = isNegative;
                   RequiredMoveX = TRUE;
 #endif
                   break;
               case 'Y':     // Y Direction
 #ifdef MOTORY
-                  gpio_motor_control_setNextPos(MotorX, value);
+                  gpio_motor_control_setNextPos(MotorX, value, isNegative);
                   isNegativeY = isNegative;
                   RequiredMoveY = TRUE;
 #endif
                   break;
               case 'Z':     // Z Direction
 #ifdef MOTORZ
-                  gpio_motor_control_setNextPos(MotorX, value);
+                  gpio_motor_control_setNextPos(MotorX, value, isNegative);
                   isNegativeZ = isNegative;
                   RequiredMoveZ = TRUE;
 #endif

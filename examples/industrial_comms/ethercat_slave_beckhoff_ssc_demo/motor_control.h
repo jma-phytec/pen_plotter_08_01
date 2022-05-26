@@ -4,7 +4,7 @@
 
 
 #define MOTORX
-#define MYDEBUG
+//#define MYDEBUG
 
 struct MotorModule {
     uint32_t step_base_addr;
@@ -41,6 +41,6 @@ void gpio_motor_control_dir_main(MotorMod *Motor);
 //void gpio_motor_control_step_main(void *args);
 void gpio_motor_control_step_main(MotorMod *Motor, float LoopRequired);
 void gpio_motor_control_setCurPos(MotorMod *Motor, float val);
-void gpio_motor_control_setNextPos(MotorMod *Motor, float val);
+void gpio_motor_control_setNextPos(MotorMod *Motor, float val, int isNegative);
 void gpio_motor_control_setSpeed(MotorMod *Motor, float val);
 

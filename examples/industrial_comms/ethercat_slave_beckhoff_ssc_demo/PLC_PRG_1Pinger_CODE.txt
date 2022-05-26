@@ -225,7 +225,7 @@ IF mode = 1 THEN	// Calibration
 	END_IF
 END_IF
 IF mode = 2 THEN	// Print
-	IF line > 13 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
+	IF line > 548 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
 		line := 0;
 		gcode_count := 0;
 		state := 10;
@@ -327,7 +327,8 @@ CASE state OF
 	IF mode = 1 THEN		// Calibration
 		s0_data := calibration_gcode_string[line][gcode_count];
 	ELSIF mode = 2 THEN		// Print
-		s0_data := phytecP_manual_gcode_string[line][gcode_count];
+		//s0_data := phytecP_manual_gcode_string[line][gcode_count];
+		s0_data := bunny_gcode_string[line][gcode_count];
 	ELSIF mode = 3 THEN	// Home
 		s0_data := home_gcode_string[line][gcode_count];
 	ELSIF mode = 4 THEN	// Test
