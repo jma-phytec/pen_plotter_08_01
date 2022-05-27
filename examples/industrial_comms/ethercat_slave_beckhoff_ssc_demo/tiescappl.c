@@ -357,20 +357,22 @@ void APPL_Application(void)
     static uint8_t prevState = 55;
     static uint8_t prevCount = 0;
 
-    uint8_t TmpCount;       // message from EtherCAT master
+    uint8_t HLED;       // message from EtherCAT master
                             // 1: new gcode data ready
                             // 2: master received ack
                             // 3: master requests start motor
                             // 4: master received ack (gcode command complete)
 
-    //uint8_t TmpCmd;         // not use
+    uint8_t TmpCount;
+    uint8_t TmpCmd;
     uint16_t TmpMotorData;  // gcode code data, 1 char transfer each time
+    int End;
 
     static uint8_t Tmpswitchs = 0;  // message to EtherCAT master
     
     LED = sDOOutputs.LEDs & 0x0f;      // LED data from EtherCAT master
 
-    TmpCount = (sDOOutputs.LEDs >> 4) & 0x0f;   // from EtherCAT master
+    HLED = (sDOOutputs.LEDs >> 4) & 0x0f;   // from EtherCAT master
     //TmpCmd = sDO1Outputs.Cmd;
 
 #ifdef ENABLE_PDI_TASK
@@ -382,14 +384,16 @@ void APPL_Application(void)
 
     prevState = LED;
 
-    if(TmpCount != prevCount)
+    if(HLED != prevCount)
     {
-        if(TmpCount==1) // new gcode data
+        if(HLED==1) // new gcode data
         {
-            TmpMotorData = sDO1Outputs.MotorData;       // gcode data
-            update_gcode_cmdbuf(TmpMotorData);
-            //print_TmpMotorData(TmpMotorData);
-            if(TmpMotorData == 0) // gcode command line was sent
+	        TmpCount = sDO1Outputs.Count;
+    	    TmpCmd = sDO1Outputs.Cmd;
+            TmpMotorData = sDO1Outputs.MotorData;
+            End = update_gcode_cmdbuf(TmpCount, TmpCmd, TmpMotorData);
+            //End = print_GCode(TmpCount, TmpCmd, TmpMotorData);
+            if(End == 1) // gcode command line was sent
             {
                 Tmpswitchs = 0x4;   //tmpswitch2, ack to master gcode command line was well received
             }
@@ -398,16 +402,16 @@ void APPL_Application(void)
                 Tmpswitchs = 0x1;   // tmpswitch0, ack to master 1 gcode char was well received
             }
         }
-        else if(TmpCount==2) // master received ack
+        else if(HLED==2) // master received ack
         {
             Tmpswitchs = 0x2;   // tmpswitch1, ack to slave after 1 gcode char was confirmed
         }
-        else if(TmpCount==3)
+        else if(HLED==3)
         {
             bGCodeCommandRunning = TRUE;
             //Tmpswitchs = 0x8;   // tmpswitch3
         }
-        else if(TmpCount==4)    // master received ack of gcode command execute complete
+        else if(HLED==4)    // master received ack of gcode command execute complete
         {
 
         }
@@ -416,7 +420,7 @@ void APPL_Application(void)
             Tmpswitchs = 0x10;  // tmpswitch4
         }
     }
-    else if(TmpCount==3)    // bGCodeCommandRunning is keeping TRUE
+    else if(HLED==3)    // bGCodeCommandRunning is keeping TRUE
     {
         if(bGCodeCommandRunning==FALSE) // Gcode command execute completed
             Tmpswitchs = 0x08;  // tmpswitch3, notify slave gcode command execute completed
@@ -441,7 +445,7 @@ void APPL_Application(void)
     //sAI1Inputs.info1 = Tmpinfo1;
     //sAI1Inputs.info2 = Tmpinfo2;
 
-    prevCount = TmpCount;
+    prevCount = HLED;
 }
 
 #if EXPLICIT_DEVICE_ID

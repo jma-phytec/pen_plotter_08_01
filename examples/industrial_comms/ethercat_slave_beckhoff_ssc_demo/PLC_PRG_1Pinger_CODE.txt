@@ -225,7 +225,7 @@ IF mode = 1 THEN	// Calibration
 	END_IF
 END_IF
 IF mode = 2 THEN	// Print
-	IF line > 548 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
+	IF line > 13 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
 		line := 0;
 		gcode_count := 0;
 		state := 10;
@@ -325,36 +325,80 @@ CASE state OF
 
 0:		// calibration idle mode, ready to send new command
 	IF mode = 1 THEN		// Calibration
-		s0_data := calibration_gcode_string[line][gcode_count];
+		s0_count := calibration_gcode_string[line][gcode_count];
+		s0_command := calibration_gcode_string[line][gcode_count+1];
+		s0_tdata := calibration_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + calibration_gcode_string[line][gcode_count+3];
 	ELSIF mode = 2 THEN		// Print
-		//s0_data := phytecP_manual_gcode_string[line][gcode_count];
-		s0_data := bunny_gcode_string[line][gcode_count];
+		s0_count := phytecP_manual_gcode_string[line][gcode_count];
+		s0_command := phytecP_manual_gcode_string[line][gcode_count+1];
+		s0_tdata := phytecP_manual_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + phytecP_manual_gcode_string[line][gcode_count+3];
 	ELSIF mode = 3 THEN	// Home
-		s0_data := home_gcode_string[line][gcode_count];
+		s0_count := home_gcode_string[line][gcode_count];
+		s0_command := home_gcode_string[line][gcode_count+1];
+		s0_tdata := home_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + home_gcode_string[line][gcode_count+3];
 	ELSIF mode = 4 THEN	// Test
-		s0_data := test_gcode_string[line][gcode_count];
+		s0_count := test_gcode_string[line][gcode_count];
+		s0_command := test_gcode_string[line][gcode_count+1];
+		s0_tdata := test_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + test_gcode_string[line][gcode_count+3];
 	ELSIF mode = 5 THEN	// X+
-		s0_data := X_p_gcode_string[line][gcode_count];
+		s0_count := X_p_gcode_string[line][gcode_count];
+		s0_command := X_p_gcode_string[line][gcode_count+1];
+		s0_tdata := X_p_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + X_p_gcode_string[line][gcode_count+3];
 	ELSIF mode = 6 THEN	// X-
-		s0_data := X_m_gcode_string[line][gcode_count];
+		s0_count := X_m_gcode_string[line][gcode_count];
+		s0_command := X_m_gcode_string[line][gcode_count+1];
+		s0_tdata := X_m_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + X_m_gcode_string[line][gcode_count+3];
 	ELSIF mode = 7 THEN	// Y+
-		s0_data := Y_p_gcode_string[line][gcode_count];
+		s0_count := Y_p_gcode_string[line][gcode_count];
+		s0_command := Y_p_gcode_string[line][gcode_count+1];
+		s0_tdata := Y_p_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + Y_p_gcode_string[line][gcode_count+3];
 	ELSIF mode = 8 THEN	// Y-
-		s0_data := Y_m_gcode_string[line][gcode_count];
+		s0_count := Y_m_gcode_string[line][gcode_count];
+		s0_command := Y_m_gcode_string[line][gcode_count+1];
+		s0_tdata := Y_m_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + Y_m_gcode_string[line][gcode_count+3];
 	ELSIF mode = 9 THEN	// Z+
-		s0_data := Z_p_gcode_string[line][gcode_count];
+		s0_count := Z_p_gcode_string[line][gcode_count];
+		s0_command := Z_p_gcode_string[line][gcode_count+1];
+		s0_tdata := Z_p_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + Z_p_gcode_string[line][gcode_count+3];
 	ELSIF mode = 10 THEN	// Z-
-		s0_data := Z_m_gcode_string[line][gcode_count];
+		s0_count := Z_m_gcode_string[line][gcode_count];
+		s0_command := Z_m_gcode_string[line][gcode_count+1];
+		s0_tdata := Z_m_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + Z_m_gcode_string[line][gcode_count+3];		
 	ELSIF mode = 11 THEN	// Home
-		s0_data := home_gcode_string[line][gcode_count];
+		s0_count := home_gcode_string[line][gcode_count];
+		s0_command := home_gcode_string[line][gcode_count+1];
+		s0_tdata := home_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + home_gcode_string[line][gcode_count+3];		
 	ELSIF mode = 12 THEN	// Set Home
-		s0_data := set_home_gcode_string[line][gcode_count];
+		s0_count := set_home_gcode_string[line][gcode_count];
+		s0_command := set_home_gcode_string[line][gcode_count+1];
+		s0_tdata := set_home_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + set_home_gcode_string[line][gcode_count+3];		
 	ELSIF mode = 13 THEN	// Go to Home Switch
-		s0_data := homeswitch_gcode_string[line][gcode_count];
+		s0_count := homeswitch_gcode_string[line][gcode_count];
+		s0_command := homeswitch_gcode_string[line][gcode_count+1];
+		s0_tdata := homeswitch_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + homeswitch_gcode_string[line][gcode_count+3];		
 	ELSIF mode = 14 THEN	// Go Home
-		s0_data := homeswitch_gcode_string[line][gcode_count];
+		s0_count := homeswitch_gcode_string[line][gcode_count];
+		s0_command := homeswitch_gcode_string[line][gcode_count+1];
+		s0_tdata := homeswitch_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + homeswitch_gcode_string[line][gcode_count+3];		
 	ELSIF mode = 15 THEN	// Go Home: move Z-axis
-		s0_data := gohome_gcode_string[line][gcode_count];
+		s0_count := gohome_gcode_string[line][gcode_count];
+		s0_command := gohome_gcode_string[line][gcode_count+1];
+		s0_tdata := gohome_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + gohome_gcode_string[line][gcode_count+3];		
 	END_IF
 
 	
@@ -390,7 +434,7 @@ CASE state OF
 	
 	IF (s0_switch1 = 1) THEN
 		state := 0;
-		gcode_count := gcode_count + 1;
+		gcode_count := gcode_count + 4;
 	END_IF;
 3:	// ack slave and waiting slave commplete gcode command
 	IF (s0_switch3 = 1) THEN	// gcode command complete

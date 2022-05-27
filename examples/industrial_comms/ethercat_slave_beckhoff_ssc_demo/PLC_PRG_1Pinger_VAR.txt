@@ -82,6 +82,7 @@ VAR
 	s0_count AT %QB1 : USINT := 0;
 	s0_command AT %QB2 : USINT := 0;
 	s0_data AT %QW2 : INT := 0;
+	s0_tdata : INT := 0;
 	s0_switch0 AT %IX0.0 : BOOL := 0;
 	s0_switch1 AT %IX0.1 : BOOL := 0;
 	s0_switch2 AT %IX0.2 : BOOL := 0;
@@ -179,17 +180,17 @@ VAR
 [
 'G92',
 'G90',
-'G00 Z4.000',
-'G01 Y20',
-'G01 X40',
-'G011 Z-4.000',
-'G01 Y80',
-'G01 X70',
+'G00 X100',
+'G01 X0',
+'G01 X100',
+'G01 X0',
+'G01 X100',
+'G01 X0',
 'G01 Y50',
-'G01 X50',
-'G01 Y20',
+'G01 X0',
+'G01 X100',
 'G01 X40',
-'G01 Z2.000',
+'G01 X0',
 'M2'
 ];														
 														

@@ -637,8 +637,8 @@ int motor_demo_main(void)
             //if(i>548)
                 //i = 0;
 
-            memset(msgBuf, 0, MAX_MSG_SIZE-1);
-            msgBuf[MAX_MSG_SIZE-1] = 0;
+            //memset(msgBuf, 0, MAX_MSG_SIZE-1);
+            //msgBuf[MAX_MSG_SIZE-1] = 0;
         }
         else
             vTaskDelay(5);
