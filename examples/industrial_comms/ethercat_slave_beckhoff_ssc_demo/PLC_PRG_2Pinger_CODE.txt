@@ -232,7 +232,7 @@ IF mode = 1 THEN	// Calibration
 	END_IF
 END_IF
 IF mode = 2 THEN	// Print
-	IF line > 13 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
+	IF line > 4687 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
 		line := 0;
 		gcode_count := 0;
 		state := 10;
@@ -344,14 +344,14 @@ CASE state OF
 		s1_tdata := calibration_gcode_string[line][gcode_count+2];
 		s1_data := SHL(s0_tdata, 8) + calibration_gcode_string[line][gcode_count+3];
 	ELSIF mode = 2 THEN		// Print
-		s0_count := phytecP_manual_gcode_string[line][gcode_count];
-		s0_command := phytecP_manual_gcode_string[line][gcode_count+1];
-		s0_tdata := phytecP_manual_gcode_string[line][gcode_count+2];
-		s0_data := SHL(s0_tdata, 8) + phytecP_manual_gcode_string[line][gcode_count+3];
-		s1_count := phytecP_manual_gcode_string[line][gcode_count];
-		s1_command := phytecP_manual_gcode_string[line][gcode_count+1];
-		s1_tdata := phytecP_manual_gcode_string[line][gcode_count+2];
-		s1_data := SHL(s0_tdata, 8) + phytecP_manual_gcode_string[line][gcode_count+3];
+		s0_count := phytec_gcode_string[line][gcode_count];
+		s0_command := phytec_gcode_string[line][gcode_count+1];
+		s0_tdata := phytec_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + phytec_gcode_string[line][gcode_count+3];
+		s1_count := phytec_gcode_string[line][gcode_count];
+		s1_command := phytec_gcode_string[line][gcode_count+1];
+		s1_tdata := phytec_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + phytec_gcode_string[line][gcode_count+3];
 	ELSIF mode = 3 THEN	// Home
 		s0_count := home_gcode_string[line][gcode_count];
 		s0_command := home_gcode_string[line][gcode_count+1];
