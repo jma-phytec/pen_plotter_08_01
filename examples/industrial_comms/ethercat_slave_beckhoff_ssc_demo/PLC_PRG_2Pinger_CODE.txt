@@ -1,0 +1,553 @@
+
+//iCounter := iCounter + 1 ;
+
+//sCommand0:= 'mux-gpio1_47.sh && read-gpio1_47.sh';
+
+refCommand0 REF= sCommand0;
+refCommand1 REF= sCommand1;
+refCommand2 REF= sCommand2;
+refCommandSH REF= sCommandSH;
+refCommandGHZ REF= sCommandGHZ;
+refCommandR0_23 REF= sCommandR0_23;
+refCommandR0_24 REF= sCommandR0_24;
+refCommandR0_25 REF= sCommandR0_25;
+
+refOutput REF= sOutput;
+
+btnP := FALSE;
+btnC := FALSE;
+btnH := FALSE;
+
+IF mode = 0 THEN
+SysProcessExecuteCommand2(pszCommand:=refCommandR0_23, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+pt0 := ADR(sOutput);
+IF StrCaseCmpA(pt0, ptV0) = 0 THEN	//	Print
+	btnP := TRUE;
+END_IF
+END_IF
+
+IF mode = 0 OR mode = 1 THEN
+SysProcessExecuteCommand2(pszCommand:=refCommandR0_24, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+pt0 := ADR(sOutput);
+IF StrCaseCmpA(pt0, ptV0) = 0 THEN	// Calibration
+	btnC := TRUE;
+END_IF
+END_IF
+
+IF mode = 0 THEN
+SysProcessExecuteCommand2(pszCommand:=refCommandR0_25, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+pt0 := ADR(sOutput);
+IF StrCaseCmpA(pt0, ptV0) = 0 THEN	// Home
+	btnH := TRUE;
+END_IF
+END_IF
+
+IF mode = 0 THEN
+	SysProcessExecuteCommand2(pszCommand:=refCommand0, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+	pt0 := ADR(sOutput);
+END_IF
+
+IF StrCaseCmpA(pt0, ptC) = 0 OR (btnC = TRUE AND mode = 0) THEN	//	1: Calibration
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 1;
+	// Green
+	s0_led0 := 0;
+	s0_led1 := 1;
+	s0_led2 := 0;
+	s1_led0 := 0;
+	s1_led1 := 1;
+	s1_led2 := 0;
+	
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptS) = 0 OR (btnC = FALSE AND mode = 1) THEN	//	2: Stop
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	IF mode = 1 THEN	// Calibration
+		// write line number to file
+		IF line < 4 THEN
+			line := 80;
+		ELSIF line < 6 THEN
+			line := 81;
+		ELSIF line < 8 THEN
+			line := 82;
+		ELSIF line < 10 THEN
+			line := 83;
+		ELSIF line < 12 THEN
+			line := 84;
+		ELSIF line < 14 THEN
+			line := 85;
+		ELSIF line < 16 THEN
+			line := 86;
+		ELSE
+			line := 86;
+		END_IF
+		sCommand3 := Concat('echo "', INT_TO_STRING(line));
+		sCommand3 := Concat(sCommand3, '"  > /etc/pinger/pos_z');
+		refCommand3 REF= sCommand3;
+		SysProcessExecuteCommand2(pszCommand:= refCommand3, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+		line := 0;
+		gcode_count := 0;
+		state := 10;
+	END_IF
+END_IF
+IF StrCaseCmpA(pt0, ptP) = 0 OR (btnP = TRUE AND mode = 0) THEN	//	3: Print
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 2;
+	// Blue
+	s0_led0 := 0;
+	s0_led1 := 0;
+	s0_led2 := 1;
+	s1_led0 := 0;
+	s1_led1 := 0;
+	s1_led2 := 1;
+
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+	
+END_IF
+
+IF mode = 0 THEN
+
+IF StrCaseCmpA(pt0, ptT) = 0 THEN	//	4: Test
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 4;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptXP) = 0 THEN	//	5: X+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 5;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptXM) = 0 THEN	//	6: X-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 6;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptYP) = 0 THEN	//	7: Y+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 7;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptYM) = 0 THEN	//	8: Y-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 8;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptZP) = 0 THEN	//	9: Z+
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 9;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptZM) = 0 THEN	//	10: Z-
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 10;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptH) = 0 THEN	//	11: Home
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 11;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptSH) = 0 THEN	//	12: Set Home 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 12;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptHS) = 0 THEN	//	12: Go to Home Switch 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 13;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+IF StrCaseCmpA(pt0, ptGH) = 0 OR (btnH = TRUE AND mode = 0) THEN	//	Go Home 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+	mode := 14;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+
+IF StrCaseCmpA(pt0, ptGHZ) = 0 THEN	//	Go Home: Moving Z-axis 
+	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
+
+	SysProcessExecuteCommand2(pszCommand:=refCommand2, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+	pt0 := ADR(sOutput);
+		IF StrCaseCmpA(pt0, pt80) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-80';
+		ELSIF StrCaseCmpA(pt0, pt81) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-81';
+		ELSIF StrCaseCmpA(pt0, pt82) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-82';
+		ELSIF StrCaseCmpA(pt0, pt83) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-83';
+		ELSIF StrCaseCmpA(pt0, pt84) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-84';
+		ELSIF StrCaseCmpA(pt0, pt85) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-85';
+		ELSIF StrCaseCmpA(pt0, pt86) = 0 THEN
+			gohome_gcode_string[0] := 'G01 Z-86';
+		ELSE
+			gohome_gcode_string[0] := 'G01 Z-86';			
+		END_IF	
+	
+	mode := 15;
+	line := 0;
+	gcode_count := 0;	
+	state := 0;
+END_IF
+
+END_IF
+
+IF gcode_count > 127 THEN
+	gcode_count := 0;
+END_IF
+
+IF mode = 1 THEN	// Calibration
+	IF line > 15 THEN
+		line := 0;
+		gcode_count := 0;
+		state := 10;
+	END_IF
+END_IF
+IF mode = 2 THEN	// Print
+	IF line > 13 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
+		line := 0;
+		gcode_count := 0;
+		state := 10;
+	END_IF
+END_IF
+IF mode = 3 THEN	// Home
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 4 THEN	// Test
+	IF line > 4 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 5 THEN	// X+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 6 THEN	// X-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 7 THEN	// Y+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 8 THEN	// Y-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 9 THEN	// Z+
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 10 THEN	// Z-
+	IF line > 2 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 11 THEN	// Home
+	IF line > 1 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 12 THEN	// Set Home
+	IF line > 0 THEN
+		state := 10;
+	END_IF
+END_IF
+IF mode = 13 THEN	// Go to Home Switch
+	IF s0_info1 = 1 THEN
+				state := 10;
+	END_IF
+	IF line > 2 THEN
+		line := 0;
+		gcode_count := 0;
+		state := 0;
+	END_IF
+END_IF
+IF mode = 14 THEN	// Go Home
+	IF s0_info1 = 1 THEN
+				//SysProcessExecuteCommand2(pszCommand:=refCommand2, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+				line := 0;
+				gcode_count := 0;
+				state := 10;
+				SysProcessExecuteCommand2(pszCommand:=refCommandGHZ, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+	END_IF
+	IF line > 1 THEN
+		line := 0;
+		gcode_count := 0;
+		state := 0;
+	END_IF
+END_IF
+IF mode = 15 THEN	// Go Home: Move Z-axis
+	IF line > 1 THEN
+		line := 0;
+		gcode_count := 0;
+		state := 10;
+	END_IF
+END_IF
+
+CASE state OF
+10:		// idle state
+	// Red
+	mode := 0;
+	line := 0;
+	gcode_count := 0;
+	s0_led0 := 1;
+	s0_led1 := 0;
+	s0_led2 := 0;
+	s1_led0 := 1;
+	s1_led1 := 0;
+	s1_led2 := 0;
+
+0:		// calibration idle mode, ready to send new command
+	IF mode = 1 THEN		// Calibration
+		s0_count := calibration_gcode_string[line][gcode_count];
+		s0_command := calibration_gcode_string[line][gcode_count+1];
+		s0_tdata := calibration_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + calibration_gcode_string[line][gcode_count+3];
+		s1_count := calibration_gcode_string[line][gcode_count];
+		s1_command := calibration_gcode_string[line][gcode_count+1];
+		s1_tdata := calibration_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + calibration_gcode_string[line][gcode_count+3];
+	ELSIF mode = 2 THEN		// Print
+		s0_count := phytecP_manual_gcode_string[line][gcode_count];
+		s0_command := phytecP_manual_gcode_string[line][gcode_count+1];
+		s0_tdata := phytecP_manual_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + phytecP_manual_gcode_string[line][gcode_count+3];
+		s1_count := phytecP_manual_gcode_string[line][gcode_count];
+		s1_command := phytecP_manual_gcode_string[line][gcode_count+1];
+		s1_tdata := phytecP_manual_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + phytecP_manual_gcode_string[line][gcode_count+3];
+	ELSIF mode = 3 THEN	// Home
+		s0_count := home_gcode_string[line][gcode_count];
+		s0_command := home_gcode_string[line][gcode_count+1];
+		s0_tdata := home_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + home_gcode_string[line][gcode_count+3];
+		s1_count := home_gcode_string[line][gcode_count];
+		s1_command := home_gcode_string[line][gcode_count+1];
+		s1_tdata := home_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + home_gcode_string[line][gcode_count+3];
+	ELSIF mode = 4 THEN	// Test
+		s0_count := test_gcode_string[line][gcode_count];
+		s0_command := test_gcode_string[line][gcode_count+1];
+		s0_tdata := test_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + test_gcode_string[line][gcode_count+3];
+		s1_count := test_gcode_string[line][gcode_count];
+		s1_command := test_gcode_string[line][gcode_count+1];
+		s1_tdata := test_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + test_gcode_string[line][gcode_count+3];
+	ELSIF mode = 5 THEN	// X+
+		s0_count := X_p_gcode_string[line][gcode_count];
+		s0_command := X_p_gcode_string[line][gcode_count+1];
+		s0_tdata := X_p_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + X_p_gcode_string[line][gcode_count+3];
+		s1_count := X_p_gcode_string[line][gcode_count];
+		s1_command := X_p_gcode_string[line][gcode_count+1];
+		s1_tdata := X_p_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + X_p_gcode_string[line][gcode_count+3];
+	ELSIF mode = 6 THEN	// X-
+		s0_count := X_m_gcode_string[line][gcode_count];
+		s0_command := X_m_gcode_string[line][gcode_count+1];
+		s0_tdata := X_m_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + X_m_gcode_string[line][gcode_count+3];
+		s1_count := X_m_gcode_string[line][gcode_count];
+		s1_command := X_m_gcode_string[line][gcode_count+1];
+		s1_tdata := X_m_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + X_m_gcode_string[line][gcode_count+3];
+	ELSIF mode = 7 THEN	// Y+
+		s0_count := Y_p_gcode_string[line][gcode_count];
+		s0_command := Y_p_gcode_string[line][gcode_count+1];
+		s0_tdata := Y_p_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + Y_p_gcode_string[line][gcode_count+3];
+		s1_count := Y_p_gcode_string[line][gcode_count];
+		s1_command := Y_p_gcode_string[line][gcode_count+1];
+		s1_tdata := Y_p_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + Y_p_gcode_string[line][gcode_count+3];
+	ELSIF mode = 8 THEN	// Y-
+		s0_count := Y_m_gcode_string[line][gcode_count];
+		s0_command := Y_m_gcode_string[line][gcode_count+1];
+		s0_tdata := Y_m_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + Y_m_gcode_string[line][gcode_count+3];
+		s1_count := Y_m_gcode_string[line][gcode_count];
+		s1_command := Y_m_gcode_string[line][gcode_count+1];
+		s1_tdata := Y_m_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + Y_m_gcode_string[line][gcode_count+3];
+	ELSIF mode = 9 THEN	// Z+
+		s0_count := Z_p_gcode_string[line][gcode_count];
+		s0_command := Z_p_gcode_string[line][gcode_count+1];
+		s0_tdata := Z_p_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + Z_p_gcode_string[line][gcode_count+3];
+		s1_count := Z_p_gcode_string[line][gcode_count];
+		s1_command := Z_p_gcode_string[line][gcode_count+1];
+		s1_tdata := Z_p_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + Z_p_gcode_string[line][gcode_count+3];
+	ELSIF mode = 10 THEN	// Z-
+		s0_count := Z_m_gcode_string[line][gcode_count];
+		s0_command := Z_m_gcode_string[line][gcode_count+1];
+		s0_tdata := Z_m_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + Z_m_gcode_string[line][gcode_count+3];		
+		s1_count := Z_m_gcode_string[line][gcode_count];
+		s1_command := Z_m_gcode_string[line][gcode_count+1];
+		s1_tdata := Z_m_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + Z_m_gcode_string[line][gcode_count+3];		
+	ELSIF mode = 11 THEN	// Home
+		s0_count := home_gcode_string[line][gcode_count];
+		s0_command := home_gcode_string[line][gcode_count+1];
+		s0_tdata := home_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + home_gcode_string[line][gcode_count+3];		
+		s1_count := home_gcode_string[line][gcode_count];
+		s1_command := home_gcode_string[line][gcode_count+1];
+		s1_tdata := home_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + home_gcode_string[line][gcode_count+3];		
+	ELSIF mode = 12 THEN	// Set Home
+		s0_count := set_home_gcode_string[line][gcode_count];
+		s0_command := set_home_gcode_string[line][gcode_count+1];
+		s0_tdata := set_home_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + set_home_gcode_string[line][gcode_count+3];		
+		s1_count := set_home_gcode_string[line][gcode_count];
+		s1_command := set_home_gcode_string[line][gcode_count+1];
+		s1_tdata := set_home_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + set_home_gcode_string[line][gcode_count+3];		
+	ELSIF mode = 13 THEN	// Go to Home Switch
+		s0_count := homeswitch_gcode_string[line][gcode_count];
+		s0_command := homeswitch_gcode_string[line][gcode_count+1];
+		s0_tdata := homeswitch_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + homeswitch_gcode_string[line][gcode_count+3];		
+		s1_count := homeswitch_gcode_string[line][gcode_count];
+		s1_command := homeswitch_gcode_string[line][gcode_count+1];
+		s1_tdata := homeswitch_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + homeswitch_gcode_string[line][gcode_count+3];		
+	ELSIF mode = 14 THEN	// Go Home
+		s0_count := homeswitch_gcode_string[line][gcode_count];
+		s0_command := homeswitch_gcode_string[line][gcode_count+1];
+		s0_tdata := homeswitch_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + homeswitch_gcode_string[line][gcode_count+3];		
+		s1_count := homeswitch_gcode_string[line][gcode_count];
+		s1_command := homeswitch_gcode_string[line][gcode_count+1];
+		s1_tdata := homeswitch_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + homeswitch_gcode_string[line][gcode_count+3];		
+	ELSIF mode = 15 THEN	// Go Home: move Z-axis
+		s0_count := gohome_gcode_string[line][gcode_count];
+		s0_command := gohome_gcode_string[line][gcode_count+1];
+		s0_tdata := gohome_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + gohome_gcode_string[line][gcode_count+3];		
+		s1_count := gohome_gcode_string[line][gcode_count];
+		s1_command := gohome_gcode_string[line][gcode_count+1];
+		s1_tdata := gohome_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s0_tdata, 8) + gohome_gcode_string[line][gcode_count+3];		
+	END_IF
+	
+	//s0_count := 1;
+	s0_led4 := 1;
+	s0_led5 := 0;
+	s0_led6 := 0;
+	s0_led7 := 0;
+	s1_led4 := 1;
+	s1_led5 := 0;
+	s1_led6 := 0;
+	s1_led7 := 0;
+	state := 1;	// going to wait ack from slave
+1:		// waiting ack from slave
+	IF ((s0_switch0 = 1) AND (s1_switch0 = 1))THEN	// not NULL
+		//s0_count := 0;
+		s0_led4 := 0;
+		s0_led5 := 0;
+		s0_led6 := 0;
+		s0_led7 := 0;
+		s1_led4 := 0;
+		s1_led5 := 0;
+		s1_led6 := 0;
+		s1_led7 := 0;
+		state := 2;
+	END_IF;
+	IF ((s0_switch2 = 1) AND (s1_switch2)) THEN	// // NULL
+		//s0_count := 0;
+		s0_led4 := 0;
+		s0_led5 := 0;
+		s0_led6 := 0;
+		s0_led7 := 0;
+		s1_led4 := 0;
+		s1_led5 := 0;
+		s1_led6 := 0;
+		s1_led7 := 0;
+		state := 3;
+	END_IF
+2:		// ack slave
+	//s0_count := 2;
+	s0_led4 := 0;
+	s0_led5 := 1;
+	s0_led6 := 0;
+	s0_led7 := 0;
+	s1_led4 := 0;
+	s1_led5 := 1;
+	s1_led6 := 0;
+	s1_led7 := 0;
+	
+	IF ((s0_switch1 = 1) AND (s1_switch1 = 1))THEN
+		state := 0;
+		gcode_count := gcode_count + 4;
+	END_IF;
+3:	// ack slave and waiting slave commplete gcode command
+	IF ((s0_switch3 = 1) AND (s1_switch3 = 1)) THEN	// gcode command complete
+		//s0_count := 4;
+		s0_led4 := 0;
+		s0_led5 := 0;
+		s0_led6 := 1;
+		s0_led7 := 0;
+		s1_led4 := 0;
+		s1_led5 := 0;
+		s1_led6 := 1;
+		s1_led7 := 0;
+		state := 0;
+		line := line + 1;
+		gcode_count := 0;
+	ELSE
+		//s0_count := 3;
+		s0_led4 := 1;
+		s0_led5 := 1;
+		s0_led6 := 0;
+		s0_led7 := 0;
+		s1_led4 := 1;
+		s1_led5 := 1;
+		s1_led6 := 0;
+		s1_led7 := 0;
+	END_IF;
+END_CASE;
+
+//IF ((s0_info1 = 1) and (s1_info1 = 1)) THEN
+	//;
+//END_IF
