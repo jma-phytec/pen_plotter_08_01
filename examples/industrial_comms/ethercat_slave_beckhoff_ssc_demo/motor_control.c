@@ -230,13 +230,13 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
         if(Motor->isActive)
         {
 #ifdef MOTORX
-            //if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
+            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
 #endif
 #ifdef MOTORY
-            //if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
+            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
 #endif
 #ifdef MOTORZ
-            //if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
+            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
 #endif
             {
                 GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
