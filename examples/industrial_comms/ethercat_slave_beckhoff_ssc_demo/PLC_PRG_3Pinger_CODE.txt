@@ -43,8 +43,8 @@ IF mode = 0 THEN
 	pt0 := ADR(sOutput);
 END_IF
 
-IF StrCaseCmpA(pt0, ptC) = 0 OR (btnC = TRUE AND mode = 0) THEN	//	1: Calibration
-//IF StrCaseCmpA(pt0, ptC) = 0 THEN	//	1: Calibration
+//IF StrCaseCmpA(pt0, ptC) = 0 OR (btnC = TRUE AND mode = 0) THEN	//	1: Calibration
+IF StrCaseCmpA(pt0, ptC) = 0 THEN	//	1: Calibration
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	mode := 1;
 	// Green
@@ -178,7 +178,8 @@ IF StrCaseCmpA(pt0, ptSH) = 0 THEN	//	12: Set Home
 	gcode_count := 0;	
 	state := 0;
 END_IF
-IF StrCaseCmpA(pt0, ptHS) = 0 THEN	//	12: Go to Home Switch 
+//IF StrCaseCmpA(pt0, ptHS) = 0 THEN	//	12: Go to Home Switch
+IF StrCaseCmpA(pt0, ptHS) = 0 OR (btnC = TRUE AND mode = 0) THEN 	//	12: Go to Home Switch
 	SysProcessExecuteCommand2(pszCommand:= refCommand1, pszStdOut:= refOutput, udiStdOutLen:= SIZEOF(sOutput), pResult:= ADR(result));	// clear command
 	mode := 13;
 	line := 0;
@@ -355,6 +356,7 @@ CASE state OF
 		s2_tdata := calibration_gcode_string[line][gcode_count+2];
 		s2_data := SHL(s2_tdata, 8) + calibration_gcode_string[line][gcode_count+3];
 	ELSIF mode = 2 THEN		// Print
+		
 		s0_count := EW2022_gcode_string[line][gcode_count];
 		s0_command := EW2022_gcode_string[line][gcode_count+1];
 		s0_tdata := EW2022_gcode_string[line][gcode_count+2];
