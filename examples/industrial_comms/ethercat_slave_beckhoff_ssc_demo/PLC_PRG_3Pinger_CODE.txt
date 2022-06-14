@@ -237,7 +237,7 @@ IF mode = 1 THEN	// Calibration
 	END_IF
 END_IF
 IF mode = 2 THEN	// Print
-	IF line > 92 THEN
+	IF line > 613 THEN	// Phytec(92), EW2022(613)
 		line := 0;
 		gcode_count := 0;
 		state := 10;
@@ -355,6 +355,20 @@ CASE state OF
 		s2_tdata := calibration_gcode_string[line][gcode_count+2];
 		s2_data := SHL(s2_tdata, 8) + calibration_gcode_string[line][gcode_count+3];
 	ELSIF mode = 2 THEN		// Print
+		s0_count := EW2022_gcode_string[line][gcode_count];
+		s0_command := EW2022_gcode_string[line][gcode_count+1];
+		s0_tdata := EW2022_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + EW2022_gcode_string[line][gcode_count+3];
+		s1_count := EW2022_gcode_string[line][gcode_count];
+		s1_command := EW2022_gcode_string[line][gcode_count+1];
+		s1_tdata := EW2022_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s1_tdata, 8) + EW2022_gcode_string[line][gcode_count+3];
+		s2_count := EW2022_gcode_string[line][gcode_count];
+		s2_command := EW2022_gcode_string[line][gcode_count+1];
+		s2_tdata := EW2022_gcode_string[line][gcode_count+2];
+		s2_data := SHL(s2_tdata, 8) + EW2022_gcode_string[line][gcode_count+3];
+
+(*		
 		s0_count := phytec_logo_gcode_string[line][gcode_count];
 		s0_command := phytec_logo_gcode_string[line][gcode_count+1];
 		s0_tdata := phytec_logo_gcode_string[line][gcode_count+2];
@@ -367,6 +381,7 @@ CASE state OF
 		s2_command := phytec_logo_gcode_string[line][gcode_count+1];
 		s2_tdata := phytec_logo_gcode_string[line][gcode_count+2];
 		s2_data := SHL(s2_tdata, 8) + phytec_logo_gcode_string[line][gcode_count+3];
+*)
 	ELSIF mode = 3 THEN	// Home
 		s0_count := home_gcode_string[line][gcode_count];
 		s0_command := home_gcode_string[line][gcode_count+1];
