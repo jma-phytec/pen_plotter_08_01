@@ -836,7 +836,7 @@ EW2022_gcode_string : ARRAY [0..613] OF STRING(128) :=
 'G01 X52.184 Y81.455',
 'G01 X51.369 Y80.459',
 'G01 X50.782 Y79.166',
-'G01 Z2',
+'G01 Z0',
 'G01 X0 Y0',
 'M2'
 ];
@@ -933,7 +933,7 @@ phytec_logo_gcode_string : ARRAY [0..92] OF STRING(128) :=
 'G01 X61.7 Y67',
 'G01 X61.7 Y74',
 'G01 X62.5 Y75',
-'G01 Z2',
+'G01 Z0',
 'G01 X0 Y0',
 'M2'
 ];
