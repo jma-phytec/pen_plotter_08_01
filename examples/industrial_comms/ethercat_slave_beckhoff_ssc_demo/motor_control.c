@@ -217,12 +217,22 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
 {
     uint32_t    loopcnt = (uint32_t)StepsRequired;
     uint32_t    gpioBaseAddr, pinNum;
+    int32_t     lowest_width, width, peak_width;
+    uint32_t    i, rampcnt;
+
+    i = 0;
+    lowest_width = 550;
+    width = lowest_width;
+    peak_width = 50;
+
+    if(loopcnt > 1000)
+        rampcnt = 500;
+    else
+        rampcnt = loopcnt / 2;
 
     /* Get address after translation translate */
     gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(Motor->step_base_addr);
     pinNum       = Motor->step_pin;
-
-    //DebugP_log("GPIO1 STEP pin toggle starts (loopcnt %d) width %d...\r\n", loopcnt, (uint32_t)(Motor->pulse_width));
 
     GPIO_setDirMode(gpioBaseAddr, pinNum, Motor->step_dir);
     while(loopcnt>0)
@@ -241,10 +251,26 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
             {
                 GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
                 //ClockP_usleep((uint32_t)(Motor->pulse_width));
-                ClockP_usleep(300);
+                ClockP_usleep(50);
                 GPIO_pinWriteLow(gpioBaseAddr, pinNum);
                 //ClockP_usleep((uint32_t)(Motor->pulse_width));
-                ClockP_usleep(300);
+
+                if(i<rampcnt)
+                {
+                    if(width > peak_width)
+                        width = width - 1;
+                    i++;
+                }
+                else if(loopcnt<rampcnt)
+                {
+                    if(width < lowest_width)
+                         width = width + 1;
+                }
+
+                //DebugP_log("gpio_motor_control_step_main (loopcnt %d rampcnt %d) width %d...\r\n", loopcnt, rampcnt, width);
+
+                ClockP_usleep(width);
+
             }
         }
         loopcnt--;
@@ -323,6 +349,8 @@ int motor_control_main(void)
     uint32_t    pin_step, pin_dir, count = 0;
     //MotorMod MotorY, MotorZ;
     MotorMod MotorX;
+    int32_t    lowest_width, width, peak_width;
+    uint32_t    i;
 
     gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0);
     //gpio_motor_control_init(&MotorY);
@@ -337,25 +365,43 @@ int motor_control_main(void)
     GPIO_setDirMode(mcu_gpio0_BaseAddr, pin_step, GPIO_MOTOR_STEP_DIR);
     GPIO_setDirMode(mcu_gpio0_BaseAddr, pin_dir, GPIO_MOTOR_DIR_DIR);
 
+    i = 0;
+    count = 10000;
+    lowest_width = 550;
+    width = lowest_width;
+    peak_width = 50;
+
+    // 300/300 -> 1.6K
+    // 100/400 -> 2K
+    // 100/300 -> 2.5K
+    // 50/300 -> 2.8K
+
     bMotorApplication = TRUE;
     do
     {
         GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_step);
         //GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
         //ClockP_usleep(500);     // 32 micro step setup (with loading)
-        ClockP_usleep(300);     // 16 micro step setup (with loading)
+        ClockP_usleep(50);     // 16 micro step setup (with loading)
         GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_step);
-        if(count>8100)  // 10cm
+
+        if(i<5000)
         {
-            return 0;
-            GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_dir);
+            if(width > peak_width)
+                width = width - 1;
         }
-        else
-            GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
-        ClockP_usleep(300);
-        count++;
-        if(count>14000)
-            count = 0;
+        else if(i>9500)
+        {
+            if(width < lowest_width)
+                 width = width + 1;
+        }
+
+        ClockP_usleep(width);
+
+        i++;
+
+        if(i>count)
+            return 0;
     }
     while(bMotorApplication == TRUE);
 
