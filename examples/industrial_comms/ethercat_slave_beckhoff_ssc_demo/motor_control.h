@@ -35,11 +35,11 @@ enum MotorCmd {
 };
 
 void gpio_motor_control_ioctl(MotorMod *Motor, uint8_t cmd, uint32_t val);
-void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove);
+void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove, float Ratio);
 void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id, Bool isMove);
 void gpio_motor_control_dir_main(MotorMod *Motor);
 //void gpio_motor_control_step_main(void *args);
-void gpio_motor_control_step_main(MotorMod *Motor, float LoopRequired);
+void gpio_motor_control_step_main(MotorMod *Motor, float LoopRequired, float Ratio);
 void gpio_motor_control_setCurPos(MotorMod *Motor, float val);
 void gpio_motor_control_setNextPos(MotorMod *Motor, float val, int isNegative);
 void gpio_motor_control_setSpeed(MotorMod *Motor, float val);

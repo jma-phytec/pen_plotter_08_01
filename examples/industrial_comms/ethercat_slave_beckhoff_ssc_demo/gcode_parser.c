@@ -447,6 +447,7 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     Bool RequiredMoveZ = FALSE;
 
     float MoveX = 0, MoveY = 0;
+    float RatioX = 1, RatioY = 1, RatioZ = 1;
 
     if(line[0]=='$')
     {
@@ -607,7 +608,7 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
             MoveX = MotorX->cur_pos - MotorX->next_pos;
     }
 
-    if(MotorY->positioning==90) // Absolute
+    if(MotorY->positioning==90) // Absolutecristian moriatie
         MoveY = MotorY->next_pos - MotorY->cur_pos;
     else    // Relative
     {
@@ -617,34 +618,51 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
             MoveY = MotorY->cur_pos - MotorX->next_pos;
     }
 
+    if(MoveX < 0)
+        MoveX = -MoveX;
+    if(MoveY < 0)
+        MoveY = -MoveY;
+
+    if((MoveX < 0.00001) || (MoveY < 0.0001))
+    {
+
+    }
+    else
+    {
+        if(MoveX > MoveY)
+            RatioY = MoveX / MoveY;
+        else
+            RatioX = MoveY / MoveX;
+    }
+
 #ifdef MYDEBUG
-    DebugP_log("RequiredMoveX %d MoveX %f RequiredMoveY %d MoveY %f\r\n", RequiredMoveX, MoveX, RequiredMoveY, MoveY);
+    DebugP_log("RequiredMoveX %d MoveX %f RatioX %f RequiredMoveY %d MoveY %f RatioY %f\r\n", RequiredMoveX, MoveX, RatioX, RequiredMoveY, MoveY, RatioY);
 #endif
 
     if(RequiredMoveX)
     {
 #ifdef MOTORX
-        gpio_motor_move(MotorX, isNegativeX, true);   // return after motor movement complete
+        gpio_motor_move(MotorX, isNegativeX, true, RatioX);   // return after motor movement complete
 #else
-        gpio_motor_move(MotorX, isNegativeX, false);   // return after motor movement complete
+        gpio_motor_move(MotorX, isNegativeX, false, RatioX);   // return after motor movement complete
 #endif
         RequiredMoveX = FALSE;
     }
     if(RequiredMoveY)
     {
 #ifdef MOTORY
-        gpio_motor_move(MotorY, isNegativeY, true);   // return after motor movement complete
+        gpio_motor_move(MotorY, isNegativeY, true, RatioY);   // return after motor movement complete
 #else
-        gpio_motor_move(MotorY, isNegativeY, false);   // return after motor movement complete
+        gpio_motor_move(MotorY, isNegativeY, false, RatioY);   // return after motor movement complete
 #endif
         RequiredMoveY = FALSE;
     }
     if(RequiredMoveZ)
     {
 #ifdef MOTORZ
-        gpio_motor_move(MotorZ, isNegativeZ, true);   // return after motor movement complete
+        gpio_motor_move(MotorZ, isNegativeZ, true, RatioZ);   // return after motor movement complete
 #else
-        gpio_motor_move(MotorZ, isNegativeZ, false);   // return after motor movement complete
+        gpio_motor_move(MotorZ, isNegativeZ, false, RatioZ);   // return after motor movement complete
 #endif
         RequiredMoveZ = FALSE;
     }

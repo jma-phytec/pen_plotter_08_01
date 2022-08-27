@@ -57,7 +57,7 @@ float CalculateMotorLoop(MotorMod *Motor, float Displayment)
     return StepsRequired;
 }
 
-void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove)
+void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove, float Ratio)
 {
     float Displacement;
     float LoopRequired;
@@ -96,7 +96,7 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove)
     if(isMove)
     {
         LoopRequired = CalculateMotorLoop(Motor, fabs(Displacement));
-        gpio_motor_control_step_main(Motor, LoopRequired);
+        gpio_motor_control_step_main(Motor, LoopRequired, Ratio);
 #ifdef MYDEBUG
         DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
 #endif
@@ -216,7 +216,7 @@ void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id, Bool isMove)
     return;
 }
 
-void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
+void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired, float Ratio)
 {
     uint32_t    loopcnt = (uint32_t)StepsRequired;
     uint32_t    gpioBaseAddr, pinNum;
@@ -237,6 +237,11 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
     gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(Motor->step_base_addr);
     pinNum       = Motor->step_pin;
 
+    width = 300 * Ratio;
+#ifdef MYDEBUG
+    DebugP_log("gpio_motor_control_step_main width %d\r\n", width);
+#endif
+
     GPIO_setDirMode(gpioBaseAddr, pinNum, Motor->step_dir);
     while(loopcnt>0)
     {
@@ -255,12 +260,12 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
                 GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
                 //ClockP_usleep((uint32_t)(Motor->pulse_width));
                 //ClockP_usleep(50);
-                ClockP_usleep(300);
+                ClockP_usleep(width);
                 GPIO_pinWriteLow(gpioBaseAddr, pinNum);
                 //ClockP_usleep((uint32_t)(Motor->pulse_width));
 
 #if 1
-                ClockP_usleep(300);
+                ClockP_usleep(width);
 #else
                 if(i<rampcnt)
                 {
