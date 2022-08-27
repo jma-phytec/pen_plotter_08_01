@@ -57,7 +57,7 @@ float CalculateMotorLoop(MotorMod *Motor, float Displayment)
     return StepsRequired;
 }
 
-void gpio_motor_move(MotorMod *Motor, Bool isNegative)
+void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove)
 {
     float Displacement;
     float LoopRequired;
@@ -93,12 +93,14 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative)
         }
         gpio_motor_control_dir_main(Motor);
     }
-
-    LoopRequired = CalculateMotorLoop(Motor, fabs(Displacement));
-    gpio_motor_control_step_main(Motor, LoopRequired);
+    if(isMove)
+    {
+        LoopRequired = CalculateMotorLoop(Motor, fabs(Displacement));
+        gpio_motor_control_step_main(Motor, LoopRequired);
 #ifdef MYDEBUG
-    DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
+        DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
 #endif
+    }
     return;
 }
 
@@ -154,7 +156,7 @@ void gpio_motor_control_setSpeed(MotorMod *Motor, float val)
     return;
 }
 
-void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id)
+void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id, Bool isMove)
 {
     Motor->cur_pos = 0;
     Motor->next_pos = 0;
@@ -175,40 +177,41 @@ void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id)
 
     gpio_motor_control_setSpeed(Motor, 6000);   // 6000mm per min = 100mm per sec
 
+    if(isMove)
+    {
+        // Enable 8255 EN pin
+        uint32_t    gpioBaseAddr, pinNum;
 
-    // Enable 8255 EN pin
-    uint32_t    gpioBaseAddr, pinNum;
+        /* Get address after translation translate */
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_EN_BASE_ADDR);
+        pinNum       = GPIO_EN_PIN;
 
-    /* Get address after translation translate */
-    gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_EN_BASE_ADDR);
-    pinNum       = GPIO_EN_PIN;
+        GPIO_setDirMode(gpioBaseAddr, GPIO_EN_PIN, GPIO_EN_DIR);
+        GPIO_pinWriteLow(gpioBaseAddr, pinNum);
 
-    GPIO_setDirMode(gpioBaseAddr, GPIO_EN_PIN, GPIO_EN_DIR);
-    GPIO_pinWriteLow(gpioBaseAddr, pinNum);
-
-    // Enable LED
-    GPIO_setDirMode(gpioBaseAddr, RED_GPIO_PIN, RED_GPIO_DIR);
-    GPIO_setDirMode(gpioBaseAddr, GREEN_GPIO_PIN, GREEN_GPIO_DIR);
-    GPIO_setDirMode(gpioBaseAddr, BLUE_GPIO_PIN, BLUE_GPIO_DIR);
-
+        // Enable LED
+        GPIO_setDirMode(gpioBaseAddr, RED_GPIO_PIN, RED_GPIO_DIR);
+        GPIO_setDirMode(gpioBaseAddr, GREEN_GPIO_PIN, GREEN_GPIO_DIR);
+        GPIO_setDirMode(gpioBaseAddr, BLUE_GPIO_PIN, BLUE_GPIO_DIR);
 
 #ifdef MOTORX
-    GPIO_pinWriteHigh(gpioBaseAddr, RED_GPIO_PIN);
-    GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
-    GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, RED_GPIO_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
 #endif
 
 #ifdef MOTORY
-    GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
-    GPIO_pinWriteHigh(gpioBaseAddr, GREEN_GPIO_PIN);
-    GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, GREEN_GPIO_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
 #endif
 
 #ifdef MOTORZ
-    GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
-    GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
-    GPIO_pinWriteHigh(gpioBaseAddr, BLUE_GPIO_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
+        GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
+        GPIO_pinWriteHigh(gpioBaseAddr, BLUE_GPIO_PIN);
 #endif
+    }
 
     return;
 }
@@ -221,9 +224,9 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
     uint32_t    i, rampcnt;
 
     i = 0;
-    lowest_width = 550;
+    lowest_width = 1100;    //550;
     width = lowest_width;
-    peak_width = 50;
+    peak_width = 100;   //50;
 
     if(loopcnt > 1000)
         rampcnt = 500;
@@ -243,7 +246,7 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
             if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
 #endif
 #ifdef MOTORY
-            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
+            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
 #endif
 #ifdef MOTORZ
             if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
@@ -251,17 +254,19 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
             {
                 GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
                 //ClockP_usleep((uint32_t)(Motor->pulse_width));
-                ClockP_usleep(50);
+                //ClockP_usleep(50);
+                ClockP_usleep(300);
                 GPIO_pinWriteLow(gpioBaseAddr, pinNum);
                 //ClockP_usleep((uint32_t)(Motor->pulse_width));
 
+#if 1
                 ClockP_usleep(300);
-#if 0
+#else
                 if(i<rampcnt)
                 {
                     if(width > peak_width)
                     {
-                        if(i%2)
+                        if(i%100)
                             width = width - 1;
                     }
                     i++;
@@ -270,7 +275,7 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired)
                 {
                     if(width < lowest_width)
                     {
-                        if(i%2)
+                        if(i%100)
                             width = width + 1;
                     }
                 }
@@ -357,14 +362,25 @@ int motor_control_main(void)
 {
     uint32_t    mcu_gpio0_BaseAddr;
     uint32_t    pin_step, pin_dir, count = 0;
-    //MotorMod MotorY, MotorZ;
-    MotorMod MotorX;
+    MotorMod MotorX, MotorY, MotorZ;;
     int32_t    lowest_width, width, peak_width;
     uint32_t    i, flag, rampcnt;
 
-    gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0);
-    //gpio_motor_control_init(&MotorY);
-    //gpio_motor_control_init(&MotorZ);
+#ifdef MOTORX
+    gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0, true);
+#else
+    gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0, false);
+#endif
+#ifdef MOTORY
+    gpio_motor_control_init(&MotorY, CSL_CORE_ID_R5FSS1_0, true);
+#else
+    gpio_motor_control_init(&MotorY, CSL_CORE_ID_R5FSS1_0, false);
+#endif
+#ifdef MOTORZ
+    gpio_motor_control_init(&MotorZ, CSL_CORE_ID_R5FSS1_0, true);
+#else
+    gpio_motor_control_init(&MotorZ, CSL_CORE_ID_R5FSS1_0, false);
+#endif
     DebugP_log("Motor Control Started\r\n");
 
     /* Get address after translation translate */
@@ -377,10 +393,10 @@ int motor_control_main(void)
 
     i = 0;
     count = 10000;
-    lowest_width = 550;
+    lowest_width = 1100;    //550;
     width = lowest_width;
     flag = 0;
-    peak_width = 50;
+    peak_width = 100;   //50;
     if(count > 1000)
         rampcnt = 500;
     else
