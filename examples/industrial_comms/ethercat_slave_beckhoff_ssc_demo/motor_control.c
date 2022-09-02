@@ -218,20 +218,9 @@ void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id, Bool isMove)
 
 void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired, float Ratio)
 {
-    uint32_t    loopcnt = (uint32_t)StepsRequired;
+    uint32_t    loopcnt = (uint32_t)(StepsRequired+0.5);
     uint32_t    gpioBaseAddr, pinNum;
-    int32_t     lowest_width, width, peak_width;
-    uint32_t    i, rampcnt;
-
-    i = 0;
-    lowest_width = 1100;    //550;
-    width = lowest_width;
-    peak_width = 100;   //50;
-
-    if(loopcnt > 1000)
-        rampcnt = 500;
-    else
-        rampcnt = loopcnt / 2;
+    int32_t     width;
 
     /* Get address after translation translate */
     gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(Motor->step_base_addr);
@@ -239,7 +228,7 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired, float Ra
 
     width = 300 * Ratio;
 #ifdef MYDEBUG
-    DebugP_log("gpio_motor_control_step_main width %d\r\n", width);
+    DebugP_log("gpio_motor_control_step_main loopcnt %d width %d\r\n", loopcnt, width);
 #endif
 
     GPIO_setDirMode(gpioBaseAddr, pinNum, Motor->step_dir);
@@ -258,37 +247,10 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired, float Ra
 #endif
             {
                 GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
-                //ClockP_usleep((uint32_t)(Motor->pulse_width));
-                //ClockP_usleep(50);
                 ClockP_usleep(width);
                 GPIO_pinWriteLow(gpioBaseAddr, pinNum);
-                //ClockP_usleep((uint32_t)(Motor->pulse_width));
-
-#if 1
-                ClockP_usleep(width);
-#else
-                if(i<rampcnt)
-                {
-                    if(width > peak_width)
-                    {
-                        if(i%100)
-                            width = width - 1;
-                    }
-                    i++;
-                }
-                else if(loopcnt<rampcnt)
-                {
-                    if(width < lowest_width)
-                    {
-                        if(i%100)
-                            width = width + 1;
-                    }
-                }
-
-                //DebugP_log("gpio_motor_control_step_main (loopcnt %d rampcnt %d) width %d...\r\n", loopcnt, rampcnt, width);
 
                 ClockP_usleep(width);
-#endif
             }
         }
         loopcnt--;
