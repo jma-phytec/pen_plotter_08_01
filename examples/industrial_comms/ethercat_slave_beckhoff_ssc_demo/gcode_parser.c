@@ -613,9 +613,9 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     else    // Relative
     {
         if(isNegativeY==0)
-            MoveY = MotorY->next_pos - MotorX->cur_pos;
+            MoveY = MotorY->next_pos - MotorY->cur_pos;
         else
-            MoveY = MotorY->cur_pos - MotorX->next_pos;
+            MoveY = MotorY->cur_pos - MotorY->next_pos;
     }
 
     if(MoveX < 0)
@@ -623,16 +623,23 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     if(MoveY < 0)
         MoveY = -MoveY;
 
-    if((MoveX < 0.00001) || (MoveY < 0.0001))
+    if((MoveX < 0.01) || (MoveY < 0.01) || (((MoveX-MoveY) < 0.1) && ((MoveY-MoveX) < 0.1)))
     {
-
+        RatioX = 1;
+        RatioY = 1;
     }
     else
     {
         if(MoveX > MoveY)
+        {
             RatioY = MoveX / MoveY;
-        else
+            RatioX = 1;
+        }
+        else if (MoveX < MoveY)
+        {
             RatioX = MoveY / MoveX;
+            RatioY = 1;
+        }
     }
 
 #ifdef MYDEBUG
@@ -647,6 +654,7 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
         gpio_motor_move(MotorX, isNegativeX, false, RatioX);   // return after motor movement complete
 #endif
         RequiredMoveX = FALSE;
+        RatioX = 1;
     }
     if(RequiredMoveY)
     {
@@ -656,6 +664,7 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
         gpio_motor_move(MotorY, isNegativeY, false, RatioY);   // return after motor movement complete
 #endif
         RequiredMoveY = FALSE;
+        RatioY = 1;
     }
     if(RequiredMoveZ)
     {
@@ -665,6 +674,7 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
         gpio_motor_move(MotorZ, isNegativeZ, false, RatioZ);   // return after motor movement complete
 #endif
         RequiredMoveZ = FALSE;
+        RatioZ = 1;
     }
     //DebugP_log("Position %d %d\r\n", MotorX->cur_pos, MotorY->cur_pos);
 
