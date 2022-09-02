@@ -215,7 +215,7 @@ IF StrCaseCmpA(pt0, ptGHZ) = 0 THEN	//	Go Home: Moving Z-axis
 		ELSIF StrCaseCmpA(pt0, pt56) = 0 THEN
 			gohome_gcode_string[1] := 'G01 Z-56';
 		ELSE
-			gohome_gcode_string[1] := 'G01 Z-65';			
+			gohome_gcode_string[1] := 'G01 Z-68';			
 		END_IF	
 	
 	mode := 15;
@@ -238,7 +238,7 @@ IF mode = 1 THEN	// Calibration
 	END_IF
 END_IF
 IF mode = 2 THEN	// Print
-	IF line > 13247 THEN	// Phytec(92), EW2022(613), SpaceNeedle_O(), Shape_O(3388)
+	IF line > line_num THEN
 		line := 0;
 		gcode_count := 0;
 		state := 10;
@@ -311,7 +311,7 @@ IF mode = 14 THEN	// Go Home
 				state := 10;
 				SysProcessExecuteCommand2(pszCommand:=refCommandGHZ, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 	END_IF
-	IF line > 1 THEN
+	IF line > 2 THEN
 		line := 0;
 		gcode_count := 0;
 		state := 0;
@@ -356,76 +356,19 @@ CASE state OF
 		s2_tdata := calibration_gcode_string[line][gcode_count+2];
 		s2_data := SHL(s2_tdata, 8) + calibration_gcode_string[line][gcode_count+3];
 	ELSIF mode = 2 THEN		// Print
-(*
-		s0_count := Test1_gcode_string[line][gcode_count];
-		s0_command := Test1_gcode_string[line][gcode_count+1];
-		s0_tdata := Test1_gcode_string[line][gcode_count+2];
-		s0_data := SHL(s0_tdata, 8) + Test1_gcode_string[line][gcode_count+3];
-		s1_count := Test1_gcode_string[line][gcode_count];
-		s1_command := Test1_gcode_string[line][gcode_count+1];
-		s1_tdata := Test1_gcode_string[line][gcode_count+2];
-		s1_data := SHL(s1_tdata, 8) + Test1_gcode_string[line][gcode_count+3];
-		s2_count := Test1_gcode_string[line][gcode_count];
-		s2_command := Test1_gcode_string[line][gcode_count+1];
-		s2_tdata := Test1_gcode_string[line][gcode_count+2];
-		s2_data := SHL(s2_tdata, 8) + Test1_gcode_string[line][gcode_count+3];
-*)
-(*	
-		s0_count := Shape_O_gcode_string[line][gcode_count];
-		s0_command := Shape_O_gcode_string[line][gcode_count+1];
-		s0_tdata := Shape_O_gcode_string[line][gcode_count+2];
-		s0_data := SHL(s0_tdata, 8) + Shape_O_gcode_string[line][gcode_count+3];
-		s1_count := Shape_O_gcode_string[line][gcode_count];
-		s1_command := Shape_O_gcode_string[line][gcode_count+1];
-		s1_tdata := Shape_O_gcode_string[line][gcode_count+2];
-		s1_data := SHL(s1_tdata, 8) + Shape_O_gcode_string[line][gcode_count+3];
-		s2_count := Shape_O_gcode_string[line][gcode_count];
-		s2_command := Shape_O_gcode_string[line][gcode_count+1];
-		s2_tdata := Shape_O_gcode_string[line][gcode_count+2];
-		s2_data := SHL(s2_tdata, 8) + Shape_O_gcode_string[line][gcode_count+3];
-*)
-		
-		s0_count := SpaceNeedle_O_gcode_string[line][gcode_count];
-		s0_command := SpaceNeedle_O_gcode_string[line][gcode_count+1];
-		s0_tdata := SpaceNeedle_O_gcode_string[line][gcode_count+2];
-		s0_data := SHL(s0_tdata, 8) + SpaceNeedle_O_gcode_string[line][gcode_count+3];
-		s1_count := SpaceNeedle_O_gcode_string[line][gcode_count];
-		s1_command := SpaceNeedle_O_gcode_string[line][gcode_count+1];
-		s1_tdata := SpaceNeedle_O_gcode_string[line][gcode_count+2];
-		s1_data := SHL(s1_tdata, 8) + SpaceNeedle_O_gcode_string[line][gcode_count+3];
-		s2_count := SpaceNeedle_O_gcode_string[line][gcode_count];
-		s2_command := SpaceNeedle_O_gcode_string[line][gcode_count+1];
-		s2_tdata := SpaceNeedle_O_gcode_string[line][gcode_count+2];
-		s2_data := SHL(s2_tdata, 8) + SpaceNeedle_O_gcode_string[line][gcode_count+3];
+		s0_count := print_gcode_string[line][gcode_count];
+		s0_command := print_gcode_string[line][gcode_count+1];
+		s0_tdata := print_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + print_gcode_string[line][gcode_count+3];
+		s1_count := print_gcode_string[line][gcode_count];
+		s1_command := print_gcode_string[line][gcode_count+1];
+		s1_tdata := print_gcode_string[line][gcode_count+2];
+		s1_data := SHL(s1_tdata, 8) + print_gcode_string[line][gcode_count+3];
+		s2_count := print_gcode_string[line][gcode_count];
+		s2_command := print_gcode_string[line][gcode_count+1];
+		s2_tdata := print_gcode_string[line][gcode_count+2];
+		s2_data := SHL(s2_tdata, 8) + print_gcode_string[line][gcode_count+3];
 
-(*		
-		s0_count := EW2022_gcode_string[line][gcode_count];
-		s0_command := EW2022_gcode_string[line][gcode_count+1];
-		s0_tdata := EW2022_gcode_string[line][gcode_count+2];
-		s0_data := SHL(s0_tdata, 8) + EW2022_gcode_string[line][gcode_count+3];
-		s1_count := EW2022_gcode_string[line][gcode_count];
-		s1_command := EW2022_gcode_string[line][gcode_count+1];
-		s1_tdata := EW2022_gcode_string[line][gcode_count+2];
-		s1_data := SHL(s1_tdata, 8) + EW2022_gcode_string[line][gcode_count+3];
-		s2_count := EW2022_gcode_string[line][gcode_count];
-		s2_command := EW2022_gcode_string[line][gcode_count+1];
-		s2_tdata := EW2022_gcode_string[line][gcode_count+2];
-		s2_data := SHL(s2_tdata, 8) + EW2022_gcode_string[line][gcode_count+3];
-*)
-(*		
-		s0_count := phytec_logo_gcode_string[line][gcode_count];
-		s0_command := phytec_logo_gcode_string[line][gcode_count+1];
-		s0_tdata := phytec_logo_gcode_string[line][gcode_count+2];
-		s0_data := SHL(s0_tdata, 8) + phytec_logo_gcode_string[line][gcode_count+3];
-		s1_count := phytec_logo_gcode_string[line][gcode_count];
-		s1_command := phytec_logo_gcode_string[line][gcode_count+1];
-		s1_tdata := phytec_logo_gcode_string[line][gcode_count+2];
-		s1_data := SHL(s1_tdata, 8) + phytec_logo_gcode_string[line][gcode_count+3];
-		s2_count := phytec_logo_gcode_string[line][gcode_count];
-		s2_command := phytec_logo_gcode_string[line][gcode_count+1];
-		s2_tdata := phytec_logo_gcode_string[line][gcode_count+2];
-		s2_data := SHL(s2_tdata, 8) + phytec_logo_gcode_string[line][gcode_count+3];
-*)
 	ELSIF mode = 3 THEN	// Home
 		s0_count := home_gcode_string[line][gcode_count];
 		s0_command := home_gcode_string[line][gcode_count+1];
