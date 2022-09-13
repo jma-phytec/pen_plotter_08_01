@@ -16,8 +16,6 @@ CORE_0=--script ../r5fss0-0_freertos/example.syscfg --context r5fss0-0 --output 
 CORE_1=--script ../r5fss0-1_nortos/example.syscfg --context r5fss0-1 --output ../r5fss0-1_nortos/ti-arm-clang/generated
 CORE_2=--script ../r5fss1-0_nortos/example.syscfg --context r5fss1-0 --output ../r5fss1-0_nortos/ti-arm-clang/generated
 CORE_3=--script ../r5fss1-1_nortos/example.syscfg --context r5fss1-1 --output ../r5fss1-1_nortos/ti-arm-clang/generated
-CORE_4=--script ../a53ss0-0_nortos/example.syscfg --context a53ss0-0 --output ../a53ss0-0_nortos/gcc-aarch64/generated
-CORE_5=--script ../m4fss0-0_nortos/example.syscfg --context m4fss0-0 --output ../m4fss0-0_nortos/ti-arm-clang/generated
 
 CORES = \
     $(CORE_5) \
@@ -32,8 +30,6 @@ all: syscfg
 	$(MAKE) -C ../r5fss0-1_nortos/ti-arm-clang/ all
 	$(MAKE) -C ../r5fss1-0_nortos/ti-arm-clang/ all
 	$(MAKE) -C ../r5fss1-1_nortos/ti-arm-clang/ all
-	$(MAKE) -C ../a53ss0-0_nortos/gcc-aarch64/ all
-	$(MAKE) -C ../m4fss0-0_nortos/ti-arm-clang/ all
 	$(MAKE) $(MULTI_CORE_BOOTIMAGE_NAME)
 
 clean:
@@ -41,8 +37,6 @@ clean:
 	$(MAKE) -C ../r5fss0-1_nortos/ti-arm-clang/ clean
 	$(MAKE) -C ../r5fss1-0_nortos/ti-arm-clang/ clean
 	$(MAKE) -C ../r5fss1-1_nortos/ti-arm-clang/ clean
-	$(MAKE) -C ../a53ss0-0_nortos/gcc-aarch64/ clean
-	$(MAKE) -C ../m4fss0-0_nortos/ti-arm-clang/ clean
 	$(RM) $(MULTI_CORE_BOOTIMAGE_NAME)
 	$(RM) $(MULTI_CORE_BOOTIMAGE_NAME_SIGNED)
 	$(RM) $(MULTI_CORE_BOOTIMAGE_NAME_XIP)
@@ -52,8 +46,6 @@ scrub:
 	$(MAKE) -C ../r5fss0-1_nortos/ti-arm-clang/ scrub
 	$(MAKE) -C ../r5fss1-0_nortos/ti-arm-clang/ scrub
 	$(MAKE) -C ../r5fss1-1_nortos/ti-arm-clang/ scrub
-	$(MAKE) -C ../a53ss0-0_nortos/gcc-aarch64/ scrub
-	$(MAKE) -C ../m4fss0-0_nortos/ti-arm-clang/ scrub
 ifeq ($(OS),Windows_NT)
 	$(RM) \*.appimage
 	$(RM) \*.appimage.signed
@@ -79,12 +71,10 @@ EXE_EXT=.exe
 endif
 BOOTIMAGE_TEMP_OUT_FILE=temp_stdout_$(PROFILE).txt
 
-BOOTIMAGE_CORE_ID_a53ss0-0 = 0
 BOOTIMAGE_CORE_ID_r5fss0-0 = 4
 BOOTIMAGE_CORE_ID_r5fss0-1 = 5
 BOOTIMAGE_CORE_ID_r5fss1-0 = 6
 BOOTIMAGE_CORE_ID_r5fss1-1 = 7
-BOOTIMAGE_CORE_ID_m4fss0-0 = 14
 SBL_RUN_ADDRESS=0x70000000
 SBL_DEV_ID=55
 
@@ -103,24 +93,18 @@ MULTI_CORE_APP_PARAMS = \
     $(BOOTIMAGE_CORE_ID_r5fss0-1) ../r5fss0-1_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
     $(BOOTIMAGE_CORE_ID_r5fss1-0) ../r5fss1-0_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
     $(BOOTIMAGE_CORE_ID_r5fss1-1) ../r5fss1-1_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
-    $(BOOTIMAGE_CORE_ID_a53ss0-0) ../a53ss0-0_nortos/gcc-aarch64/ipc_rpmsg_echo.$(PROFILE).rprc \
-    $(BOOTIMAGE_CORE_ID_m4fss0-0) ../m4fss0-0_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
 
 MULTI_CORE_APP_PARAMS_XIP = \
     $(BOOTIMAGE_CORE_ID_r5fss0-0) ../r5fss0-0_freertos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc_xip \
     $(BOOTIMAGE_CORE_ID_r5fss0-1) ../r5fss0-1_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc_xip \
     $(BOOTIMAGE_CORE_ID_r5fss1-0) ../r5fss1-0_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc_xip \
     $(BOOTIMAGE_CORE_ID_r5fss1-1) ../r5fss1-1_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc_xip \
-    $(BOOTIMAGE_CORE_ID_a53ss0-0) ../a53ss0-0_nortos/gcc-aarch64/ipc_rpmsg_echo.$(PROFILE).rprc_xip \
-    $(BOOTIMAGE_CORE_ID_m4fss0-0) ../m4fss0-0_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc_xip \
 
 MULTI_CORE_BOOTIMAGE_DEPENDENCY = \
     ../r5fss0-0_freertos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
     ../r5fss0-1_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
     ../r5fss1-0_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
     ../r5fss1-1_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
-    ../a53ss0-0_nortos/gcc-aarch64/ipc_rpmsg_echo.$(PROFILE).rprc \
-    ../m4fss0-0_nortos/ti-arm-clang/ipc_rpmsg_echo.$(PROFILE).rprc \
 
 $(MULTI_CORE_BOOTIMAGE_DEPENDENCY):
 
