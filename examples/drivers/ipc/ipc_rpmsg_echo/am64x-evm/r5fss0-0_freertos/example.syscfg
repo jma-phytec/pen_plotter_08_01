@@ -22,7 +22,8 @@ const mpu_armv77 = mpu_armv7.addInstance();
 /**
  * Write custom configuration values to the imported modules.
  */
-ipc.a53ss0_0 = "notify_rpmsg";
+ipc.m4fss0_0  = "NONE";
+ipc.vringSize = 15744;
 
 debug_log.enableCssLog             = false;
 debug_log.enableUartLog            = true;

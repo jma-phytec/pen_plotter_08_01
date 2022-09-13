@@ -12,12 +12,6 @@
     <project configuration="@match" id="project_3" name="ipc_rpmsg_echo_am64x-evm_r5fss1-1_nortos_ti-arm-clang">
     </project>
     <core id="MAIN_PULSAR_Cortex_R5_1_1" project="project_3"/>
-    <project configuration="@match" id="project_4" name="ipc_rpmsg_echo_am64x-evm_a53ss0-0_nortos_gcc-aarch64">
-    </project>
-    <core id="CortexA53_0" project="project_4"/>
-    <project configuration="@match" id="project_5" name="ipc_rpmsg_echo_am64x-evm_m4fss0-0_nortos_ti-arm-clang">
-    </project>
-    <core id="Cortex_M4F_0" project="project_5"/>
 	<preBuildSteps>
 	</preBuildSteps>
     <postBuildSteps>
