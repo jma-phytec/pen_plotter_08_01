@@ -2,7 +2,7 @@
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
  * @cliArgs --device "AM64x_beta" --package "ALV" --part "Default" --context "r5fss0-0" --product "MCU_PLUS_SDK_AM64x@08.01.00"
- * @versions {"tool":"1.10.0+2163"}
+ * @versions {"tool":"1.13.0+2553"}
  */
 
 /**
@@ -28,6 +28,7 @@ const gpio10     = gpio.addInstance();
 const i2c        = scripting.addModule("/drivers/i2c/i2c", {}, false);
 const i2c1       = i2c.addInstance();
 const i2c2       = i2c.addInstance();
+const ipc        = scripting.addModule("/drivers/ipc/ipc");
 const ospi       = scripting.addModule("/drivers/ospi/ospi", {}, false);
 const ospi1      = ospi.addInstance();
 const ethercat   = scripting.addModule("/industrial_comms/ethercat/ethercat", {}, false);
@@ -39,6 +40,7 @@ const mpu_armv72 = mpu_armv7.addInstance();
 const mpu_armv73 = mpu_armv7.addInstance();
 const mpu_armv74 = mpu_armv7.addInstance();
 const mpu_armv75 = mpu_armv7.addInstance();
+const mpu_armv76 = mpu_armv7.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -109,6 +111,8 @@ i2c2.I2C.$assign     = "I2C1";
 i2c2.I2C.SCL.$assign = "ball.C18";
 i2c2.I2C.SDA.$assign = "ball.B19";
 
+ipc.m4fss0_0 = "NONE";
+
 ospi1.$name = "CONFIG_OSPI0";
 
 ethercat1.$name                                 = "CONFIG_ETHERCAT0";
@@ -158,6 +162,11 @@ mpu_armv74.size              = 21;
 mpu_armv75.$name    = "CONFIG_MPU_REGION4";
 mpu_armv75.baseAddr = 0x80000000;
 mpu_armv75.size     = 31;
+
+mpu_armv76.$name      = "CONFIG_MPU_REGION5";
+mpu_armv76.baseAddr   = 0x701D0000;
+mpu_armv76.size       = 16;
+mpu_armv76.attributes = "Device";
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future

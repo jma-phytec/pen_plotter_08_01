@@ -40,20 +40,26 @@
 
 #define MAIN_TASK_PRI  (configMAX_PRIORITIES-1)
 #define MOTOR_TASK_PRI  (configMAX_PRIORITIES-2)
+#define IPC_TASK_PRI  (configMAX_PRIORITIES-3)
 
-#define MAIN_TASK_SIZE (16384U/sizeof(configSTACK_DEPTH_TYPE))
-#define MOTOR_TASK_SIZE (16384U/sizeof(configSTACK_DEPTH_TYPE))
+#define MAIN_TASK_SIZE (32768U/sizeof(configSTACK_DEPTH_TYPE))
+#define MOTOR_TASK_SIZE (32768U/sizeof(configSTACK_DEPTH_TYPE))
+#define IPC_TASK_SIZE (32768U/sizeof(configSTACK_DEPTH_TYPE))
 StackType_t gMainTaskStack[MAIN_TASK_SIZE] __attribute__((aligned(32)));
-StackType_t gMotorTaskStack[MAIN_TASK_SIZE] __attribute__((aligned(32)));
+StackType_t gMotorTaskStack[MOTOR_TASK_SIZE] __attribute__((aligned(32)));
+StackType_t gIPCTaskStack[IPC_TASK_SIZE] __attribute__((aligned(32)));
 
 StaticTask_t gMainTaskObj;
 StaticTask_t gMotorTaskObj;
+StaticTask_t gIPCTaskObj;
 TaskHandle_t gMainTask;
 TaskHandle_t gMotorTask;
+TaskHandle_t gIPCTask;
 
 void ethercat_slave_beckhoff_ssc_demo_main(void *args);
 void motor_control_main(void *args);
 void motor_demo_main(void *args);
+void ipc_rpmsg_echo_main(void *args);
 
 void motor_main(void *args)
 {
@@ -65,6 +71,13 @@ void motor_main(void *args)
 void frertos_main(void *args)
 {
     ethercat_slave_beckhoff_ssc_demo_main(NULL);
+
+    vTaskDelete(NULL);
+}
+
+void ipc_main(void *args)
+{
+    ipc_rpmsg_echo_main(NULL);
 
     vTaskDelete(NULL);
 }
@@ -153,6 +166,15 @@ int main()
                                   gMotorTaskStack,  /* pointer to stack base */
                                   &gMotorTaskObj ); /* pointer to statically allocated task object memory */
     configASSERT(gMotorTask != NULL);
+
+    gIPCTask = xTaskCreateStatic( ipc_main, //motor_main,   /* Pointer to the function that implements the task. */
+                                  "ipc_main", /* Text name for the task.  This is to facilitate debugging only. */
+                                  IPC_TASK_SIZE,  /* Stack depth in units of StackType_t typically uint32_t on 32b CPUs */
+                                  NULL,            /* We are not using the task parameter. */
+                                  IPC_TASK_PRI,   /* task priority, 0 is lowest priority, configMAX_PRIORITIES-1 is highest */
+                                  gIPCTaskStack,  /* pointer to stack base */
+                                  &gIPCTaskObj ); /* pointer to statically allocated task object memory */
+    configASSERT(gIPCTask != NULL);
 
     /* Start the scheduler to start the tasks executing. */
     vTaskStartScheduler();
