@@ -55,9 +55,6 @@
  *
  */
 
-/* number of iterations of message exchange to do */
-uint32_t gMsgEchoCount = 100000u;
-
 #if defined(SOC_AM243X)
 /* main core that starts the message exchange */
 uint32_t gMainCoreId = CSL_CORE_ID_R5FSS0_0;
@@ -117,7 +114,7 @@ uint32_t gRemoteCoreId[] = {
 uint16_t gRemoteServiceEndPt = 13u;
 
 /* maximum size that message can have in this example */
-#define MAX_MSG_SIZE        (64u)
+#define MAX_MSG_SIZE        (128u)
 
 /* Main core ack reply end point
  *
@@ -129,11 +126,81 @@ uint16_t gRemoteServiceEndPt = 13u;
 /* RPMessage_Object MUST be global or static */
 RPMessage_Object gAckReplyMsgObject;
 
+void ipc_rpmsg_echo_main_core_init(void *args)
+{
+    RPMessage_CreateParams createParams;
+    uint32_t i, numRemoteCores;
+    int32_t status;
+
+    RPMessage_CreateParams_init(&createParams);
+    createParams.localEndPt = MAIN_CORE_ACK_REPLY_END_PT;
+    status = RPMessage_construct(&gAckReplyMsgObject, &createParams);
+    DebugP_assert(status==SystemP_SUCCESS);
+
+    numRemoteCores = 0;
+    for(i=0; gRemoteCoreId[i]!=CSL_CORE_ID_MAX; i++)
+    {
+        numRemoteCores++;
+    }
+
+    /* wait for all cores to be ready */
+    IpcNotify_syncAll(SystemP_WAIT_FOREVER);
+
+    ClockP_usleep(500*1000); /* wait for log messages from remote cores to be flushed, otherwise this delay is not needed */
+
+    DebugP_log("[IPC RPMSG ECHO] Message exchange started by main core !!!\r\n");
+
+    //RPMessage_destruct(&gAckReplyMsgObject);
+
+}
+
+uint8_t ipc_execute_line(char *line)
+{
+    char msgBuf[MAX_MSG_SIZE];
+    int32_t status;
+    uint32_t msg, i;
+    uint16_t remoteCoreId, remoteCoreEndPt, msgSize;
+
+    memcpy(msgBuf, line, MAX_MSG_SIZE-1);
+    msgBuf[MAX_MSG_SIZE-1] = 0;
+    msgSize = strlen(msgBuf) + 1; /* count the terminating char as well */
+
+    DebugP_log("[IPC RPMSG ECHO] Main Core sent %s\r\n", msgBuf);
+
+    /* send the same messages to all cores */
+    for(i=0; gRemoteCoreId[i]!=CSL_CORE_ID_MAX; i++ )
+    {
+        status = RPMessage_send(
+                msgBuf, msgSize,
+                gRemoteCoreId[i], gRemoteServiceEndPt,
+                RPMessage_getLocalEndPt(&gAckReplyMsgObject),
+                SystemP_WAIT_FOREVER);
+            DebugP_assert(status==SystemP_SUCCESS);
+    }
+    memset(msgBuf, 0, MAX_MSG_SIZE-1);
+    /* wait for response from all cores */
+    for(i=0; gRemoteCoreId[i]!=CSL_CORE_ID_MAX; i++ )
+    {
+            /* set 'msgSize' to size of recv buffer,
+            * after return `msgSize` contains actual size of valid data in recv buffer
+            */
+            msgSize = sizeof(msgBuf);
+            status = RPMessage_recv(&gAckReplyMsgObject,
+                msgBuf, &msgSize,
+                &remoteCoreId, &remoteCoreEndPt,
+                SystemP_WAIT_FOREVER);
+            DebugP_assert(status==SystemP_SUCCESS);
+            DebugP_log("[IPC RPMSG ECHO] Main Core received %s\r\n", msgBuf);
+
+    }
+
+}
+
+
 void ipc_rpmsg_echo_main_core_start()
 {
     RPMessage_CreateParams createParams;
     uint32_t msg, i, numRemoteCores;
-    uint64_t curTime;
     char msgBuf[MAX_MSG_SIZE];
     int32_t status;
     uint16_t remoteCoreId, remoteCoreEndPt, msgSize;
@@ -156,9 +223,7 @@ void ipc_rpmsg_echo_main_core_start()
 
     DebugP_log("[IPC RPMSG ECHO] Message exchange started by main core !!!\r\n");
 
-    curTime = ClockP_getTimeUsec();
-
-    for(msg=0; msg<gMsgEchoCount; msg++)
+    while(1)
     {
         snprintf(msgBuf, MAX_MSG_SIZE-1, "%d", msg);
         msgBuf[MAX_MSG_SIZE-1] = 0;
@@ -189,18 +254,8 @@ void ipc_rpmsg_echo_main_core_start()
         }
     }
 
-    curTime = ClockP_getTimeUsec() - curTime;
-
-    DebugP_log("[IPC RPMSG ECHO] All echoed messages received by main core from %d remote cores !!!\r\n", numRemoteCores);
-    DebugP_log("[IPC RPMSG ECHO] Messages sent to each core = %d \r\n", gMsgEchoCount);
-    DebugP_log("[IPC RPMSG ECHO] Number of remote cores = %d \r\n", numRemoteCores);
-    DebugP_log("[IPC RPMSG ECHO] Total execution time = %" PRId64 " usecs\r\n", curTime);
-    DebugP_log("[IPC RPMSG ECHO] One way message latency = %" PRId32 " nsec\r\n",
-        (uint32_t)(curTime*1000u/(gMsgEchoCount*numRemoteCores*2)));
-
     RPMessage_destruct(&gAckReplyMsgObject);
 
-    DebugP_log("All tests have passed!!\r\n");
 }
 
 /* RPMessage_Object MUST be global or static */
@@ -236,6 +291,13 @@ void ipc_rpmsg_echo_remote_core_start()
             SystemP_WAIT_FOREVER);
         DebugP_assert(status==SystemP_SUCCESS);
 
+#if 0
+        if(recvMsg[0]==0x35)
+            GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
+        else
+            GPIO_pinWriteLow(gpioBaseAddr, pinNum);
+#endif
+
         /* echo the same message string as reply */
 
         /* send ack to sender CPU at the sender end point */
@@ -260,6 +322,9 @@ void ipc_rpmsg_echo_main(void *args)
     }
     else
     {
+	Drivers_open();
+	Board_driversOpen();
+
         ipc_rpmsg_echo_remote_core_start();
     }
 

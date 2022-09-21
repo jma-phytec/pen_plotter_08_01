@@ -67,6 +67,9 @@
  *
  */
 
+uint8_t ipc_execute_line(char *line);
+
+
 /* maximum size that message can have in this example */
 #define MAX_MSG_SIZE        (128u)
 
@@ -545,20 +548,22 @@ int motor_demo_main(void)
     DebugP_log("Motor Demo Started\r\n");
     memset(msgBuf, 0, MAX_MSG_SIZE-1);
 
+// TODO: gpio_motor_control_init -> other cores
+
 #ifdef MOTORX
-    gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0, true);
+    gpio_motor_control_init(&MotorX, true);
 #else
-    gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0, false);
+    gpio_motor_control_init(&MotorX, false);
 #endif
 #ifdef MOTORY
-    gpio_motor_control_init(&MotorY, CSL_CORE_ID_R5FSS1_0, true);
+    gpio_motor_control_init(&MotorY, true);
 #else
-    gpio_motor_control_init(&MotorY, CSL_CORE_ID_R5FSS1_0, false);
+    gpio_motor_control_init(&MotorY, false);
 #endif
 #ifdef MOTORZ
-    gpio_motor_control_init(&MotorZ, CSL_CORE_ID_R5FSS1_0, true);
+    gpio_motor_control_init(&MotorZ, true);
 #else
-    gpio_motor_control_init(&MotorZ, CSL_CORE_ID_R5FSS1_0, false);
+    gpio_motor_control_init(&MotorZ, false);
 #endif
 
     bMotorApplication = TRUE;
@@ -569,16 +574,8 @@ int motor_demo_main(void)
         if(bGCodeCommandRunning==TRUE)
         {
             bGCodeCommandRunning = FALSE;
-            //bGCodeCommandRunning = TRUE
-            //memcpy(msgBuf, GCodeFile1[i++], MAX_MSG_SIZE-1);
-            //DebugP_log("Before gc_execute_line\r\n");
-            gc_execute_line(&MotorX, &MotorY, &MotorZ, msgBuf);       // G Code Parser
-            //DebugP_log("After gc_execute_line\r\n");
-            //if(i>548)
-                //i = 0;
-
-            //memset(msgBuf, 0, MAX_MSG_SIZE-1);
-            //msgBuf[MAX_MSG_SIZE-1] = 0;
+            //gc_execute_line(&MotorX, &MotorY, &MotorZ, msgBuf);       // G Code Parser
+            ipc_execute_line(msgBuf);
         }
         else
             vTaskDelay(5);

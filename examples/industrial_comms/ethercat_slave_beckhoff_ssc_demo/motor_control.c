@@ -34,7 +34,6 @@
 #define STEPSIZE 16
 
 char msgBuf[128];
-//int idx = 0;
 
 float CalculateMotorLoop(MotorMod *Motor, float Displayment)
 {
@@ -156,7 +155,7 @@ void gpio_motor_control_setSpeed(MotorMod *Motor, float val)
     return;
 }
 
-void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id, Bool isMove)
+void gpio_motor_control_init(MotorMod *Motor, Bool isMove)
 {
     Motor->cur_pos = 0;
     Motor->next_pos = 0;
@@ -165,15 +164,13 @@ void gpio_motor_control_init(MotorMod *Motor, uint32_t core_id, Bool isMove)
     Motor->unit = 21;
     Motor->moving = 0;
     Motor->isActive = TRUE;
-    if(core_id==CSL_CORE_ID_R5FSS1_0)
-    {
-        Motor->step_base_addr = GPIO_MOTOR_STEP_BASE_ADDR;
-        Motor->step_pin = GPIO_MOTOR_STEP_PIN;
-        Motor->step_dir = GPIO_MOTOR_STEP_DIR;
-        Motor->dir_base_addr = GPIO_MOTOR_DIR_BASE_ADDR;
-        Motor->dir_pin = GPIO_MOTOR_DIR_PIN;
-        Motor->dir_dir = GPIO_MOTOR_DIR_DIR;
-    }
+
+    Motor->step_base_addr = GPIO_MOTOR_STEP_BASE_ADDR;
+    Motor->step_pin = GPIO_MOTOR_STEP_PIN;
+    Motor->step_dir = GPIO_MOTOR_STEP_DIR;
+    Motor->dir_base_addr = GPIO_MOTOR_DIR_BASE_ADDR;
+    Motor->dir_pin = GPIO_MOTOR_DIR_PIN;
+    Motor->dir_dir = GPIO_MOTOR_DIR_DIR;
 
     gpio_motor_control_setSpeed(Motor, 6000);   // 6000mm per min = 100mm per sec
 
@@ -334,19 +331,19 @@ int motor_control_main(void)
     uint32_t    i, flag, rampcnt;
 
 #ifdef MOTORX
-    gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0, true);
+    gpio_motor_control_init(&MotorX, true);
 #else
-    gpio_motor_control_init(&MotorX, CSL_CORE_ID_R5FSS1_0, false);
+    gpio_motor_control_init(&MotorX, false);
 #endif
 #ifdef MOTORY
-    gpio_motor_control_init(&MotorY, CSL_CORE_ID_R5FSS1_0, true);
+    gpio_motor_control_init(&MotorY, true);
 #else
-    gpio_motor_control_init(&MotorY, CSL_CORE_ID_R5FSS1_0, false);
+    gpio_motor_control_init(&MotorY, false);
 #endif
 #ifdef MOTORZ
-    gpio_motor_control_init(&MotorZ, CSL_CORE_ID_R5FSS1_0, true);
+    gpio_motor_control_init(&MotorZ, true);
 #else
-    gpio_motor_control_init(&MotorZ, CSL_CORE_ID_R5FSS1_0, false);
+    gpio_motor_control_init(&MotorZ, false);
 #endif
     DebugP_log("Motor Control Started\r\n");
 

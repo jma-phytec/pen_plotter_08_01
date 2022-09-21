@@ -60,6 +60,7 @@ void ethercat_slave_beckhoff_ssc_demo_main(void *args);
 void motor_control_main(void *args);
 void motor_demo_main(void *args);
 void ipc_rpmsg_echo_main(void *args);
+void ipc_rpmsg_echo_main_core_init(void *args);
 
 void motor_main(void *args)
 {
@@ -77,7 +78,8 @@ void frertos_main(void *args)
 
 void ipc_main(void *args)
 {
-    ipc_rpmsg_echo_main(NULL);
+    //ipc_rpmsg_echo_main(NULL);
+    ipc_rpmsg_echo_main_core_init(NULL);
 
     vTaskDelete(NULL);
 }
