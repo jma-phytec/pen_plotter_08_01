@@ -8,6 +8,8 @@
 /**
  * Import the modules used in this configuration.
  */
+const gpio       = scripting.addModule("/drivers/gpio/gpio", {}, false);
+const gpio1      = gpio.addInstance();
 const ipc        = scripting.addModule("/drivers/ipc/ipc");
 const debug_log  = scripting.addModule("/kernel/dpl/debug_log");
 const mpu_armv7  = scripting.addModule("/kernel/dpl/mpu_armv7", {}, false);
@@ -22,8 +24,12 @@ const mpu_armv77 = mpu_armv7.addInstance();
 /**
  * Write custom configuration values to the imported modules.
  */
-ipc.m4fss0_0  = "NONE";
-ipc.vringSize = 15744;
+gpio1.pinDir               = "OUTPUT";
+gpio1.$name                = "P14";
+gpio1.GPIO.$assign         = "GPIO1";
+gpio1.GPIO.gpioPin.$assign = "ball.D13";
+
+ipc.m4fss0_0 = "NONE";
 
 debug_log.enableCssLog       = false;
 debug_log.enableSharedMemLog = true;
