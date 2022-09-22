@@ -55,6 +55,7 @@
  *
  */
 
+
 #if defined(SOC_AM243X)
 /* main core that starts the message exchange */
 uint32_t gMainCoreId = CSL_CORE_ID_R5FSS0_0;
@@ -125,6 +126,10 @@ uint16_t gRemoteServiceEndPt = 13u;
 
 /* RPMessage_Object MUST be global or static */
 RPMessage_Object gAckReplyMsgObject;
+
+int motor_demo_init(void);
+uint8_t gc_execute_line(char *line);
+
 
 void ipc_rpmsg_echo_main_core_init(void *args)
 {
@@ -298,6 +303,8 @@ void ipc_rpmsg_echo_remote_core_start()
             GPIO_pinWriteLow(gpioBaseAddr, pinNum);
 #endif
 
+        gc_execute_line(recvMsg);
+
         /* echo the same message string as reply */
 
         /* send ack to sender CPU at the sender end point */
@@ -322,8 +329,9 @@ void ipc_rpmsg_echo_main(void *args)
     }
     else
     {
-	Drivers_open();
-	Board_driversOpen();
+        Drivers_open();
+        Board_driversOpen();
+        motor_demo_init();
 
         ipc_rpmsg_echo_remote_core_start();
     }

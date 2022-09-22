@@ -17,23 +17,18 @@
 #include <kernel/dpl/DebugP.h>
 #include "motor_control.h"
 #include <math.h>
-#include <tiescutils.h>
-#include <tiesceoefoe.h>
-#include <tiescsoc.h>
-#include <applInterface.h>
-#include <ecatslv.h>
 #include <drivers/gpio.h>
 #include <kernel/dpl/AddrTranslateP.h>
 #include <kernel/dpl/DebugP.h>
 #include <kernel/dpl/ClockP.h>
-#include <ti_drivers_open_close.h>
-#include <ti_board_open_close.h>
+#include "ti_drivers_config.h"
 
 #define ROUND_LEN 40.5
 #define NUM_STEPS_PER_ROTATION 205
 #define STEPSIZE 16
 
 char msgBuf[128];
+MotorMod MotorX, MotorY, MotorZ;
 
 float CalculateMotorLoop(MotorMod *Motor, float Displayment)
 {
@@ -165,17 +160,38 @@ void gpio_motor_control_init(MotorMod *Motor, Bool isMove)
     Motor->moving = 0;
     Motor->isActive = TRUE;
 
-    Motor->step_base_addr = GPIO_MOTOR_STEP_BASE_ADDR;
-    Motor->step_pin = GPIO_MOTOR_STEP_PIN;
-    Motor->step_dir = GPIO_MOTOR_STEP_DIR;
-    Motor->dir_base_addr = GPIO_MOTOR_DIR_BASE_ADDR;
-    Motor->dir_pin = GPIO_MOTOR_DIR_PIN;
-    Motor->dir_dir = GPIO_MOTOR_DIR_DIR;
+#ifdef MOTORX
+    Motor->step_base_addr = P7_BASE_ADDR;
+    Motor->step_pin = P7_PIN;
+    Motor->step_dir = P7_DIR;
+    Motor->dir_base_addr = P9_BASE_ADDR;
+    Motor->dir_pin = P9_PIN;
+    Motor->dir_dir = P9_DIR;
+#endif
+
+#ifdef MOTORY
+    Motor->step_base_addr = P11_BASE_ADDR;
+    Motor->step_pin = P11_PIN;
+    Motor->step_dir = P11_DIR;
+    Motor->dir_base_addr = P17_BASE_ADDR;
+    Motor->dir_pin = P17_PIN;
+    Motor->dir_dir = P17_DIR;
+#endif
+
+#ifdef MOTORZ
+    Motor->step_base_addr = P16_BASE_ADDR;
+    Motor->step_pin = P16_PIN;
+    Motor->step_dir = P16_DIR;
+    Motor->dir_base_addr = P18_BASE_ADDR;
+    Motor->dir_pin = P18_PIN;
+    Motor->dir_dir = P18_DIR;
+#endif
 
     gpio_motor_control_setSpeed(Motor, 6000);   // 6000mm per min = 100mm per sec
 
     if(isMove)
     {
+#if 0
         // Enable 8255 EN pin
         uint32_t    gpioBaseAddr, pinNum;
 
@@ -208,6 +224,7 @@ void gpio_motor_control_init(MotorMod *Motor, Bool isMove)
         GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
         GPIO_pinWriteHigh(gpioBaseAddr, BLUE_GPIO_PIN);
 #endif
+#endif
     }
 
     return;
@@ -234,13 +251,13 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired, float Ra
         if(Motor->isActive)
         {
 #ifdef MOTORX
-            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
+//            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
 #endif
 #ifdef MOTORY
-            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
+//            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
 #endif
 #ifdef MOTORZ
-            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
+//            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
 #endif
             {
                 GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
@@ -279,51 +296,12 @@ void gpio_motor_control_dir_main(MotorMod *Motor)
     return;
 }
 
-int update_gcode_cmdbuf(uint8_t TmpCount, uint8_t TmpCmd, uint16_t TmpMotorData)
-{
-    static int idx = 0;
-
-    if(idx==0)
-        memset(msgBuf, 0, 128-1);
-
-    msgBuf[idx] = (char)TmpCount;
-    msgBuf[idx+1] = (char)TmpCmd;
-    msgBuf[idx+2] = (char)(TmpMotorData>>8);
-    msgBuf[idx+3] = (char)(TmpMotorData & 0xff);
-
-
-    if((TmpCount==0) || (TmpCmd==0) || (msgBuf[idx+2]==0) || (msgBuf[idx+3]==0))
-    {
-#ifdef MYDEBUG
-        DebugP_log("msgBug %s\r\n", msgBuf);
-#endif
-        idx = 0;
-        return 1;
-    }
-    else
-        idx = idx + 4;
-
-    return 0;
-}
 
 #define SMOOTH 2
 
-int print_GCode(uint8_t TmpCount, uint8_t TmpCmd, uint16_t TmpMotorData)
-{
-    DebugP_log("print_GCode: %c %c %c %c\r\n", TmpCount, TmpCmd, (TmpMotorData>>8), (TmpMotorData & 0xff));
-    if(TmpCount==0)
-        return 1;
-    if(TmpCmd==0)
-        return 1;
-    if((TmpMotorData >> 8)==0)
-        return 1;
-    if((TmpMotorData & 0xff)==0)
-        return 1;
-    return 0;
-}
-
 int motor_control_main(void)
 {
+#if 0
     uint32_t    mcu_gpio0_BaseAddr;
     uint32_t    pin_step, pin_dir, count = 0;
     MotorMod MotorX, MotorY, MotorZ;;
@@ -405,6 +383,6 @@ int motor_control_main(void)
         count--;
         i++;
     }
-
+#endif
     return 0;
 }
