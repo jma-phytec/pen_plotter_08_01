@@ -10,6 +10,7 @@
  */
 const gpio       = scripting.addModule("/drivers/gpio/gpio", {}, false);
 const gpio1      = gpio.addInstance();
+const gpio2      = gpio.addInstance();
 const ipc        = scripting.addModule("/drivers/ipc/ipc");
 const debug_log  = scripting.addModule("/kernel/dpl/debug_log");
 const mpu_armv7  = scripting.addModule("/kernel/dpl/mpu_armv7", {}, false);
@@ -26,13 +27,19 @@ const mpu_armv77 = mpu_armv7.addInstance();
  */
 gpio1.$name                = "P18";
 gpio1.pinDir               = "OUTPUT";
-gpio1.GPIO.$assign         = "GPIO1";
-gpio1.GPIO.gpioPin.$assign = "ball.A14";
+gpio1.$name                = "P16";
+gpio1.GPIO.gpioPin.$assign = "ball.A13";
+
+gpio2.$name                = "P18";
+gpio2.pinDir               = "OUTPUT";
+gpio2.GPIO.gpioPin.$assign = "ball.A14";
 
 ipc.m4fss0_0 = "NONE";
 
 debug_log.enableCssLog       = false;
 debug_log.enableSharedMemLog = true;
+debug_log.enableUartLog      = true;
+debug_log.uartLog.$name      = "CONFIG_UART0";
 
 mpu_armv71.$name             = "CONFIG_MPU_REGION0";
 mpu_armv71.size              = 31;
@@ -68,3 +75,14 @@ mpu_armv76.accessPermissions = "Supervisor RD, User RD";
 mpu_armv77.$name    = "CONFIG_MPU_REGION6";
 mpu_armv77.baseAddr = 0x80000000;
 mpu_armv77.size     = 31;
+
+/**
+ * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
+ * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
+ * re-solve from scratch.
+ */
+gpio1.GPIO.$suggestSolution                 = "GPIO1";
+gpio2.GPIO.$suggestSolution                 = "GPIO1";
+debug_log.uartLog.UART.$suggestSolution     = "USART0";
+debug_log.uartLog.UART.RXD.$suggestSolution = "ball.D15";
+debug_log.uartLog.UART.TXD.$suggestSolution = "ball.C16";

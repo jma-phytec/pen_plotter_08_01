@@ -37,15 +37,8 @@
 #include <drivers/ipc_notify.h>
 #include <drivers/ipc_rpmsg.h>
 #include <math.h>
-#include <FreeRTOS.h>
-#include <task.h>
 #include <drivers/gpio.h>
 #include <kernel/dpl/AddrTranslateP.h>
-#include <tiescutils.h>
-#include <tiesceoefoe.h>
-#include <tiescsoc.h>
-#include <applInterface.h>
-#include <ecatslv.h>
 #include "ti_drivers_open_close.h"
 #include "ti_board_open_close.h"
 #include "motor_control.h"
@@ -68,6 +61,7 @@
  */
 
 uint8_t ipc_execute_line(char *line);
+extern MotorMod MotorX, MotorY, MotorZ;
 
 
 /* maximum size that message can have in this example */
@@ -287,7 +281,7 @@ uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr, Bool *is
 }
 
 
-uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, char *line)
+uint8_t gc_execute_line(char *line)
 {
     uint8_t char_counter = 0;
     char letter;
@@ -374,9 +368,9 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
                 break;
             case 20:    // inches
             case 21:    // millimeters
-                gpio_motor_control_ioctl(MotorX, UPDATE_UNIT, int_value);
-                gpio_motor_control_ioctl(MotorY, UPDATE_UNIT, int_value);
-                gpio_motor_control_ioctl(MotorZ, UPDATE_UNIT, int_value);
+                gpio_motor_control_ioctl(&MotorX, UPDATE_UNIT, int_value);
+                gpio_motor_control_ioctl(&MotorY, UPDATE_UNIT, int_value);
+                gpio_motor_control_ioctl(&MotorZ, UPDATE_UNIT, int_value);
                 break;
             case 17:
             case 18:
@@ -387,14 +381,14 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
                 break;
             case 90:    // absoulte mode
             case 91:    // relative mode
-                gpio_motor_control_ioctl(MotorX, UPDATE_POSITIONING, int_value);
-                gpio_motor_control_ioctl(MotorY, UPDATE_POSITIONING, int_value);
-                gpio_motor_control_ioctl(MotorZ, UPDATE_POSITIONING, int_value);
+                gpio_motor_control_ioctl(&MotorX, UPDATE_POSITIONING, int_value);
+                gpio_motor_control_ioctl(&MotorY, UPDATE_POSITIONING, int_value);
+                gpio_motor_control_ioctl(&MotorZ, UPDATE_POSITIONING, int_value);
                 break;
             case 92:    // set the current position as 0
-                gpio_motor_control_ioctl(MotorX, UPDATE_HOME, int_value);
-                gpio_motor_control_ioctl(MotorY, UPDATE_HOME, int_value);
-                gpio_motor_control_ioctl(MotorZ, UPDATE_HOME, int_value);
+                gpio_motor_control_ioctl(&MotorX, UPDATE_HOME, int_value);
+                gpio_motor_control_ioctl(&MotorY, UPDATE_HOME, int_value);
+                gpio_motor_control_ioctl(&MotorZ, UPDATE_HOME, int_value);
                 break;
             default:
                 break;
@@ -420,14 +414,14 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
             switch(letter){
               case 'F': // Feedrate
               case 'S': // Speed
-                  gpio_motor_control_setSpeed(MotorX, value);
-                  gpio_motor_control_setSpeed(MotorY, value);
-                  gpio_motor_control_setSpeed(MotorZ, value);
+                  gpio_motor_control_setSpeed(&MotorX, value);
+                  gpio_motor_control_setSpeed(&MotorY, value);
+                  gpio_motor_control_setSpeed(&MotorZ, value);
                   break;
               case 'X':     // X Direction
                   RequiredMoveX = TRUE;
 //#ifdef MOTORX
-                  gpio_motor_control_setNextPos(MotorX, value, isNegative);
+                  gpio_motor_control_setNextPos(&MotorX, value, isNegative);
                   isNegativeX = isNegative;
                   RequiredMoveX = TRUE;
 //#endif
@@ -435,14 +429,14 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
               case 'Y':     // Y Direction
                   RequiredMoveY = TRUE;
 //#ifdef MOTORY
-                  gpio_motor_control_setNextPos(MotorY, value, isNegative);
+                  gpio_motor_control_setNextPos(&MotorY, value, isNegative);
                   isNegativeY = isNegative;
                   RequiredMoveY = TRUE;
 //#endif
                   break;
               case 'Z':     // Z Direction
 //#ifdef MOTORZ
-                  gpio_motor_control_setNextPos(MotorZ, value, isNegative);
+                  gpio_motor_control_setNextPos(&MotorZ, value, isNegative);
                   isNegativeZ = isNegative;
                   RequiredMoveZ = TRUE;
 //#endif
@@ -454,24 +448,24 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
         }
     }
 
-    if(MotorX->positioning==90) // Absolute
-        MoveX = MotorX->next_pos - MotorX->cur_pos;
+    if(MotorX.positioning==90) // Absolute
+        MoveX = MotorX.next_pos - MotorX.cur_pos;
     else    // Relative
     {
         if(isNegativeX==0)
-            MoveX = MotorX->next_pos - MotorX->cur_pos;
+            MoveX = MotorX.next_pos - MotorX.cur_pos;
         else
-            MoveX = MotorX->cur_pos - MotorX->next_pos;
+            MoveX = MotorX.cur_pos - MotorX.next_pos;
     }
 
-    if(MotorY->positioning==90) // Absolutecristian moriatie
-        MoveY = MotorY->next_pos - MotorY->cur_pos;
+    if(MotorY.positioning==90) // Absolutecristian moriatie
+        MoveY = MotorY.next_pos - MotorY.cur_pos;
     else    // Relative
     {
         if(isNegativeY==0)
-            MoveY = MotorY->next_pos - MotorY->cur_pos;
+            MoveY = MotorY.next_pos - MotorY.cur_pos;
         else
-            MoveY = MotorY->cur_pos - MotorY->next_pos;
+            MoveY = MotorY.cur_pos - MotorY.next_pos;
     }
 
     if(MoveX < 0)
@@ -505,9 +499,9 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     if(RequiredMoveX)
     {
 #ifdef MOTORX
-        gpio_motor_move(MotorX, isNegativeX, true, RatioX);   // return after motor movement complete
+        gpio_motor_move(&MotorX, isNegativeX, TRUE, RatioX);   // return after motor movement complete
 #else
-        gpio_motor_move(MotorX, isNegativeX, false, RatioX);   // return after motor movement complete
+        gpio_motor_move(&MotorX, isNegativeX, FALSE, RatioX);   // return after motor movement complete
 #endif
         RequiredMoveX = FALSE;
         RatioX = 1;
@@ -515,9 +509,9 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     if(RequiredMoveY)
     {
 #ifdef MOTORY
-        gpio_motor_move(MotorY, isNegativeY, true, RatioY);   // return after motor movement complete
+        gpio_motor_move(&MotorY, isNegativeY, TRUE, RatioY);   // return after motor movement complete
 #else
-        gpio_motor_move(MotorY, isNegativeY, false, RatioY);   // return after motor movement complete
+        gpio_motor_move(&MotorY, isNegativeY, FALSE, RatioY);   // return after motor movement complete
 #endif
         RequiredMoveY = FALSE;
         RatioY = 1;
@@ -525,9 +519,9 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
     if(RequiredMoveZ)
     {
 #ifdef MOTORZ
-        gpio_motor_move(MotorZ, isNegativeZ, true, RatioZ);   // return after motor movement complete
+        gpio_motor_move(&MotorZ, isNegativeZ, TRUE, RatioZ);   // return after motor movement complete
 #else
-        gpio_motor_move(MotorZ, isNegativeZ, false, RatioZ);   // return after motor movement complete
+        gpio_motor_move(&MotorZ, isNegativeZ, FALSE, RatioZ);   // return after motor movement complete
 #endif
         RequiredMoveZ = FALSE;
         RatioZ = 1;
@@ -539,49 +533,27 @@ uint8_t gc_execute_line(MotorMod *MotorX, MotorMod *MotorY, MotorMod *MotorZ, ch
 
 extern char msgBuf[128];
 
-int motor_demo_main(void)
+int motor_demo_init(void)
 {
     //int i = 0;
     //char msgBuf[MAX_MSG_SIZE];
-    MotorMod MotorX, MotorY, MotorZ;
-
-    DebugP_log("Motor Demo Started\r\n");
-    memset(msgBuf, 0, MAX_MSG_SIZE-1);
-
-// TODO: gpio_motor_control_init -> other cores
 
 #ifdef MOTORX
-    gpio_motor_control_init(&MotorX, true);
+    gpio_motor_control_init(&MotorX, TRUE);
 #else
-    gpio_motor_control_init(&MotorX, false);
+    gpio_motor_control_init(&MotorX, FALSE);
 #endif
 #ifdef MOTORY
-    gpio_motor_control_init(&MotorY, true);
+    gpio_motor_control_init(&MotorY, TRUE);
 #else
-    gpio_motor_control_init(&MotorY, false);
+    gpio_motor_control_init(&MotorY, FALSE);
 #endif
 #ifdef MOTORZ
-    gpio_motor_control_init(&MotorZ, true);
+    gpio_motor_control_init(&MotorZ, TRUE);
 #else
-    gpio_motor_control_init(&MotorZ, false);
+    gpio_motor_control_init(&MotorZ, FALSE);
 #endif
 
-    bMotorApplication = TRUE;
-    bGCodeCommandRunning = FALSE;
-    //bGCodeCommandRunning = TRUE;
-    do
-    {
-        if(bGCodeCommandRunning==TRUE)
-        {
-            bGCodeCommandRunning = FALSE;
-            //gc_execute_line(&MotorX, &MotorY, &MotorZ, msgBuf);       // G Code Parser
-            ipc_execute_line(msgBuf);
-        }
-        else
-            vTaskDelay(5);
-    }
-    while(bMotorApplication == TRUE);
-    /* This loop will never exit */
     return 0;
 }
 
