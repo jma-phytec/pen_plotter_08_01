@@ -1,5 +1,5 @@
 /*
- *  MotorX Control
+ *  Motor Control
  *
  */
 
@@ -297,92 +297,23 @@ void gpio_motor_control_dir_main(MotorMod *Motor)
 }
 
 
-#define SMOOTH 2
-
-int motor_control_main(void)
+int motor_demo_init(void)
 {
-#if 0
-    uint32_t    mcu_gpio0_BaseAddr;
-    uint32_t    pin_step, pin_dir, count = 0;
-    MotorMod MotorX, MotorY, MotorZ;;
-    int32_t    lowest_width, width, peak_width;
-    uint32_t    i, flag, rampcnt;
-
 #ifdef MOTORX
-    gpio_motor_control_init(&MotorX, true);
+    gpio_motor_control_init(&MotorX, TRUE);
 #else
-    gpio_motor_control_init(&MotorX, false);
+    gpio_motor_control_init(&MotorX, FALSE);
 #endif
 #ifdef MOTORY
-    gpio_motor_control_init(&MotorY, true);
+    gpio_motor_control_init(&MotorY, TRUE);
 #else
-    gpio_motor_control_init(&MotorY, false);
+    gpio_motor_control_init(&MotorY, FALSE);
 #endif
 #ifdef MOTORZ
-    gpio_motor_control_init(&MotorZ, true);
+    gpio_motor_control_init(&MotorZ, TRUE);
 #else
-    gpio_motor_control_init(&MotorZ, false);
+    gpio_motor_control_init(&MotorZ, FALSE);
 #endif
-    DebugP_log("Motor Control Started\r\n");
 
-    /* Get address after translation translate */
-    mcu_gpio0_BaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_MOTOR_STEP_BASE_ADDR);
-    pin_step       = GPIO_MOTOR_STEP_PIN;
-    pin_dir        = GPIO_MOTOR_DIR_PIN;
-
-    GPIO_setDirMode(mcu_gpio0_BaseAddr, pin_step, GPIO_MOTOR_STEP_DIR);
-    GPIO_setDirMode(mcu_gpio0_BaseAddr, pin_dir, GPIO_MOTOR_DIR_DIR);
-
-    i = 0;
-    count = 10000;
-    lowest_width = 1100;    //550;
-    width = lowest_width;
-    flag = 0;
-    peak_width = 100;   //50;
-    if(count > 1000)
-        rampcnt = 500;
-    else
-        rampcnt = count / 2;
-
-    rampcnt = rampcnt * SMOOTH;
-
-    // 300/300 -> 1.6K
-    // 100/400 -> 2K
-    // 100/300 -> 2.5K
-    // 50/300 -> 2.8K
-
-    bMotorApplication = TRUE;
-    while(count>0)
-    {
-        GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_step);
-        //GPIO_pinWriteHigh(mcu_gpio0_BaseAddr, pin_dir);
-        //ClockP_usleep(500);     // 32 micro step setup (with loading)
-        ClockP_usleep(50);     // 16 micro step setup (with loading)
-        GPIO_pinWriteLow(mcu_gpio0_BaseAddr, pin_step);
-
-        if(i<rampcnt)
-        {
-            if(width > peak_width)
-            {
-                if(i%SMOOTH)
-                    width = width - 1;
-            }
-        }
-        else if(count<rampcnt)
-        {
-            if(width < lowest_width)
-            {
-                if(i%SMOOTH)
-                    width = width + 1;
-            }
-        }
-
-
-        ClockP_usleep(width);
-
-        count--;
-        i++;
-    }
-#endif
     return 0;
 }
