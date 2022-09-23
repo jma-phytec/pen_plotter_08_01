@@ -87,8 +87,6 @@
         <pathVariable name="MCU_PLUS_SDK_PATH" path="${COM_TI_MCU_PLUS_SDK_AM64X_INSTALL_DIR}" scope="project" />
         <file path="${MCU_PLUS_SDK_PATH}/examples/industrial_comms/ethercat_slave_beckhoff_ssc_demo/ipc_rpmsg_echo.c" openOnCreation="false" excludeFromBuild="false" action="link">
         </file>
-        <file path="../../../gcode_data.h" openOnCreation="false" excludeFromBuild="false" action="link">
-        </file>
         <file path="../../../gcode_parser.c" openOnCreation="false" excludeFromBuild="false" action="link">
         </file>
         <file path="../../../motor_control.c" openOnCreation="false" excludeFromBuild="false" action="link">

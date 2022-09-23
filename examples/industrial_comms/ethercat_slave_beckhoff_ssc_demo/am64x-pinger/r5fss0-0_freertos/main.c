@@ -40,21 +40,16 @@
 
 #define MAIN_TASK_PRI  (configMAX_PRIORITIES-1)
 #define MOTOR_TASK_PRI  (configMAX_PRIORITIES-2)
-#define IPC_TASK_PRI  (configMAX_PRIORITIES-3)
 
 #define MAIN_TASK_SIZE (32768U/sizeof(configSTACK_DEPTH_TYPE))
 #define MOTOR_TASK_SIZE (32768U/sizeof(configSTACK_DEPTH_TYPE))
-#define IPC_TASK_SIZE (32768U/sizeof(configSTACK_DEPTH_TYPE))
 StackType_t gMainTaskStack[MAIN_TASK_SIZE] __attribute__((aligned(32)));
 StackType_t gMotorTaskStack[MOTOR_TASK_SIZE] __attribute__((aligned(32)));
-StackType_t gIPCTaskStack[IPC_TASK_SIZE] __attribute__((aligned(32)));
 
 StaticTask_t gMainTaskObj;
 StaticTask_t gMotorTaskObj;
-StaticTask_t gIPCTaskObj;
 TaskHandle_t gMainTask;
 TaskHandle_t gMotorTask;
-TaskHandle_t gIPCTask;
 
 void ethercat_slave_beckhoff_ssc_demo_main(void *args);
 void motor_control_main(void *args);
@@ -64,22 +59,18 @@ void ipc_rpmsg_echo_main_core_init(void *args);
 
 void motor_main(void *args)
 {
-    //motor_control_main(NULL);
+    // Initialize RPMessage
+    ipc_rpmsg_echo_main_core_init(NULL);
+
     motor_demo_main(NULL);
+
     vTaskDelete(NULL);
 }
 
 void frertos_main(void *args)
 {
+    // EtherCAT slave application
     ethercat_slave_beckhoff_ssc_demo_main(NULL);
-
-    vTaskDelete(NULL);
-}
-
-void ipc_main(void *args)
-{
-    //ipc_rpmsg_echo_main(NULL);
-    ipc_rpmsg_echo_main_core_init(NULL);
 
     vTaskDelete(NULL);
 }
@@ -103,32 +94,6 @@ void EthRefCLK_init(void)
 {
     Pinmux_config(My_gPinMuxMainDomainCfg, PINMUX_DOMAIN_ID_MAIN);
 }
-
-//is this really needed? Didnt have to do this to get the same phys working on the pinger lite
-// WAIT, so does this even do anything
-/*
-static void EnetMp_ReleasePhyResets(void) {
-    uint32_t phyResetBaseAddr, pinNum;
-
-    // enable CPSW3G OUTCLK (used by ICSSG PHYs)
-    //EnetAppUtils_enableClkOut(ENET_CPSW_3G, ENETAPPUTILS_CLKOUT_FREQ_25MHZ);
-
-    // wait for clock to come alive
-    ClockP_usleep(1);
-#if 0
-    // release PHY1 reset
-    phyResetBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_PHY1_RESET_BASE_ADDR);
-    pinNum = GPIO_PHY1_RESET_PIN;
-    GPIO_setDirMode(phyResetBaseAddr, pinNum, GPIO_DIRECTION_OUTPUT);
-    GPIO_pinWriteHigh(phyResetBaseAddr, pinNum);
-
-    // release PHY2 reset
-    phyResetBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_PHY2_RESET_BASE_ADDR);
-    pinNum = GPIO_PHY2_RESET_PIN;
-    GPIO_setDirMode(phyResetBaseAddr, pinNum, GPIO_DIRECTION_OUTPUT);
-    GPIO_pinWriteHigh(phyResetBaseAddr, pinNum);
-#endif
-}*/
 
 // PHYTEC - Map some special address we need to enable the ethernet clock below for the phyCORE-AM64x and Pinger carrier board
 #define CTRLMMR_LOCK2_KICK0 (uint32_t*)0x43009008
@@ -168,15 +133,6 @@ int main()
                                   gMotorTaskStack,  /* pointer to stack base */
                                   &gMotorTaskObj ); /* pointer to statically allocated task object memory */
     configASSERT(gMotorTask != NULL);
-
-    gIPCTask = xTaskCreateStatic( ipc_main, //motor_main,   /* Pointer to the function that implements the task. */
-                                  "ipc_main", /* Text name for the task.  This is to facilitate debugging only. */
-                                  IPC_TASK_SIZE,  /* Stack depth in units of StackType_t typically uint32_t on 32b CPUs */
-                                  NULL,            /* We are not using the task parameter. */
-                                  IPC_TASK_PRI,   /* task priority, 0 is lowest priority, configMAX_PRIORITIES-1 is highest */
-                                  gIPCTaskStack,  /* pointer to stack base */
-                                  &gIPCTaskObj ); /* pointer to statically allocated task object memory */
-    configASSERT(gIPCTask != NULL);
 
     /* Start the scheduler to start the tasks executing. */
     vTaskStartScheduler();

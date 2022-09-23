@@ -42,7 +42,6 @@
 #include "ti_drivers_open_close.h"
 #include "ti_board_open_close.h"
 #include "motor_control.h"
-#include "gcode_data.h"
 
 /* This example shows message exchange between multiple cores.
  *
@@ -63,9 +62,10 @@
 uint8_t ipc_execute_line(char *line);
 extern MotorMod MotorX, MotorY, MotorZ;
 
-
 /* maximum size that message can have in this example */
 #define MAX_MSG_SIZE        (128u)
+
+#define MAX_INT_DIGITS 8 // Maximum number of digits in int32 (and float)
 
 double to_degrees(double rad)
 {
@@ -202,9 +202,6 @@ void DrawCur(Point SP, Point EP, double I, double J, uint8_t CW)
         }
 }
 
-
-#define MAX_INT_DIGITS 8 // Maximum number of digits in int32 (and float)
-
 uint8_t read_float(char *line, uint8_t *char_counter, float *float_ptr, Bool *isNegative)
 {
   char *ptr = line + *char_counter;
@@ -289,15 +286,15 @@ uint8_t gc_execute_line(char *line)
     uint8_t int_value = 0;
     uint16_t mantissa = 0;
     Bool isNegative = FALSE;
-    Bool isNegativeX = FALSE;
-    Bool isNegativeY = FALSE;
-    Bool isNegativeZ = FALSE;
-    Bool RequiredMoveX = FALSE;
-    Bool RequiredMoveY = FALSE;
-    Bool RequiredMoveZ = FALSE;
+    Bool isNegativeX = FALSE;       // Direction of Motor X
+    Bool isNegativeY = FALSE;       // Direction of Motor Y
+    Bool isNegativeZ = FALSE;       // Direction of Motor Z
+    Bool RequiredMoveX = FALSE;     // Any movement required for Motor X
+    Bool RequiredMoveY = FALSE;     // Any movement required for Motor Y
+    Bool RequiredMoveZ = FALSE;     // Any movement required for Motor Z
 
     float MoveX = 0, MoveY = 0;
-    float RatioX = 1, RatioY = 1, RatioZ = 1;
+    float RatioX = 1, RatioY = 1, RatioZ = 1;   // different motors may run in different speeds
 
     if(line[0]=='$')
     {
@@ -323,10 +320,8 @@ uint8_t gc_execute_line(char *line)
         }
 
         char_counter++;
-        //DebugP_log("char_counter %d\r\n", char_counter);
 
-
-        if(!read_float(line, &char_counter, &value, &isNegative))   // Read command code
+        if(!read_float(line, &char_counter, &value, &isNegative))   // Read command value
         {
             return 0;
         }
@@ -399,8 +394,6 @@ uint8_t gc_execute_line(char *line)
             switch(int_value)
             {
               case 0:
-                  //ClockP_usleep(1000*100);
-                  //ClockP_usleep(1000*100);
               case 2:
               case 30:
                   // Stop Program
@@ -419,27 +412,19 @@ uint8_t gc_execute_line(char *line)
                   gpio_motor_control_setSpeed(&MotorZ, value);
                   break;
               case 'X':     // X Direction
-                  RequiredMoveX = TRUE;
-//#ifdef MOTORX
-                  gpio_motor_control_setNextPos(&MotorX, value, isNegative);
+                  gpio_motor_control_setNextPos(&MotorX, value, isNegative);    // update new position
                   isNegativeX = isNegative;
                   RequiredMoveX = TRUE;
-//#endif
                   break;
               case 'Y':     // Y Direction
-                  RequiredMoveY = TRUE;
-//#ifdef MOTORY
-                  gpio_motor_control_setNextPos(&MotorY, value, isNegative);
+                  gpio_motor_control_setNextPos(&MotorY, value, isNegative);    // update new position
                   isNegativeY = isNegative;
                   RequiredMoveY = TRUE;
-//#endif
                   break;
               case 'Z':     // Z Direction
-//#ifdef MOTORZ
-                  gpio_motor_control_setNextPos(&MotorZ, value, isNegative);
+                  gpio_motor_control_setNextPos(&MotorZ, value, isNegative);    // update new position
                   isNegativeZ = isNegative;
                   RequiredMoveZ = TRUE;
-//#endif
                   break;
               default:
                   break;
@@ -448,6 +433,7 @@ uint8_t gc_execute_line(char *line)
         }
     }
 
+    // Calculate Displacement of X direction
     if(MotorX.positioning==90) // Absolute
         MoveX = MotorX.next_pos - MotorX.cur_pos;
     else    // Relative
@@ -457,8 +443,11 @@ uint8_t gc_execute_line(char *line)
         else
             MoveX = MotorX.cur_pos - MotorX.next_pos;
     }
+    if(MoveX < 0)
+        MoveX = -MoveX;
 
-    if(MotorY.positioning==90) // Absolutecristian moriatie
+    // Calculate Displacement of Y direction
+    if(MotorY.positioning==90) // Absolute
         MoveY = MotorY.next_pos - MotorY.cur_pos;
     else    // Relative
     {
@@ -467,12 +456,11 @@ uint8_t gc_execute_line(char *line)
         else
             MoveY = MotorY.cur_pos - MotorY.next_pos;
     }
-
-    if(MoveX < 0)
-        MoveX = -MoveX;
     if(MoveY < 0)
         MoveY = -MoveY;
 
+
+    // Calculate ratio of motor speed to be applied in Motor X and Motor Y
     if((MoveX < 0.01) || (MoveY < 0.01) || (((MoveX-MoveY) < 0.1) && ((MoveY-MoveX) < 0.1)))
     {
         RatioX = 1;
@@ -530,30 +518,3 @@ uint8_t gc_execute_line(char *line)
 
     return 0;
 }
-
-extern char msgBuf[128];
-
-int motor_demo_init(void)
-{
-    //int i = 0;
-    //char msgBuf[MAX_MSG_SIZE];
-
-#ifdef MOTORX
-    gpio_motor_control_init(&MotorX, TRUE);
-#else
-    gpio_motor_control_init(&MotorX, FALSE);
-#endif
-#ifdef MOTORY
-    gpio_motor_control_init(&MotorY, TRUE);
-#else
-    gpio_motor_control_init(&MotorY, FALSE);
-#endif
-#ifdef MOTORZ
-    gpio_motor_control_init(&MotorZ, TRUE);
-#else
-    gpio_motor_control_init(&MotorZ, FALSE);
-#endif
-
-    return 0;
-}
-
