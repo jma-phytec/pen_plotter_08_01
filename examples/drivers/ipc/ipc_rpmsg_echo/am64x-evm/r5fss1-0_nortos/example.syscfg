@@ -11,6 +11,9 @@
 const gpio       = scripting.addModule("/drivers/gpio/gpio", {}, false);
 const gpio1      = gpio.addInstance();
 const gpio2      = gpio.addInstance();
+const gpio3      = gpio.addInstance();
+const gpio4      = gpio.addInstance();
+const gpio5      = gpio.addInstance();
 const ipc        = scripting.addModule("/drivers/ipc/ipc");
 const debug_log  = scripting.addModule("/kernel/dpl/debug_log");
 const mpu_armv7  = scripting.addModule("/kernel/dpl/mpu_armv7", {}, false);
@@ -25,14 +28,26 @@ const mpu_armv77 = mpu_armv7.addInstance();
 /**
  * Write custom configuration values to the imported modules.
  */
-gpio1.$name                = "P16";
 gpio1.pinDir               = "OUTPUT";
-gpio1.$name                = "P11";
-gpio1.GPIO.gpioPin.$assign = "ball.Y20";
+gpio1.$name                = "STEP_Y";
+gpio1.GPIO.gpioPin.rx      = false;
+gpio1.GPIO.gpioPin.$assign = "ball.U2";
 
 gpio2.pinDir               = "OUTPUT";
-gpio2.$name                = "P17";
-gpio2.GPIO.gpioPin.$assign = "ball.P17";
+gpio2.$name                = "DIR_Y";
+gpio2.GPIO.gpioPin.rx      = false;
+gpio2.GPIO.gpioPin.$assign = "ball.Y1";
+
+gpio3.$name                = "EN_Y";
+gpio3.pinDir               = "OUTPUT";
+gpio3.GPIO.gpioPin.rx      = false;
+gpio3.GPIO.gpioPin.$assign = "ball.P17";
+
+gpio4.$name                = "nFAULT_Y";
+gpio4.GPIO.gpioPin.$assign = "ball.V4";
+
+gpio5.$name                = "ALERT_Y";
+gpio5.GPIO.gpioPin.$assign = "ball.R6";
 
 ipc.m4fss0_0 = "NONE";
 
@@ -81,8 +96,11 @@ mpu_armv77.size     = 31;
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-gpio1.GPIO.$suggestSolution                 = "GPIO0";
-gpio2.GPIO.$suggestSolution                 = "GPIO0";
+gpio1.GPIO.$suggestSolution                 = "GPIO1";
+gpio2.GPIO.$suggestSolution                 = "GPIO1";
+gpio3.GPIO.$suggestSolution                 = "GPIO0";
+gpio4.GPIO.$suggestSolution                 = "GPIO1";
+gpio5.GPIO.$suggestSolution                 = "GPIO1";
 debug_log.uartLog.UART.$suggestSolution     = "USART1";
 debug_log.uartLog.UART.RXD.$suggestSolution = "ball.E15";
 debug_log.uartLog.UART.TXD.$suggestSolution = "ball.E14";

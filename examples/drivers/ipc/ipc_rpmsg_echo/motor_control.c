@@ -161,30 +161,30 @@ void gpio_motor_control_init(MotorMod *Motor, Bool isMove)
     Motor->isActive = TRUE;
 
 #ifdef MOTORX
-    Motor->step_base_addr = P7_BASE_ADDR;
-    Motor->step_pin = P7_PIN;
-    Motor->step_dir = P7_DIR;
-    Motor->dir_base_addr = P9_BASE_ADDR;
-    Motor->dir_pin = P9_PIN;
-    Motor->dir_dir = P9_DIR;
+    Motor->step_base_addr = STEP_X_BASE_ADDR;
+    Motor->step_pin = STEP_X_PIN;
+    Motor->step_dir = STEP_X_DIR;
+    Motor->dir_base_addr = DIR_X_BASE_ADDR;
+    Motor->dir_pin = DIR_X_PIN;
+    Motor->dir_dir = DIR_X_DIR;
 #endif
 
 #ifdef MOTORY
-    Motor->step_base_addr = P11_BASE_ADDR;
-    Motor->step_pin = P11_PIN;
-    Motor->step_dir = P11_DIR;
-    Motor->dir_base_addr = P17_BASE_ADDR;
-    Motor->dir_pin = P17_PIN;
-    Motor->dir_dir = P17_DIR;
+    Motor->step_base_addr = STEP_Y_BASE_ADDR;
+    Motor->step_pin = STEP_Y_PIN;
+    Motor->step_dir = STEP_Y_DIR;
+    Motor->dir_base_addr = DIR_Y_BASE_ADDR;
+    Motor->dir_pin = DIR_Y_PIN;
+    Motor->dir_dir = DIR_Y_DIR;
 #endif
 
 #ifdef MOTORZ
-    Motor->step_base_addr = P16_BASE_ADDR;
-    Motor->step_pin = P16_PIN;
-    Motor->step_dir = P16_DIR;
-    Motor->dir_base_addr = P18_BASE_ADDR;
-    Motor->dir_pin = P18_PIN;
-    Motor->dir_dir = P18_DIR;
+    Motor->step_base_addr = STEP_Z_BASE_ADDR;
+    Motor->step_pin = STEP_Z_PIN;
+    Motor->step_dir = STEP_Z_DIR;
+    Motor->dir_base_addr = DIR_Z_BASE_ADDR;
+    Motor->dir_pin = DIR_Z_PIN;
+    Motor->dir_dir = DIR_Z_DIR;
 #endif
 
     gpio_motor_control_setSpeed(Motor, 6000);   // 6000mm per min = 100mm per sec
