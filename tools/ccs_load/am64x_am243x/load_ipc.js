@@ -76,7 +76,7 @@ isAvailableM4 = false;
 sdkPath = System.getenv("MCU_PLUS_SDK_AM64X_PATH");
 if(sdkPath == null)
 {
-    sdkPath = "C:/ti/workspace_v12";
+    sdkPath = "D:/ti/workspace_v12";
 }
 
 // !!! EDIT THIS !!! Edit all of below based on the example you want to run

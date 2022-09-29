@@ -54,6 +54,7 @@
 /* ========================================================================== */
 /*                            Global Variables                                */
 /* ========================================================================== */
+uint32_t gHS_val;
 
 /* ========================================================================== */
 /*                       Function Definitions                                 */
@@ -428,16 +429,10 @@ void APPL_Application(void)
 
     // HomeSwitch
     {
-        uint32_t hs_val;
-        hs_val = tiesc_readHomeSwitch();
-        bHomeSwitch = hs_val;
-
-        if(hs_val==0)
-            sAI1Inputs.info1 = 0;
-        else if(hs_val==1)
-            sAI1Inputs.info1 = 1;
+        if(gHS_val == 0x79)   // XX11 1XXX
+            sAI1Inputs.info1 = 0x79;
         else
-            sAI1Inputs.info1 = 2;
+            sAI1Inputs.info1 = 0x0;
     }
 
     sDIInputs.switchs = Tmpswitchs;
