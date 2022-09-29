@@ -44,10 +44,36 @@
 #include "ti_drivers_config.h"
 #include <industrial_comms/ethercat_slave/beckhoff_stack/stack_hal/tieschw.h>
 #include "tiesc_eeprom.h" // header equivalent of ESI bin file
+#include <drivers/i2c.h>
+#include "ti_drivers_config.h"
+#include "ti_drivers_open_close.h"
+#include "ti_board_open_close.h"
+
+volatile uint32_t gUserSharedMem __attribute__((aligned(128), section(".bss.user_shared_mem")));
 
 /* ========================================================================== */
 /*                           Macros & Typedefs                                */
 /* ========================================================================== */
+
+#define TCA9534_IO_EXP  0x20
+
+/* Input Port Register */
+#define TCA9534_INPUT_PORT_REG  (0x0000U)
+/* Output Port Register */
+#define TCA9534_OUTPUT_PORT_REG  (0x0001U)
+/* Polarity Inversion Register */
+#define TCA9534_POLARITY_INV_REG  (0x0002U)
+/* Configuration Register */
+#define TCA9534_CFG_REG  (0x0003U)
+
+
+/*
+    Bit     7   6       5       4       3       2       1       0
+            X   ALERT_Z HS_Z    HS_Y    HS_X    BLUE    GREE    RED
+            X   IN      IN      IN      IN      OUT     OUT     OUT
+            X   1       1       1       1       0       0       0
+*/
+#define TCA9534_CFG_REG_VAL (0x0078U)
 
 /* EEPROM data offset in I2C EEPROM Flash */
 #define I2C_EEPROM_DATA_OFFSET      (0x8000)
@@ -175,14 +201,168 @@ void tiesc_displayEscVersion(uint16_t revision, uint16_t build)
 
 uint32_t tiesc_readHomeSwitch(void)
 {
-    uint32_t    hs_val = 0;
+    uint16_t        sample;
+    int16_t         temperature;
+    uint8_t         txBuffer[2];
+    uint8_t         rxBuffer[2];
+    int32_t         status;
+    uint8_t         deviceAddress;
+    I2C_Handle      i2cHandle;
+    I2C_Transaction i2cTransaction;
 
+    i2cHandle = gI2cHandle[CONFIG_I2C1];
+
+    uint32_t    hs_val = 0x44;
+
+    /* Determine if TCA9534 is present */
+    deviceAddress = TCA9534_IO_EXP;
+    status = I2C_probe(i2cHandle, deviceAddress);
+    if(status == SystemP_SUCCESS)
+    {
+        //DebugP_log("[I2C] TCA9534 found at device address 0x%02x \r\n", deviceAddress);
+    }
+    else
+    {
+        //DebugP_logError("[I2C] TCA9534 not found at device address 0x%02x \r\n", deviceAddress);
+    }
+
+    if(status == SystemP_SUCCESS)
+    {
+        /* Select configuration register */
+        I2C_Transaction_init(&i2cTransaction);
+        i2cTransaction.writeBuf   = txBuffer;
+        i2cTransaction.writeCount = 2;
+        i2cTransaction.slaveAddress = deviceAddress;
+        txBuffer[0] = TCA9534_CFG_REG;
+        txBuffer[1] = TCA9534_CFG_REG_VAL;
+        status = I2C_transfer(i2cHandle, &i2cTransaction);
+
+        if(status == SystemP_SUCCESS)
+        {
+            /* Select input port register */
+            I2C_Transaction_init(&i2cTransaction);
+            i2cTransaction.writeBuf   = txBuffer;
+            i2cTransaction.writeCount = 1;
+            i2cTransaction.slaveAddress = deviceAddress;
+            txBuffer[0] = TCA9534_INPUT_PORT_REG;
+            status = I2C_transfer(i2cHandle, &i2cTransaction);
+            if(status == SystemP_SUCCESS)
+            {
+                /* read the results */
+                I2C_Transaction_init(&i2cTransaction);
+                i2cTransaction.readBuf = rxBuffer;
+                i2cTransaction.readCount = 1;
+                i2cTransaction.slaveAddress = deviceAddress;
+                rxBuffer[0] = 0;
+                status = I2C_transfer(i2cHandle, &i2cTransaction);
+                if(status == SystemP_SUCCESS)
+                {
+                    //DebugP_log("Homeswitch 0x%x\r\n", rxBuffer[0]);
+                    hs_val = rxBuffer[0];
+                    gUserSharedMem = hs_val;
+                }
+            }
+        }
+    }
     return hs_val;
 }
 
 void tiesc_setOutputLed(uint8_t mask)
 {
     //LED_setMask(gLedHandle[CONFIG_LED_DIGITAL_OUTPUT], (uint32_t)(0xFFFF & mask));
+
+    uint8_t         txBuffer[2];
+    uint8_t         rxBuffer[2];
+    int32_t         status;
+    uint8_t         deviceAddress;
+    I2C_Handle      i2cHandle;
+    I2C_Transaction i2cTransaction;
+
+    i2cHandle = gI2cHandle[CONFIG_I2C1];
+
+    /* Determine if TCA9534 is present */
+    deviceAddress = TCA9534_IO_EXP;
+    status = I2C_probe(i2cHandle, deviceAddress);
+    if(status == SystemP_SUCCESS)
+    {
+        DebugP_log("[I2C] TCA9534 found at device address 0x%02x \r\n", deviceAddress);
+    }
+    else
+    {
+        DebugP_logError("[I2C] TCA9534 not found at device address 0x%02x \r\n", deviceAddress);
+    }
+
+    if(status == SystemP_SUCCESS)
+    {
+        /* Select configuration register */
+        I2C_Transaction_init(&i2cTransaction);
+        i2cTransaction.writeBuf   = txBuffer;
+        i2cTransaction.writeCount = 2;
+        i2cTransaction.slaveAddress = deviceAddress;
+        txBuffer[0] = TCA9534_CFG_REG;
+        txBuffer[1] = TCA9534_CFG_REG_VAL;
+        status = I2C_transfer(i2cHandle, &i2cTransaction);
+
+        if(status == SystemP_SUCCESS)
+        {
+#if 0   // old code
+             if(mask & 0x01)
+                 GPIO_pinWriteHigh(gpioBaseAddr, RED_GPIO_PIN);
+             if(mask & 0x02)
+                 GPIO_pinWriteHigh(gpioBaseAddr, GREEN_GPIO_PIN);
+             if(mask & 0x04)
+                 GPIO_pinWriteHigh(gpioBaseAddr, BLUE_GPIO_PIN);
+#endif
+             DebugP_log("tiesc_setOutputLed mask 0x%x \r\n", mask);
+
+             if(mask==0x01)
+            {
+                /* RED */
+                I2C_Transaction_init(&i2cTransaction);
+                i2cTransaction.writeBuf   = txBuffer;
+                i2cTransaction.writeCount = 2;
+                i2cTransaction.slaveAddress = deviceAddress;
+                txBuffer[0] = TCA9534_OUTPUT_PORT_REG;
+                txBuffer[1] = 0x1U;
+                status = I2C_transfer(i2cHandle, &i2cTransaction);
+            }
+            else if(mask & 0x6a)
+            {
+                /* GREEN */
+                I2C_Transaction_init(&i2cTransaction);
+                i2cTransaction.writeBuf   = txBuffer;
+                i2cTransaction.writeCount = 2;
+                i2cTransaction.slaveAddress = deviceAddress;
+                txBuffer[0] = TCA9534_OUTPUT_PORT_REG;
+                txBuffer[1] = 0x2U;
+                status = I2C_transfer(i2cHandle, &i2cTransaction);
+            }
+            else if(mask & 0x04)
+            {
+                /* BLUE */
+                I2C_Transaction_init(&i2cTransaction);
+                i2cTransaction.writeBuf   = txBuffer;
+                i2cTransaction.writeCount = 2;
+                i2cTransaction.slaveAddress = deviceAddress;
+                txBuffer[0] = TCA9534_OUTPUT_PORT_REG;
+                txBuffer[1] = 0x4U;
+                status = I2C_transfer(i2cHandle, &i2cTransaction);
+            }
+            else
+            {
+                /* RED */
+                I2C_Transaction_init(&i2cTransaction);
+                i2cTransaction.writeBuf   = txBuffer;
+                i2cTransaction.writeCount = 2;
+                i2cTransaction.slaveAddress = deviceAddress;
+                txBuffer[0] = TCA9534_OUTPUT_PORT_REG;
+                txBuffer[1] = 0x1U;
+                status = I2C_transfer(i2cHandle, &i2cTransaction);
+            }
+
+        }
+    }
+
 
 }
 

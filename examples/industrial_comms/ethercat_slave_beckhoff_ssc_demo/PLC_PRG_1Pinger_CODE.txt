@@ -6,6 +6,7 @@
 refCommand0 REF= sCommand0;
 refCommand1 REF= sCommand1;
 refCommand2 REF= sCommand2;
+refCommandR REF= sCommandR;
 refCommandSH REF= sCommandSH;
 refCommandGHZ REF= sCommandGHZ;
 refCommandR0_23 REF= sCommandR0_23;
@@ -15,11 +16,11 @@ refCommandR0_25 REF= sCommandR0_25;
 refOutput REF= sOutput;
 
 btnP := FALSE;
-btnC := FALSE;
+btnR := FALSE;
 btnH := FALSE;
 
 IF mode = 0 THEN
-SysProcessExecuteCommand2(pszCommand:=refCommandR0_23, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+SysProcessExecuteCommand2(pszCommand:=refCommandR0_24, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 pt0 := ADR(sOutput);
 IF StrCaseCmpA(pt0, ptV0) = 0 THEN	//	Print
 	btnP := TRUE;
@@ -27,10 +28,10 @@ END_IF
 END_IF
 
 IF mode = 0 OR mode = 1 THEN
-SysProcessExecuteCommand2(pszCommand:=refCommandR0_24, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
+SysProcessExecuteCommand2(pszCommand:=refCommandR0_23, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 pt0 := ADR(sOutput);
 IF StrCaseCmpA(pt0, ptV0) = 0 THEN	// Calibration
-	btnC := TRUE;
+	btnR := TRUE;
 END_IF
 END_IF
 
@@ -40,6 +41,10 @@ pt0 := ADR(sOutput);
 IF StrCaseCmpA(pt0, ptV0) = 0 THEN	// Home
 	btnH := TRUE;
 END_IF
+END_IF
+
+IF btnR = TRUE THEN
+	SysProcessExecuteCommand2(pszCommand:=refCommandR, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));	
 END_IF
 
 IF mode = 0 THEN
@@ -188,21 +193,21 @@ IF StrCaseCmpA(pt0, ptGHZ) = 0 THEN	//	Go Home: Moving Z-axis
 	SysProcessExecuteCommand2(pszCommand:=refCommand2, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 	pt0 := ADR(sOutput);
 		IF StrCaseCmpA(pt0, pt80) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-80';
+			gohome_gcode_string[0] := 'G01 Z-8';
 		ELSIF StrCaseCmpA(pt0, pt81) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-81';
+			gohome_gcode_string[0] := 'G01 Z-8';
 		ELSIF StrCaseCmpA(pt0, pt82) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-82';
+			gohome_gcode_string[0] := 'G01 Z-8';
 		ELSIF StrCaseCmpA(pt0, pt83) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-83';
+			gohome_gcode_string[0] := 'G01 Z-8';
 		ELSIF StrCaseCmpA(pt0, pt84) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-84';
+			gohome_gcode_string[0] := 'G01 Z-8';
 		ELSIF StrCaseCmpA(pt0, pt85) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-85';
+			gohome_gcode_string[0] := 'G01 Z-8';
 		ELSIF StrCaseCmpA(pt0, pt86) = 0 THEN
-			gohome_gcode_string[0] := 'G01 Z-86';
+			gohome_gcode_string[0] := 'G01 Z-8';
 		ELSE
-			gohome_gcode_string[0] := 'G01 Z-86';			
+			gohome_gcode_string[0] := 'G01 Z-80';			
 		END_IF	
 	
 	mode := 15;
@@ -225,7 +230,7 @@ IF mode = 1 THEN	// Calibration
 	END_IF
 END_IF
 IF mode = 2 THEN	// Print
-	IF line > 13 THEN	// 548 (bunny), 4548 (cartoonsom), 623 (phytec), 4687 (phytecLogo), 1284 (phytecP)
+	IF line > 13 THEN
 		line := 0;
 		gcode_count := 0;
 		state := 10;
@@ -282,7 +287,7 @@ IF mode = 12 THEN	// Set Home
 	END_IF
 END_IF
 IF mode = 13 THEN	// Go to Home Switch
-	IF s0_info1 = 1 THEN
+	IF s0_info1 = 121 THEN	// 0x79
 				state := 10;
 	END_IF
 	IF line > 2 THEN
@@ -292,21 +297,21 @@ IF mode = 13 THEN	// Go to Home Switch
 	END_IF
 END_IF
 IF mode = 14 THEN	// Go Home
-	IF s0_info1 = 1 THEN
+	IF s0_info1 = 121 THEN	// 0x79
 				//SysProcessExecuteCommand2(pszCommand:=refCommand2, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 				line := 0;
 				gcode_count := 0;
 				state := 10;
 				SysProcessExecuteCommand2(pszCommand:=refCommandGHZ, pszStdOut:=refOutput, udiStdOutLen:=SIZEOF(sOutput), pResult:=ADR(result));
 	END_IF
-	IF line > 1 THEN
+	IF line > 2 THEN
 		line := 0;
 		gcode_count := 0;
 		state := 0;
 	END_IF
 END_IF
 IF mode = 15 THEN	// Go Home: Move Z-axis
-	IF line > 1 THEN
+	IF line > 2 THEN
 		line := 0;
 		gcode_count := 0;
 		state := 10;
@@ -330,10 +335,14 @@ CASE state OF
 		s0_tdata := calibration_gcode_string[line][gcode_count+2];
 		s0_data := SHL(s0_tdata, 8) + calibration_gcode_string[line][gcode_count+3];
 	ELSIF mode = 2 THEN		// Print
-		s0_count := phytecP_manual_gcode_string[line][gcode_count];
-		s0_command := phytecP_manual_gcode_string[line][gcode_count+1];
-		s0_tdata := phytecP_manual_gcode_string[line][gcode_count+2];
-		s0_data := SHL(s0_tdata, 8) + phytecP_manual_gcode_string[line][gcode_count+3];
+		s0_count := test2_gcode_string[line][gcode_count];
+		s0_command := test2_gcode_string[line][gcode_count+1];
+		s0_tdata := test2_gcode_string[line][gcode_count+2];
+		s0_data := SHL(s0_tdata, 8) + test2_gcode_string[line][gcode_count+3];
+		//s0_count := ti_logo_gcode_string[line][gcode_count];
+		//s0_command := ti_logo_gcode_string[line][gcode_count+1];
+		//s0_tdata := ti_logo_gcode_string[line][gcode_count+2];
+		//s0_data := SHL(s0_tdata, 8) + ti_logo_gcode_string[line][gcode_count+3];
 	ELSIF mode = 3 THEN	// Home
 		s0_count := home_gcode_string[line][gcode_count];
 		s0_command := home_gcode_string[line][gcode_count+1];

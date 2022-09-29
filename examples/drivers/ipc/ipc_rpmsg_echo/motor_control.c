@@ -30,6 +30,8 @@
 char msgBuf[128];
 MotorMod MotorX, MotorY, MotorZ;
 
+volatile uint32_t gUserSharedMem __attribute__((aligned(128), section(".bss.user_shared_mem")));
+
 float CalculateMotorLoop(MotorMod *Motor, float Displayment)
 {
     float StepsRequired = 0;
@@ -58,6 +60,7 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove, float Ratio)
 
 #ifdef MYDEBUG
     DebugP_log("Motor positioning %d cur_pos %f next_pos %f\r\n", Motor->positioning, Motor->cur_pos, Motor->next_pos);
+    //DebugP_log("gUserSharedMem 0x%x\r\n", gUserSharedMem);
 #endif
 
     if(Motor->positioning==90) // Absolute
@@ -191,39 +194,59 @@ void gpio_motor_control_init(MotorMod *Motor, Bool isMove)
 
     if(isMove)
     {
-#if 0
+#ifdef MOTORX
         // Enable 8255 EN pin
         uint32_t    gpioBaseAddr, pinNum;
-
         /* Get address after translation translate */
-        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(GPIO_EN_BASE_ADDR);
-        pinNum       = GPIO_EN_PIN;
-
-        GPIO_setDirMode(gpioBaseAddr, GPIO_EN_PIN, GPIO_EN_DIR);
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(EN_X_BASE_ADDR);
+        pinNum       = EN_X_PIN;
+        GPIO_setDirMode(gpioBaseAddr, EN_X_PIN, EN_X_DIR);
         GPIO_pinWriteLow(gpioBaseAddr, pinNum);
 
-        // Enable LED
-        GPIO_setDirMode(gpioBaseAddr, RED_GPIO_PIN, RED_GPIO_DIR);
-        GPIO_setDirMode(gpioBaseAddr, GREEN_GPIO_PIN, GREEN_GPIO_DIR);
-        GPIO_setDirMode(gpioBaseAddr, BLUE_GPIO_PIN, BLUE_GPIO_DIR);
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(STEP_X_BASE_ADDR);
+        pinNum       = STEP_X_PIN;
+        GPIO_setDirMode(gpioBaseAddr, STEP_X_PIN, STEP_X_DIR);
 
-#ifdef MOTORX
-        GPIO_pinWriteHigh(gpioBaseAddr, RED_GPIO_PIN);
-        GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
-        GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(DIR_X_BASE_ADDR);
+        pinNum       = DIR_X_PIN;
+        GPIO_setDirMode(gpioBaseAddr, DIR_X_PIN, DIR_X_DIR);
+
 #endif
-
 #ifdef MOTORY
-        GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
-        GPIO_pinWriteHigh(gpioBaseAddr, GREEN_GPIO_PIN);
-        GPIO_pinWriteLow(gpioBaseAddr, BLUE_GPIO_PIN);
-#endif
+        // Enable 8255 EN pin
+        uint32_t    gpioBaseAddr, pinNum;
+        /* Get address after translation translate */
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(EN_Y_BASE_ADDR);
+        pinNum       = EN_Y_PIN;
+        GPIO_setDirMode(gpioBaseAddr, EN_Y_PIN, EN_Y_DIR);
+        GPIO_pinWriteLow(gpioBaseAddr, pinNum);
 
-#ifdef MOTORZ
-        GPIO_pinWriteLow(gpioBaseAddr, RED_GPIO_PIN);
-        GPIO_pinWriteLow(gpioBaseAddr, GREEN_GPIO_PIN);
-        GPIO_pinWriteHigh(gpioBaseAddr, BLUE_GPIO_PIN);
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(STEP_Y_BASE_ADDR);
+        pinNum       = STEP_Y_PIN;
+        GPIO_setDirMode(gpioBaseAddr, STEP_Y_PIN, STEP_Y_DIR);
+
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(DIR_Y_BASE_ADDR);
+        pinNum       = DIR_Y_PIN;
+        GPIO_setDirMode(gpioBaseAddr, DIR_Y_PIN, DIR_Y_DIR);
+
 #endif
+#ifdef MOTORZ
+        // Enable 8255 EN pin
+        uint32_t    gpioBaseAddr, pinNum;
+        /* Get address after translation translate */
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(EN_Z_BASE_ADDR);
+        pinNum       = EN_Z_PIN;
+        GPIO_setDirMode(gpioBaseAddr, EN_Z_PIN, EN_Z_DIR);
+        GPIO_pinWriteLow(gpioBaseAddr, pinNum);
+
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(STEP_Z_BASE_ADDR);
+        pinNum       = STEP_Z_PIN;
+        GPIO_setDirMode(gpioBaseAddr, STEP_Z_PIN, STEP_Z_DIR);
+
+        gpioBaseAddr = (uint32_t) AddrTranslateP_getLocalAddr(DIR_Z_BASE_ADDR);
+        pinNum       = DIR_Z_PIN;
+        GPIO_setDirMode(gpioBaseAddr, DIR_Z_PIN, DIR_Z_DIR);
+
 #endif
     }
 
@@ -250,14 +273,30 @@ void gpio_motor_control_step_main(MotorMod *Motor, float StepsRequired, float Ra
     {
         if(Motor->isActive)
         {
+            int bHomeSwitchX, bHomeSwitchY, bHomeSwitchZ;
+            if(gUserSharedMem & 0x8)
+                bHomeSwitchX = 1;
+            else
+                bHomeSwitchX = 0;
+            if(gUserSharedMem & 0x10)
+                bHomeSwitchY = 1;
+            else
+                bHomeSwitchY = 0;
+            if(gUserSharedMem & 0x20)
+                bHomeSwitchZ = 1;
+            else
+                bHomeSwitchZ = 0;
 #ifdef MOTORX
 //            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==1)))
+            if((bHomeSwitchX==0) || ((bHomeSwitchX==1) && (Motor->dir==1)))
 #endif
 #ifdef MOTORY
 //            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
+              if((bHomeSwitchY==0) || ((bHomeSwitchY==1) && (Motor->dir==0)))
 #endif
 #ifdef MOTORZ
 //            if((bHomeSwitch==0) || ((bHomeSwitch==1) && (Motor->dir==0)))
+            if((bHomeSwitchZ==0) || ((bHomeSwitchZ==1) && (Motor->dir==0)))
 #endif
             {
                 GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
@@ -286,10 +325,24 @@ void gpio_motor_control_dir_main(MotorMod *Motor)
     pinNum       = Motor->dir_pin;
 
     GPIO_setDirMode(gpioBaseAddr, pinNum, Motor->dir_dir);
+#ifdef MOTORX
     if(Motor->dir==0)
         GPIO_pinWriteLow(gpioBaseAddr, pinNum);
     else
         GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
+#endif
+#ifdef MOTORY
+    if(Motor->dir==0)
+        GPIO_pinWriteLow(gpioBaseAddr, pinNum);
+    else
+        GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
+#endif
+#ifdef MOTORZ
+    if(Motor->dir==0)
+        GPIO_pinWriteLow(gpioBaseAddr, pinNum);
+    else
+        GPIO_pinWriteHigh(gpioBaseAddr, pinNum);
+#endif
 
     ClockP_usleep(100);
 
