@@ -174,7 +174,7 @@ uint8_t ipc_execute_line(char *line)
                 &remoteCoreId, &remoteCoreEndPt,
                 SystemP_WAIT_FOREVER);
             DebugP_assert(status==SystemP_SUCCESS);
-            DebugP_log("[IPC RPMSG ECHO] Main Core received %s\r\n", msgBuf);
+            //DebugP_log("[IPC RPMSG ECHO] Main Core received %s\r\n", msgBuf);
     }
     return 0;
 }

@@ -59,7 +59,8 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove, float Ratio)
     float LoopRequired;
 
 #ifdef MYDEBUG
-    DebugP_log("Motor positioning %d cur_pos %f next_pos %f\r\n", Motor->positioning, Motor->cur_pos, Motor->next_pos);
+    if(isMove)
+        DebugP_log("Motor positioning %d cur_pos %f next_pos %f\r\n", Motor->positioning, Motor->cur_pos, Motor->next_pos);
     //DebugP_log("gUserSharedMem 0x%x\r\n", gUserSharedMem);
 #endif
 
@@ -95,7 +96,8 @@ void gpio_motor_move(MotorMod *Motor, Bool isNegative, Bool isMove, float Ratio)
         LoopRequired = CalculateMotorLoop(Motor, fabs(Displacement));
         gpio_motor_control_step_main(Motor, LoopRequired, Ratio);
 #ifdef MYDEBUG
-        DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
+        if(isMove)
+            DebugP_log("isNegative %d Motor->dir %d Motor->cur_pos %f LoopRequired %f \r\n", isNegative, Motor->dir, Motor->cur_pos, LoopRequired);
 #endif
     }
     return;
@@ -116,7 +118,12 @@ void gpio_motor_control_ioctl(MotorMod *Motor, uint8_t cmd, uint32_t val)
     else if(cmd == UPDATE_MOVING)
         Motor->moving = val;
     else if(cmd == UPDATE_HOME)
+    {
         Motor->cur_pos = 0;
+#ifdef MOTORZ
+        Motor->next_pos = 0;
+#endif
+    }
     return;
 }
 
