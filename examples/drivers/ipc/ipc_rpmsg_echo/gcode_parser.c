@@ -459,7 +459,6 @@ uint8_t gc_execute_line(char *line)
     if(MoveY < 0)
         MoveY = -MoveY;
 
-
     // Calculate ratio of motor speed to be applied in Motor X and Motor Y
     if((MoveX < 0.01) || (MoveY < 0.01) || (((MoveX-MoveY) < 0.1) && ((MoveY-MoveX) < 0.1)))
     {
@@ -481,7 +480,7 @@ uint8_t gc_execute_line(char *line)
     }
 
 #ifdef MYDEBUG
-    DebugP_log("RequiredMoveX %d MoveX %f RatioX %f RequiredMoveY %d MoveY %f RatioY %f\r\n", RequiredMoveX, MoveX, RatioX, RequiredMoveY, MoveY, RatioY);
+    //DebugP_log("RequiredMoveX %d MoveX %f RatioX %f RequiredMoveY %d MoveY %f RatioY %f\r\n", RequiredMoveX, MoveX, RatioX, RequiredMoveY, MoveY, RatioY);
 #endif
 
     if(RequiredMoveX)
@@ -514,7 +513,8 @@ uint8_t gc_execute_line(char *line)
         RequiredMoveZ = FALSE;
         RatioZ = 1;
     }
-    //DebugP_log("Position %d %d\r\n", MotorX->cur_pos, MotorY->cur_pos);
-
+#ifdef MYDEBUG
+    DebugP_log("Position %d %d %d\r\n", MotorX.cur_pos, MotorY.cur_pos, MotorZ.cur_pos);
+#endif
     return 0;
 }

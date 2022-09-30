@@ -429,10 +429,10 @@ void APPL_Application(void)
 
     // HomeSwitch
     {
-        if(gHS_val == 0x79)   // XX11 1XXX
-            sAI1Inputs.info1 = 0x79;
+        if(gHS_val == 1)   // XX11 1XXX
+            sAI1Inputs.info1 = 1;
         else
-            sAI1Inputs.info1 = 0x0;
+            sAI1Inputs.info1 = 0;
     }
 
     sDIInputs.switchs = Tmpswitchs;

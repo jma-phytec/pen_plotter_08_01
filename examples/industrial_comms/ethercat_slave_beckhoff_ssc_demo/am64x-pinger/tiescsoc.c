@@ -212,21 +212,22 @@ uint32_t tiesc_readHomeSwitch(void)
 
     i2cHandle = gI2cHandle[CONFIG_I2C1];
 
-    uint32_t    hs_val = 0x44;
+    uint32_t    hs_val = 0xff;
 
     /* Determine if TCA9534 is present */
     deviceAddress = TCA9534_IO_EXP;
+#if 0
     status = I2C_probe(i2cHandle, deviceAddress);
     if(status == SystemP_SUCCESS)
     {
-        //DebugP_log("[I2C] TCA9534 found at device address 0x%02x \r\n", deviceAddress);
+        DebugP_log("[I2C] TCA9534 found at device address 0x%02x \r\n", deviceAddress);
     }
     else
     {
         //DebugP_logError("[I2C] TCA9534 not found at device address 0x%02x \r\n", deviceAddress);
     }
-
-    if(status == SystemP_SUCCESS)
+#endif
+    //if(status == SystemP_SUCCESS)
     {
         /* Select configuration register */
         I2C_Transaction_init(&i2cTransaction);
@@ -282,6 +283,7 @@ void tiesc_setOutputLed(uint8_t mask)
 
     /* Determine if TCA9534 is present */
     deviceAddress = TCA9534_IO_EXP;
+#if 0
     status = I2C_probe(i2cHandle, deviceAddress);
     if(status == SystemP_SUCCESS)
     {
@@ -291,8 +293,8 @@ void tiesc_setOutputLed(uint8_t mask)
     {
         DebugP_logError("[I2C] TCA9534 not found at device address 0x%02x \r\n", deviceAddress);
     }
-
-    if(status == SystemP_SUCCESS)
+#endif
+    //if(status == SystemP_SUCCESS)
     {
         /* Select configuration register */
         I2C_Transaction_init(&i2cTransaction);

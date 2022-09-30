@@ -93,6 +93,10 @@ const pruicss1 = pruicss.addInstance({}, false);
 pruicss1.$name = "CONFIG_PRU_ICSS0";
 ethercat1.icss = pruicss1;
 
+debug_log.enableCssLog  = false;
+debug_log.enableUartLog = true;
+debug_log.uartLog.$name = "CONFIG_UART0";
+
 mpu_armv71.$name             = "CONFIG_MPU_REGION0";
 mpu_armv71.size              = 31;
 mpu_armv71.attributes        = "Device";
@@ -178,3 +182,6 @@ ethercat1.PRU_ICSSG1_MII_G_RT.MII_MR0_CLK.$suggestSolution = "ball.AA7";
 ethercat1.PRU_ICSSG1_MII_G_RT.MII_MR1_CLK.$suggestSolution = "ball.U11";
 ethercat1.PRU_ICSSG1_MII_G_RT.MII_MT0_CLK.$suggestSolution = "ball.V9";
 ethercat1.PRU_ICSSG1_MII_G_RT.MII_MT1_CLK.$suggestSolution = "ball.Y10";
+debug_log.uartLog.UART.$suggestSolution                    = "USART0";
+debug_log.uartLog.UART.RXD.$suggestSolution                = "ball.D15";
+debug_log.uartLog.UART.TXD.$suggestSolution                = "ball.C16";
