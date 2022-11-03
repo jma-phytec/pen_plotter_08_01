@@ -55,6 +55,7 @@
 /*                            Global Variables                                */
 /* ========================================================================== */
 uint32_t gHS_val;
+uint16_t gTempX_val, gTempY_val, gTempZ_val;
 
 /* ========================================================================== */
 /*                       Function Definitions                                 */
@@ -370,6 +371,8 @@ void APPL_Application(void)
     int End;
 
     static uint8_t Tmpswitchs = 0;  // message to EtherCAT master
+    static uint32_t TmpInfo1 = 0;
+    static uint16_t TmpInfo2 = 0;
     
     LED = sDOOutputs.LEDs & 0x0f;      // LED data from EtherCAT master
 
@@ -430,14 +433,27 @@ void APPL_Application(void)
     // HomeSwitch
     {
         if(gHS_val == 1)   // XX11 1XXX
-            sAI1Inputs.info1 = 1;
+        {
+            //sAI1Inputs.info1 = 1;
+            Tmpswitchs = Tmpswitchs | 0x80;
+        }
         else
-            sAI1Inputs.info1 = 0;
+        {
+            //sAI1Inputs.info1 = 0;
+            Tmpswitchs = Tmpswitchs & 0x7f;
+        }
+    }
+
+    // Temperature
+    {
+        TmpInfo1 = gTempX_val;
+        TmpInfo1 = (TmpInfo1 << 16) + gTempY_val;
+        TmpInfo2 = gTempZ_val;
     }
 
     sDIInputs.switchs = Tmpswitchs;
-    //sAI1Inputs.info1 = Tmpinfo1;
-    //sAI1Inputs.info2 = Tmpinfo2;
+    sAI1Inputs.info1 = TmpInfo1;
+    sAI1Inputs.info2 = TmpInfo2;
 
     prevCount = HLED;
 }

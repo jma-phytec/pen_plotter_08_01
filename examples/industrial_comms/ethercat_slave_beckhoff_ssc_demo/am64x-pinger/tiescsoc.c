@@ -55,6 +55,14 @@ volatile uint32_t gUserSharedMem __attribute__((aligned(128), section(".bss.user
 /*                           Macros & Typedefs                                */
 /* ========================================================================== */
 
+/* Temperature sensor slave address */
+#define TMP1075D_MOTORX     0x48
+#define TMP1075D_MOTORY     0x49
+#define TMP1075D_MOTORZ     0x4A
+
+/* Temperature result registers */
+#define TMP10X_RESULT_REG       (0x0000U)
+
 #define TCA9534_IO_EXP  0x20
 
 /* Input Port Register */
@@ -266,6 +274,79 @@ uint32_t tiesc_readHomeSwitch(void)
         }
     }
     return hs_val;
+}
+
+uint16_t tiesc_readTemp(uint8_t dev_addr)
+{
+    int16_t         temperature;
+    uint8_t         txBuffer[2];
+    uint8_t         rxBuffer[2];
+    int32_t         status;
+    uint8_t         deviceAddress = dev_addr;
+    I2C_Handle      i2cHandle;
+    I2C_Transaction i2cTransaction;
+
+    i2cHandle = gI2cHandle[CONFIG_I2C1];
+#if 0
+    status = I2C_probe(i2cHandle, deviceAddress);
+    if(status == SystemP_SUCCESS)
+    {
+        DebugP_log("[I2C] Temperature sensor found at device address 0x%02x \r\n", deviceAddress);
+    }
+    else
+    {
+        DebugP_logError("[I2C] Temperature sensor not found at device address 0x%02x \r\n", deviceAddress);
+    }
+#endif
+    //if(status == SystemP_SUCCESS)
+    {
+        /* found temperature sensor */
+        /* Select result register */
+        I2C_Transaction_init(&i2cTransaction);
+        i2cTransaction.writeBuf   = txBuffer;
+        i2cTransaction.writeCount = 1;
+        i2cTransaction.slaveAddress = deviceAddress;
+        txBuffer[0] = TMP10X_RESULT_REG;
+        status = I2C_transfer(i2cHandle, &i2cTransaction);
+        if(status == SystemP_SUCCESS)
+        {
+            /* read the results */
+            I2C_Transaction_init(&i2cTransaction);
+            i2cTransaction.readBuf = rxBuffer;
+            i2cTransaction.readCount = 2;
+            i2cTransaction.slaveAddress = deviceAddress;
+
+            /* clear RX buffer every time we read, to make sure it does not have stale data */
+            rxBuffer[0] = rxBuffer[1] = 0;
+            status = I2C_transfer(i2cHandle, &i2cTransaction);
+            if(status == SystemP_SUCCESS)
+            {
+                /* Create 16 bit temperature */
+                temperature = ((uint16_t)rxBuffer[0] << 8) | (rxBuffer[1]);
+                /*
+                 * 4 LSBs of temperature are 0 according to datasheet
+                 * since temperature is stored in 12 bits. Therefore,
+                 * right shift by 4 places
+                 */
+                temperature = temperature >> 4;
+                /*
+                 * If the 12th bit of temperature is set '1' (equivalent to 8th bit of the first byte read),
+                 * then we have a 2's complement negative value which needs to be sign extended
+                 */
+                if(rxBuffer[0] & 0x80)
+                {
+                    temperature |= 0xF000;
+                }
+                /* Of the 12 bits of temperature, 4 LSBs are for decimal point according to datasheet so divide by 16 */
+                //DebugP_log("[I2C] Sample %d %f (celcius)\r\n", temperature, temperature/16.0);
+            }
+            else
+            {
+                //DebugP_logError("[I2C] Sample read failed\r\n");
+            }
+        }
+    }
+    return temperature;
 }
 
 void tiesc_setOutputLed(uint8_t mask)
